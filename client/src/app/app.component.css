@@ -59,7 +59,7 @@
   gap: 0.75rem;
   padding: 0.7rem 1rem;
   border-radius: var(--border-radius);
-  color: var(--p-text-muted-color);
+  color: #4b5563;
   text-decoration: none;
   transition: background var(--transition-speed), color var(--transition-speed);
   font-weight: 500;
@@ -109,7 +109,7 @@
 
 .sidebar-user-role {
   font-size: 0.7rem;
-  color: var(--p-text-muted-color);
+  color: #4b5563;
   text-transform: capitalize;
 }
 
@@ -117,6 +117,10 @@
   padding: 1rem;
   border-top: 1px solid var(--p-surface-border);
   text-align: center;
+}
+
+.sidebar-footer span {
+  color: #4b5563;
 }
 
 .layout-main {

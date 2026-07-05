@@ -41,7 +41,7 @@
 .auth-subtitle {
   margin: 0.5rem 0 0;
   font-size: 0.9rem;
-  color: var(--p-text-muted-color);
+  color: #4b5563;
 }
 
 .auth-error-msg {
@@ -56,7 +56,7 @@
 }
 
 .field-error {
-  color: var(--p-red-500, #ef4444);
+  color: #b91c1c;
   font-size: 0.8rem;
   margin-top: 0.125rem;
 }
@@ -70,6 +70,10 @@
   margin-top: 1.25rem;
   padding-top: 1rem;
   border-top: 1px solid var(--p-surface-200, #e5e7eb);
+}
+
+.auth-toggle span {
+  color: #4b5563;
 }
 
 .auth-link {
@@ -88,5 +92,5 @@
   margin-top: 2rem;
   text-align: center;
   font-size: 0.8rem;
-  color: var(--p-text-muted-color);
+  color: #4b5563;
 }

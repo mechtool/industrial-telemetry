@@ -18,6 +18,14 @@
   --color-sensor-critical: #ef4444;
   --color-mqtt-online: #22c55e;
   --color-mqtt-offline: #6b7280;
+
+  // Accessibility: WCAG AA contrast (≥4.5:1)
+  --p-text-muted-color: #4b5563;
+  --p-floatlabel-color: #4b5563;
+  --p-floatlabel-focus-color: var(--p-primary-color);
+  --p-floatlabel-invalid-color: #b91c1c;
+  --p-inputborder-color: #9ca3af;
+  --p-inputborder-hover-color: #6b7280;
 }
 
 // ---- Сброс ----
