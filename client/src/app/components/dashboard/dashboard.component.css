@@ -1,0 +1,16 @@
+/* Dashboard — карточки статистики и состояние системы */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.card-grid p-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.card-grid p-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}

@@ -17,7 +17,7 @@ export interface ApiResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  readonly baseUrl = 'http://localhost:3000/api';
+  readonly baseUrl = '/api';
 
   get<T>(path: string, params?: Record<string, string | number>): Observable<ApiResponse<T>> {
     let httpParams = new HttpParams();

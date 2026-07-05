@@ -21,6 +21,7 @@ interface StatCard {
   standalone: true,
   imports: [CommonModule, CardModule, ButtonModule, TagModule, SkeletonModule, RouterLink],
   templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent implements OnInit {

@@ -1,0 +1,29 @@
+/* MQTT Telemetry — управление подписками и публикация */
+
+.topic-input {
+  min-width: 200px;
+}
+
+.subscriptions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.subscriptions-list p-tag {
+  cursor: pointer;
+}
+
+.topic-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.publish-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+}

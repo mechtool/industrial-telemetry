@@ -1,0 +1,23 @@
+/* Users — таблица и диалог редактирования */
+
+.actions-cell {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.search-bar {
+  width: 250px;
+}

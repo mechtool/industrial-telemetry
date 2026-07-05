@@ -21,6 +21,7 @@ import { startWith, switchMap } from 'rxjs/operators';
     TagModule, DividerModule, ToastModule, SkeletonModule,
   ],
   templateUrl: './mqtt-telemetry.component.html',
+  styleUrl: './mqtt-telemetry.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MqttTelemetryComponent implements OnInit, OnDestroy {

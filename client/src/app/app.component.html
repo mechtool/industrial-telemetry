@@ -1,0 +1,36 @@
+<div class="layout-wrapper">
+  <a href="#main-content" class="skip-link">Перейти к содержимому</a>
+
+  <!-- Sidebar -->
+  <aside class="layout-sidebar">
+    <div class="sidebar-header">
+      <i class="pi pi-industry text-3xl" style="color: var(--p-primary-color)" aria-hidden="true"></i>
+      <span class="text-xl font-bold ml-2">Telemetry</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+          class="nav-item"
+          [attr.aria-label]="item.label"
+          [attr.aria-current]="router.url === item.route ? 'page' : null"
+        >
+          <i [class]="item.icon + ' text-xl'" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="text-xs text-500">Industrial Telemetry v1.0</span>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="layout-main" id="main-content" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>

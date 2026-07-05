@@ -25,6 +25,7 @@ import { UsersService, User, UserCreatePayload } from '../../services/users.serv
   ],
   providers: [ConfirmationService],
   templateUrl: './users.component.html',
+  styleUrl: './users.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent implements OnInit {
