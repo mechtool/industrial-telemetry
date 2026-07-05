@@ -1,10 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NgClass } from '@angular/common';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
-import { SidebarModule } from 'primeng/sidebar';
+
 
 interface NavItem {
   label: string;
@@ -16,8 +15,8 @@ interface NavItem {
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet, RouterLink, RouterLinkActive, NgClass,
-    ToolbarModule, ButtonModule, AvatarModule, SidebarModule,
+    RouterOutlet, RouterLink, RouterLinkActive,
+    ToolbarModule, ButtonModule, AvatarModule,
   ],
   template: `
     <div class="layout-wrapper">

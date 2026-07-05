@@ -5,7 +5,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -20,7 +20,7 @@ import { UsersService, User, UserCreatePayload } from '../../services/users.serv
   standalone: true,
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule, TableModule, ButtonModule,
-    DialogModule, InputTextModule, DropdownModule, TagModule, ToastModule,
+    DialogModule, InputTextModule, SelectModule, TagModule, ToastModule,
     ConfirmDialogModule, ToolbarModule, SkeletonModule,
   ],
   providers: [ConfirmationService],
@@ -81,7 +81,7 @@ import { UsersService, User, UserCreatePayload } from '../../services/users.serv
               <td>
                 <p-tag
                   [value]="user.role"
-                  [severity]="user.role === 'admin' ? 'danger' : user.role === 'engineer' ? 'warning' : 'info'"
+                  [severity]="user.role === 'admin' ? 'danger' : user.role === 'engineer' ? 'warn' : 'info'"
                 />
               </td>
               <td>
@@ -125,7 +125,7 @@ import { UsersService, User, UserCreatePayload } from '../../services/users.serv
         </div>
         <div class="flex flex-column gap-1">
           <label for="role" class="text-sm font-medium">Роль *</label>
-          <p-dropdown
+          <p-select
             id="role"
             formControlName="role"
             [options]="roleOptions"

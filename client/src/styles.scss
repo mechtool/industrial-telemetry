@@ -3,9 +3,7 @@
 // PrimeNG тема + кастомные переменные
 // ========================================================
 
-// Импорт PrimeNG-темы Aura (тёмная индустриальная палитра)
-@import "primeng/resources/themes/aura-dark-blue/theme.css";
-@import "primeng/resources/primeng.min.css";
+// PrimeNG тема настраивается через providePrimeNG в app.config.ts
 
 // ---- CSS-переменные проекта ----
 :root {

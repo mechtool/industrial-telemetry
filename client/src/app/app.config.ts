@@ -4,6 +4,8 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideClientHydration } from '@angular/platform-browser';
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
 import { routes } from './app.routes';
 import { MessageService } from 'primeng/api';
 
@@ -14,6 +16,11 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideAnimations(),
     provideClientHydration(),
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+      },
+    }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',

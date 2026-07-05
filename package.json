@@ -1,7 +1,7 @@
 {
   "name": "industrial-telemetry",
   "version": "1.0.0",
-  "description": "Industrial telemetry — PWA dashboard with Express + MongoDB + MQTT + Angular 18 + PrimeNG",
+  "description": "Industrial telemetry — PWA dashboard with Express + MongoDB + MQTT + Angular 22 + PrimeNG",
   "private": true,
   "scripts": {
     "install:all": "cd server && npm install && cd ../client && npm install",
