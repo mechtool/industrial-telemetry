@@ -1,0 +1,80 @@
+// ========================================================
+// Industrial Telemetry — Глобальные стили
+// PrimeNG тема + кастомные переменные
+// ========================================================
+
+// Импорт PrimeNG-темы Aura (тёмная индустриальная палитра)
+@import "primeng/resources/themes/aura-dark-blue/theme.css";
+@import "primeng/resources/primeng.min.css";
+
+// ---- CSS-переменные проекта ----
+:root {
+  --sidebar-width: 260px;
+  --header-height: 56px;
+  --border-radius: 6px;
+  --transition-speed: 0.2s;
+
+  // Индустриальные акценты
+  --color-sensor-normal: #22c55e;
+  --color-sensor-warning: #f59e0b;
+  --color-sensor-critical: #ef4444;
+  --color-mqtt-online: #22c55e;
+  --color-mqtt-offline: #6b7280;
+}
+
+// ---- Сброс ----
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: var(--p-text-color);
+  background: var(--p-ground-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ---- Утилиты ----
+.page-container {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: var(--p-text-color);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  &.online::before  { background: var(--color-sensor-normal); }
+  &.warning::before { background: var(--color-sensor-warning); }
+  &.offline::before { background: var(--color-sensor-critical); }
+}

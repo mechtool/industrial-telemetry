@@ -1,0 +1,20 @@
+{
+  "name": "industrial-telemetry",
+  "version": "1.0.0",
+  "description": "Industrial telemetry — PWA dashboard with Express + MongoDB + MQTT + Angular 18 + PrimeNG",
+  "private": true,
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run start",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose build --no-cache",
+    "docker:logs": "docker compose logs -f"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,105 @@
+# ========================================================
+# Industrial Telemetry — docker-compose.yml
+# Полный стек для разработки и продакшена
+#
+# Использование:
+#   docker compose up -d              # Запуск всего стека
+#   docker compose down               # Остановка
+#   docker compose build --no-cache   # Пересборка образов
+# ========================================================
+
+services:
+  # --------------- MongoDB ---------------
+  mongo:
+    image: mongo:8
+    container_name: it-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    environment:
+      MONGO_INITDB_DATABASE: industrial-telemetry
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet localhost/industrial-telemetry
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - it-network
+
+  # --------------- Mosquitto MQTT Broker ---------------
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: it-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    healthcheck:
+      test: mosquitto_sub -t '$$SYS/#' -C 1 -W 3 2>/dev/null || exit 0
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - it-network
+
+  # --------------- Express API Server ---------------
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: it-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/industrial-telemetry
+      - MQTT_BROKER_URL=mqtt://mosquitto:1883
+      - MQTT_CLIENT_ID=industrial-telemetry-server
+      - MQTT_TOPIC_PREFIX=industrial/
+      - CORS_ORIGIN=http://localhost:4000
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    networks:
+      - it-network
+
+  # --------------- Angular SSR PWA Client ---------------
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: it-client
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+    depends_on:
+      - server
+    networks:
+      - it-network
+
+volumes:
+  mongo-data:
+    driver: local
+  mosquitto-data:
+    driver: local
+  mosquitto-log:
+    driver: local
+
+networks:
+  it-network:
+    driver: bridge
+    name: it-network
