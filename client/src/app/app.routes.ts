@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './services/auth.guard';
+import { UserAuthenticationComponent } from './components/user-authentication/user-authentication.component';
 
 export const routes: Routes = [
   {
     path: 'login',
-    loadComponent: () => import('./components/user-authentication/user-authentication.component').then(m => m.UserAuthenticationComponent),
+    component: UserAuthenticationComponent,
     title: 'Вход — Industrial Telemetry',
   },
   {
