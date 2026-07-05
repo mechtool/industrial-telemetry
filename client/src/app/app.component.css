@@ -76,6 +76,43 @@
   color: var(--p-primary-contrast-color);
 }
 
+/* ---- User info section ---- */
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--p-surface-border);
+}
+
+.sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.sidebar-user-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sidebar-user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-role {
+  font-size: 0.7rem;
+  color: var(--p-text-muted-color);
+  text-transform: capitalize;
+}
+
 .sidebar-footer {
   padding: 1rem;
   border-top: 1px solid var(--p-surface-border);

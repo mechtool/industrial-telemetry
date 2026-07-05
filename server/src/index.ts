@@ -8,6 +8,7 @@ import { mqttService } from './services/mqtt.service.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import usersRouter from './routes/users.routes.js';
 import mqttRouter from './routes/mqtt.routes.js';
+import authRouter from './routes/auth.routes.js';
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.get('/api/health', (_req, res) => {
 // --------------- Routes ---------------
 app.use('/api/users', usersRouter);
 app.use('/api/mqtt', mqttRouter);
+app.use('/api/auth', authRouter);
 
 // --------------- SPA fallback ---------------
 app.get('*', (_req, res) => {

@@ -1,0 +1,216 @@
+<div class="auth-container">
+  <div class="auth-card-wrapper">
+    <p-card styleClass="auth-card">
+      <ng-template pTemplate="header">
+        <div class="auth-header">
+          <i class="pi pi-industry auth-logo" aria-hidden="true"></i>
+          <h1 class="auth-title">Industrial Telemetry</h1>
+          <p class="auth-subtitle">
+            @if (mode() === 'login') {
+              Войдите в систему для продолжения работы
+            } @else {
+              Создайте учётную запись
+            }
+          </p>
+        </div>
+      </ng-template>
+
+      <!-- Режим логина -->
+      @if (mode() === 'login') {
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+          <!-- Сообщение об ошибке -->
+          @if (errorMessage()) {
+            <p-message severity="error" variant="outlined" styleClass="auth-error-msg w-full mb-4">
+              {{ errorMessage() }}
+            </p-message>
+          }
+
+          <!-- Email -->
+          <div class="field mb-4">
+            <p-floatlabel variant="on">
+              <input
+                pInputText
+                id="email"
+                type="email"
+                formControlName="email"
+                class="w-full"
+                autocomplete="email"
+              />
+              <label for="email">Email</label>
+            </p-floatlabel>
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+              <small class="field-error">
+                @if (loginForm.get('email')?.errors?.['required']) { Email обязателен. }
+                @if (loginForm.get('email')?.errors?.['email']) { Некорректный формат email. }
+              </small>
+            }
+          </div>
+
+          <!-- Пароль -->
+          <div class="field mb-4">
+            <p-floatlabel variant="on">
+              <p-password
+                id="password"
+                formControlName="password"
+                class="w-full"
+                [feedback]="false"
+                [toggleMask]="true"
+                autocomplete="current-password"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+              />
+              <label for="password">Пароль</label>
+            </p-floatlabel>
+            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+              <small class="field-error">
+                @if (loginForm.get('password')?.errors?.['required']) { Пароль обязателен. }
+                @if (loginForm.get('password')?.errors?.['minlength']) { Пароль должен содержать минимум 6 символов. }
+              </small>
+            }
+          </div>
+
+          <!-- Кнопка входа -->
+          <p-button
+            type="submit"
+            label="Войти"
+            icon="pi pi-sign-in"
+            [loading]="loading()"
+            styleClass="w-full"
+            [disabled]="loading()"
+          />
+
+          <!-- Переключение на регистрацию -->
+          <div class="auth-toggle">
+            <span class="text-sm text-500">Нет аккаунта?</span>
+            <a class="auth-link" (click)="switchMode('register'); $event.preventDefault()" href="#">
+              Зарегистрироваться
+            </a>
+          </div>
+        </form>
+      }
+
+      <!-- Режим регистрации -->
+      @if (mode() === 'register') {
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+          <!-- Сообщение об ошибке / инфо -->
+          @if (errorMessage()) {
+            <p-message severity="info" variant="outlined" styleClass="auth-error-msg w-full mb-4">
+              {{ errorMessage() }}
+            </p-message>
+          }
+
+          <!-- Имя пользователя -->
+          <div class="field mb-3">
+            <p-floatlabel variant="on">
+              <input
+                pInputText
+                id="reg-username"
+                type="text"
+                formControlName="username"
+                class="w-full"
+                autocomplete="username"
+              />
+              <label for="reg-username">Имя пользователя</label>
+            </p-floatlabel>
+            @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
+              <small class="field-error">
+                @if (registerForm.get('username')?.errors?.['required']) { Имя пользователя обязательно. }
+                @if (registerForm.get('username')?.errors?.['minlength']) { Минимум 3 символа. }
+                @if (registerForm.get('username')?.errors?.['maxlength']) { Максимум 64 символа. }
+              </small>
+            }
+          </div>
+
+          <!-- Email -->
+          <div class="field mb-3">
+            <p-floatlabel variant="on">
+              <input
+                pInputText
+                id="reg-email"
+                type="email"
+                formControlName="email"
+                class="w-full"
+                autocomplete="email"
+              />
+              <label for="reg-email">Email</label>
+            </p-floatlabel>
+            @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+              <small class="field-error">
+                @if (registerForm.get('email')?.errors?.['required']) { Email обязателен. }
+                @if (registerForm.get('email')?.errors?.['email']) { Некорректный формат email. }
+              </small>
+            }
+          </div>
+
+          <!-- Пароль -->
+          <div class="field mb-3">
+            <p-floatlabel variant="on">
+              <p-password
+                id="reg-password"
+                formControlName="password"
+                class="w-full"
+                [feedback]="false"
+                [toggleMask]="true"
+                autocomplete="new-password"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+              />
+              <label for="reg-password">Пароль</label>
+            </p-floatlabel>
+            @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+              <small class="field-error">
+                @if (registerForm.get('password')?.errors?.['required']) { Пароль обязателен. }
+                @if (registerForm.get('password')?.errors?.['minlength']) { Минимум 6 символов. }
+              </small>
+            }
+          </div>
+
+          <!-- Подтверждение пароля -->
+          <div class="field mb-4">
+            <p-floatlabel variant="on">
+              <p-password
+                id="reg-confirm"
+                formControlName="confirmPassword"
+                class="w-full"
+                [feedback]="false"
+                [toggleMask]="true"
+                autocomplete="new-password"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+              />
+              <label for="reg-confirm">Подтвердите пароль</label>
+            </p-floatlabel>
+            @if (registerForm.get('confirmPassword')?.touched) {
+              <small class="field-error">
+                @if (registerForm.get('confirmPassword')?.errors?.['required']) { Подтверждение пароля обязательно. }
+                @if (registerForm.errors?.['passwordsMismatch']) { Пароли не совпадают. }
+              </small>
+            }
+          </div>
+
+          <!-- Кнопка регистрации -->
+          <p-button
+            type="submit"
+            label="Зарегистрироваться"
+            icon="pi pi-user-plus"
+            [loading]="loading()"
+            styleClass="w-full"
+            [disabled]="loading()"
+          />
+
+          <!-- Переключение на логин -->
+          <div class="auth-toggle">
+            <span class="text-sm text-500">Уже есть аккаунт?</span>
+            <a class="auth-link" (click)="switchMode('login'); $event.preventDefault()" href="#">
+              Войти
+            </a>
+          </div>
+        </form>
+      }
+    </p-card>
+  </div>
+
+  <footer class="auth-footer">
+    <span>Industrial Telemetry v1.0</span>
+  </footer>
+</div>

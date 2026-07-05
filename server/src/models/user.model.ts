@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IUser extends Document {
   username: string;
   email: string;
+  passwordHash: string;
   role: 'operator' | 'engineer' | 'admin';
   isActive: boolean;
   lastLogin?: Date;
@@ -28,6 +29,11 @@ const userSchema = new Schema<IUser>(
       trim: true,
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, 'Некорректный формат email'],
+    },
+    passwordHash: {
+      type: String,
+      required: [true, 'Хеш пароля обязателен'],
+      select: false,
     },
     role: {
       type: String,
@@ -65,8 +71,7 @@ const userSchema = new Schema<IUser>(
   },
 );
 
-// Индекс для быстрого поиска по email
-userSchema.index({ email: 1 });
+// Индекс для быстрого поиска по роли (email уже индексирован через unique: true)
 userSchema.index({ role: 1 });
 
 export const User = mongoose.model<IUser>('User', userSchema);
