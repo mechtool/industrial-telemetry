@@ -20,7 +20,7 @@ RUN npx ng build --configuration production
 # ---- Stage 2: Production Nginx ----
 FROM nginx:alpine
 
-COPY --from=builder /build/dist/industrial-telemetry-client/browser /usr/share/nginx/html
+COPY --from=builder /build/dist/browser /usr/share/nginx/html
 
 # SPA fallback
 RUN echo 'server { \

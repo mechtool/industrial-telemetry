@@ -15,7 +15,7 @@ app.use(cors({ origin: [/^http:\/\/localhost:\d+$/], credentials: true }));
 app.use(express.json());
 
 // --------------- Static files (production client) ---------------
-const clientDist = path.resolve(process.cwd(), '../client/dist/industrial-telemetry-client/browser');
+const clientDist = path.resolve(process.cwd(), '../client/dist/browser');
 app.use(express.static(clientDist));
 
 // --------------- Health-check ---------------

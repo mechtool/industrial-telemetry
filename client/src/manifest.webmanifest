@@ -1,7 +1,7 @@
 {
   "name": "Industrial Telemetry",
   "short_name": "Telemetry",
-  "description": "Промышленная телеметрия — мониторинг датчиков в реальном времени",
+  "description": "Промышленная телеметрия — мониторинг технологического оборудования в реальном времени",
   "theme_color": "#1e3a5f",
   "background_color": "#f8f9fa",
   "display": "standalone",
