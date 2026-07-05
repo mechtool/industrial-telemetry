@@ -3,7 +3,6 @@ import { provideRouter, withPreloading, PreloadAllModules } from '@angular/route
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
-import { provideClientHydration } from '@angular/platform-browser';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { routes } from './app.routes';
@@ -15,7 +14,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(withFetch()),
     provideAnimations(),
-    provideClientHydration(),
     providePrimeNG({
       theme: {
         preset: Aura,

@@ -54,9 +54,11 @@ const userSchema = new Schema<IUser>(
     timestamps: true,
     toJSON: {
       transform(_doc, ret) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         ret.id = ret._id.toString();
-        delete ret._id;
-        delete ret.__v;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        delete (ret as Record<string, unknown>)._id;
+        delete (ret as Record<string, unknown>).__v;
         return ret;
       },
     },

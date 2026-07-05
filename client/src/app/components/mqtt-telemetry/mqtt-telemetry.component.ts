@@ -20,74 +20,7 @@ import { startWith, switchMap } from 'rxjs/operators';
     CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule,
     TagModule, DividerModule, ToastModule, SkeletonModule,
   ],
-  template: `
-    <p-toast />
-    <div class="page-container">
-      <h1 class="page-title">MQTT Телеметрия</h1>
-
-      <!-- Статус -->
-      <div class="card-grid mb-3">
-        <p-card>
-          <div class="flex align-items-center gap-3">
-            <i class="pi pi-wifi text-3xl" [style.color]="connected() ? 'var(--color-mqtt-online)' : 'var(--color-mqtt-offline)'"></i>
-            <div>
-              <div class="text-sm text-500">MQTT брокер</div>
-              <p-tag [value]="connected() ? 'Подключён' : 'Отключён'" [severity]="connected() ? 'success' : 'danger'" />
-            </div>
-          </div>
-        </p-card>
-        <p-card>
-          <div class="flex align-items-center gap-3">
-            <i class="pi pi-sitemap text-3xl" style="color:#8b5cf6"></i>
-            <div>
-              <div class="text-sm text-500">Активных подписок</div>
-              <span class="text-2xl font-bold">{{ subscriptions().length }}</span>
-            </div>
-          </div>
-        </p-card>
-      </div>
-
-      <!-- Подписка на топик -->
-      <p-card header="Управление подписками" styleClass="mb-3">
-        <div class="flex flex-wrap gap-2 align-items-end">
-          <div class="flex flex-column gap-1 flex-1" style="min-width:200px">
-            <label class="text-sm font-medium">Топик</label>
-            <input pInputText [(ngModel)]="newTopic" placeholder="sensors/temperature" />
-          </div>
-          <p-button label="Подписаться" icon="pi pi-plus" (onClick)="subscribe()" [disabled]="!newTopic() || subscribing()" [loading]="subscribing()" />
-          <p-button label="Отписаться" icon="pi pi-minus" severity="danger" (onClick)="unsubscribe()" [disabled]="!newTopic() || subscribing()" />
-        </div>
-        <p-divider />
-        <h3 class="text-base font-semibold mb-2">Активные подписки</h3>
-        @if (subscriptions().length > 0) {
-          <div class="flex flex-wrap gap-2">
-            @for (sub of subscriptions(); track sub) {
-              <p-tag [value]="sub" severity="info" styleClass="cursor-pointer" (click)="newTopic.set(sub)" />
-            }
-          </div>
-        } @else {
-          <span class="text-500 text-sm">Нет активных подписок</span>
-        }
-      </p-card>
-
-      <!-- Публикация -->
-      <p-card header="Публикация сообщения">
-        <div class="flex flex-column gap-3">
-          <div class="flex flex-wrap gap-2 align-items-end">
-            <div class="flex flex-column gap-1 flex-1" style="min-width:200px">
-              <label class="text-sm font-medium">Топик</label>
-              <input pInputText [(ngModel)]="publishTopic" placeholder="sensors/alarm" />
-            </div>
-            <div class="flex flex-column gap-1 flex-1" style="min-width:200px">
-              <label class="text-sm font-medium">Сообщение</label>
-              <input pInputText [(ngModel)]="publishMessage" placeholder='{"value": 42}' />
-            </div>
-            <p-button label="Отправить" icon="pi pi-send" (onClick)="publish()" [disabled]="!publishTopic() || !publishMessage() || publishing()" [loading]="publishing()" />
-          </div>
-        </div>
-      </p-card>
-    </div>
-  `,
+  templateUrl: './mqtt-telemetry.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MqttTelemetryComponent implements OnInit, OnDestroy {

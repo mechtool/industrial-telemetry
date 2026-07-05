@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import path from 'node:path';
 import { config } from './config/index.js';
 import { mqttService } from './services/mqtt.service.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
@@ -12,6 +13,10 @@ const app = express();
 // --------------- Middleware ---------------
 app.use(cors({ origin: [/^http:\/\/localhost:\d+$/], credentials: true }));
 app.use(express.json());
+
+// --------------- Static files (production client) ---------------
+const clientDist = path.resolve(process.cwd(), '../client/dist/industrial-telemetry-client/browser');
+app.use(express.static(clientDist));
 
 // --------------- Health-check ---------------
 app.get('/api/health', (_req, res) => {
@@ -30,24 +35,26 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/users', usersRouter);
 app.use('/api/mqtt', mqttRouter);
 
+// --------------- SPA fallback ---------------
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(clientDist, 'index.html'));
+});
+
 // --------------- Error handling ---------------
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 // --------------- Startup ---------------
 async function bootstrap(): Promise<void> {
-  // Express — стартует немедленно
   app.listen(config.port, () => {
-    console.log(`[Server] Industrial Telemetry API запущен на порту ${config.port}`);
+    console.log(`[Server] Industrial Telemetry API + Client запущены на http://localhost:${config.port}`);
   });
 
-  // MongoDB — фоновая попытка подключения
   mongoose
     .connect(config.mongo.uri)
     .then(() => console.log(`[MongoDB] Подключена: ${config.mongo.uri}`))
     .catch((err) => console.warn(`[MongoDB] Недоступна (${err.message}) — сервер работает, БД отключена`));
 
-  // MQTT — фоновая попытка подключения
   mqttService
     .connect()
     .then(() => {
