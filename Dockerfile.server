@@ -5,27 +5,28 @@ FROM node:22-alpine AS builder
 
 WORKDIR /build
 
-# Зависимости
-COPY server/package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+# Copy server files preserving directory structure for tsconfig rootDir
+COPY server/package*.json ./server/
+COPY server/tsconfig.json ./server/
+COPY server/src/ ./server/src/
 
-# Сборка TypeScript
-COPY server/tsconfig.json ./
-COPY server/src/ ./src/
-RUN npx -y typescript --project tsconfig.json
+WORKDIR /build/server
+RUN npm ci && npm cache clean --force
+
+RUN npx tsc --project tsconfig.json
+
+RUN npm prune --production
 
 # ========================================================
 # Production image
 # ========================================================
 FROM node:22-alpine
-
 RUN addgroup -S app && adduser -S app -G app
 
 WORKDIR /app
 
-# Production dependencies already installed in builder
-COPY --from=builder /build/node_modules ./node_modules
-COPY --from=builder /build/dist ./dist
+COPY --from=builder /build/server/node_modules ./node_modules
+COPY --from=builder /build/server/dist ./dist
 COPY server/.env ./
 
 USER app
