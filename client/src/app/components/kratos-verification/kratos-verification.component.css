@@ -70,12 +70,3 @@
   color: #ef4444;
   margin-left: 0.15rem;
 }
-
-.recovery-link {
-  display: block;
-  text-align: right;
-  margin-top: 0.25rem;
-  border: none;
-  background: none;
-  font-family: inherit;
-}

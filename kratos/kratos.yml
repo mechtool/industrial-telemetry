@@ -43,9 +43,9 @@ selfservice:
     password:
       enabled: true
     link:
-      enabled: false
+      enabled: true
     code:
-      enabled: false
+      enabled: true
 
   flows:
     error:
@@ -68,10 +68,12 @@ selfservice:
       privileged_session_max_age: 15m
 
     recovery:
-      enabled: false
+      enabled: true
+      ui_url: http://localhost:3000/recovery
 
     verification:
-      enabled: false
+      enabled: true
+      ui_url: http://localhost:3000/verification
 
     logout:
       after:
@@ -104,7 +106,7 @@ identity:
 
 courier:
   smtp:
-    connection_uri: smtps://test:test@mailslurper:1025/?skip_ssl_verify=true
+    connection_uri: smtps://mit-2%40yandex.ru:REDACTED@smtp.yandex.ru:465/?skip_ssl_verify=false
 
 feature_flags:
   use_continue_with_transitions: true

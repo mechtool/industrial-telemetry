@@ -16,38 +16,40 @@
       }
 
       @if (mode() === 'login') {
-        <form (ngSubmit)="submitLogin()" class="flex flex-column gap-3">
+        <form #loginForm="ngForm" (ngSubmit)="submitLogin()" class="flex flex-column gap-3">
           <div class="flex flex-column gap-1">
-            <label for="kratos-email" class="text-sm font-medium">Email</label>
+            <label for="kratos-email" class="text-sm font-medium">Email <span class="required">*</span></label>
             <input id="kratos-email" pInputText type="email" [(ngModel)]="email" name="email" class="w-full" autocomplete="email" required />
           </div>
           <div class="flex flex-column gap-1">
-            <label for="kratos-password" class="text-sm font-medium">Пароль</label>
+            <label for="kratos-password" class="text-sm font-medium">Пароль <span class="required">*</span></label>
             <input id="kratos-password" pInputText type="password" [(ngModel)]="password" name="password" class="w-full" autocomplete="current-password" required />
           </div>
-          <p-button type="submit" label="Войти" icon="pi pi-sign-in" [loading]="loading()" [disabled]="loading()" styleClass="w-full" />
+          <p-button [raised]="true" type="submit" label="Войти" icon="pi pi-sign-in" [loading]="loading()" [disabled]="loading() || loginForm.invalid" styleClass="w-full" />
+          <button type="button" class="auth-link recovery-link" (click)="startRecovery()">Забыли пароль?</button>
+          <button type="button" class="auth-link recovery-link" (click)="startVerification()">Подтвердить email</button>
         </form>
       }
 
       @if (mode() === 'registration') {
-        <form (ngSubmit)="submitRegistration()" class="flex flex-column gap-3">
+        <form #regForm="ngForm" (ngSubmit)="submitRegistration()" class="flex flex-column gap-3">
           <div class="flex flex-column gap-1">
-            <label for="kratos-reg-email" class="text-sm font-medium">Email</label>
+            <label for="kratos-reg-email" class="text-sm font-medium">Email <span class="required">*</span></label>
             <input id="kratos-reg-email" pInputText type="email" [(ngModel)]="email" name="reg-email" class="w-full" autocomplete="email" required />
           </div>
           <div class="flex flex-column gap-1">
-            <label for="kratos-reg-username" class="text-sm font-medium">Имя пользователя</label>
+            <label for="kratos-reg-username" class="text-sm font-medium">Имя пользователя <span class="required">*</span></label>
             <input id="kratos-reg-username" pInputText [(ngModel)]="username" name="reg-username" class="w-full" autocomplete="username" required />
           </div>
           <div class="flex flex-column gap-1">
-            <label for="kratos-reg-password" class="text-sm font-medium">Пароль</label>
+            <label for="kratos-reg-password" class="text-sm font-medium">Пароль <span class="required">*</span></label>
             <input id="kratos-reg-password" pInputText type="password" [(ngModel)]="password" name="reg-password" class="w-full" autocomplete="new-password" required />
           </div>
           <div class="flex flex-column gap-1">
-            <label for="kratos-reg-confirm" class="text-sm font-medium">Подтвердите пароль</label>
+            <label for="kratos-reg-confirm" class="text-sm font-medium">Подтвердите пароль <span class="required">*</span></label>
             <input id="kratos-reg-confirm" pInputText type="password" [(ngModel)]="passwordConfirm" name="reg-confirm" class="w-full" autocomplete="new-password" required />
           </div>
-          <p-button type="submit" label="Зарегистрироваться" icon="pi pi-user-plus" [loading]="loading()" [disabled]="loading()" styleClass="w-full" />
+          <p-button type="submit" label="Зарегистрироваться" icon="pi pi-user-plus" [loading]="loading()" [disabled]="loading() || regForm.invalid" styleClass="w-full" />
         </form>
       }
 

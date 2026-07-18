@@ -18,6 +18,16 @@ export const routes: Routes = [
     title: 'Регистрация — Industrial Telemetry',
   },
   {
+    path: 'verification',
+    loadComponent: () => import('./components/kratos-verification/kratos-verification.component').then(m => m.KratosVerificationComponent),
+    title: 'Верификация — Industrial Telemetry',
+  },
+  {
+    path: 'recovery',
+    loadComponent: () => import('./components/kratos-recovery/kratos-recovery.component').then(m => m.KratosRecoveryComponent),
+    title: 'Восстановление пароля — Industrial Telemetry',
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     title: 'Панель управления — Industrial Telemetry',

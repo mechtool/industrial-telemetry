@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +6,6 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
-
 type AuthMode = 'login' | 'registration';
 
 interface KratosProxyResponse {
@@ -23,7 +22,7 @@ interface KratosProxyResponse {
   styleUrl: './kratos-auth.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KratosAuthComponent {
+export class KratosAuthComponent implements OnInit {
   private readonly router = inject(Router);
 
   mode = signal<AuthMode>('login');
@@ -35,7 +34,37 @@ export class KratosAuthComponent {
   password = '';
   passwordConfirm = '';
 
+  ngOnInit(): void {
+    if (this.router.url.includes('/registration')) {
+      this.mode.set('registration');
+    }
+  }
+
   setMode(m: AuthMode): void { this.mode.set(m); this.error.set(null); }
+
+  async startRecovery(): Promise<void> {
+    try {
+      const res = await fetch('/api/kratos/recovery/init', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        this.router.navigate(['/recovery'], { queryParams: { flow: data.data.flowId } });
+      }
+    } catch {
+      window.location.href = '/.ory/self-service/recovery/browser';
+    }
+  }
+
+  async startVerification(): Promise<void> {
+    try {
+      const res = await fetch('/api/kratos/verification/init', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        this.router.navigate(['/verification'], { queryParams: { flow: data.data.flowId } });
+      }
+    } catch {
+      window.location.href = '/.ory/self-service/verification/browser';
+    }
+  }
 
   async submitLogin(): Promise<void> {
     if (!this.email || !this.password) return;

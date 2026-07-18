@@ -1,0 +1,39 @@
+<div class="auth-container">
+  <div class="auth-card-wrapper">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="auth-header">
+          <i class="pi pi-industry auth-logo" aria-hidden="true"></i>
+          <h1 class="auth-title">Industrial Telemetry</h1>
+          <p class="auth-subtitle">Восстановление пароля</p>
+        </div>
+      </ng-template>
+
+      @if (error()) {
+        <p-message severity="error" variant="outlined" styleClass="w-full mb-3">{{ error() }}</p-message>
+      }
+
+      @if (success()) {
+        <p-message severity="success" variant="outlined" styleClass="w-full mb-3">
+          Инструкции по восстановлению пароля отправлены на указанный email. Проверьте почту.
+        </p-message>
+      } @else {
+        <form #recoveryForm="ngForm" (ngSubmit)="submitRecovery()" class="flex flex-column gap-3">
+          <div class="flex flex-column gap-1">
+            <label for="kratos-recovery-email" class="text-sm font-medium">Email <span class="required">*</span></label>
+            <input id="kratos-recovery-email" pInputText type="email" [(ngModel)]="email" name="recovery-email"
+              class="w-full" autocomplete="email" required
+              placeholder="Введите email, указанный при регистрации" />
+          </div>
+          <p-button type="submit" label="Восстановить пароль" icon="pi pi-envelope"
+            [loading]="loading()" [disabled]="loading() || recoveryForm.invalid || !flowId"
+            styleClass="w-full" />
+        </form>
+      }
+
+      <div class="auth-toggle">
+        <a class="auth-link" routerLink="/login">← Вернуться ко входу</a>
+      </div>
+    </p-card>
+  </div>
+</div>

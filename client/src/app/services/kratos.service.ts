@@ -50,6 +50,11 @@ export class KratosService {
     window.location.href = `${KRATOS_URL}/self-service/registration/browser`;
   }
 
+  /** Запустить поток восстановления пароля Kratos */
+  startRecovery(): void {
+    window.location.href = `${KRATOS_URL}/self-service/recovery/browser`;
+  }
+
   /** Выход через Kratos */
   logout(): void {
     this.currentUser.set(null);

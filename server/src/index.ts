@@ -8,6 +8,7 @@ import { errorHandler, notFoundHandler } from './middleware/error.middleware.js'
 import { kratosAuth } from './middleware/kratos.middleware.js';
 import kratosRouter from './routes/kratos.routes.js';
 import mqttRouter from './routes/mqtt.routes.js';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
 
@@ -63,6 +64,13 @@ app.use('/api/kratos', kratosRouter);
 
 // --------------- Routes ---------------
 app.use('/api/mqtt', kratosAuth, mqttRouter);
+
+// --------------- Kratos public proxy (/.ory → Kratos) ---------------
+app.use('/.ory', createProxyMiddleware({
+  target: config.kratos.publicUrl,
+  changeOrigin: true,
+  pathRewrite: { '^/.ory': '' },
+}));
 
 // --------------- SPA fallback (only when serving client) ---------------
 if (config.serveClient) {
