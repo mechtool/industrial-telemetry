@@ -6,6 +6,7 @@ import { config } from './config/index.js';
 import { mqttService } from './services/mqtt.service.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { kratosAuth } from './middleware/kratos.middleware.js';
+import kratosRouter from './routes/kratos.routes.js';
 import mqttRouter from './routes/mqtt.routes.js';
 
 const app = express();
@@ -56,6 +57,9 @@ app.get('/api/session', kratosAuth, (req, res) => {
     },
   });
 });
+
+// --------------- Kratos proxy routes (login/registration API) ---------------
+app.use('/api/kratos', kratosRouter);
 
 // --------------- Routes ---------------
 app.use('/api/mqtt', kratosAuth, mqttRouter);

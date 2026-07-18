@@ -9,6 +9,12 @@ import { MessageModule } from 'primeng/message';
 
 type AuthMode = 'login' | 'registration';
 
+interface KratosProxyResponse {
+  success: boolean;
+  data?: { id: string; email: string; username: string; role: string };
+  error?: { message: string };
+}
+
 @Component({
   selector: 'app-kratos-auth',
   standalone: true,
@@ -31,43 +37,25 @@ export class KratosAuthComponent {
 
   setMode(m: AuthMode): void { this.mode.set(m); this.error.set(null); }
 
-  /** Переписать action URL с localhost:4433 на /.ory/ (через nginx proxy) */
-  private fixActionUrl(action: string): string {
-    return action.replace(/^http:\/\/localhost:4433\//, '/.ory/');
-  }
-
   async submitLogin(): Promise<void> {
     if (!this.email || !this.password) return;
     this.loading.set(true);
     this.error.set(null);
 
     try {
-      // 1. Создать login flow
-      const flowRes = await fetch('/.ory/self-service/login/api', { credentials: 'include' });
-      const flow = await flowRes.json();
-
-      // 2. Отправить учётные данные
-      const body = new URLSearchParams();
-      body.set('method', 'password');
-      body.set('csrf_token', '');
-      body.set('identifier', this.email);
-      body.set('password', this.password);
-
-      const loginRes = await fetch(this.fixActionUrl(flow.ui.action), {
-        method: flow.ui.method,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
-        body: body.toString(),
+      const res = await fetch('/api/kratos/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: this.email, password: this.password }),
         credentials: 'include',
-        redirect: 'manual',
       });
 
-      if (loginRes.status === 422 || loginRes.status === 400) {
-        const err = await loginRes.json();
-        throw new Error(err?.ui?.messages?.[0]?.text || err?.error?.message || 'Неверный email или пароль');
-      }
-      if (!loginRes.ok) throw new Error('Ошибка входа');
+      const data: KratosProxyResponse = await res.json();
 
-      // 3. Успех — на дашборд
+      if (!res.ok || !data.success) {
+        throw new Error(data.error?.message || 'Неверный email или пароль');
+      }
+
       this.router.navigate(['/dashboard']);
     } catch (err: any) {
       this.error.set(err?.message || 'Ошибка входа');
@@ -83,34 +71,23 @@ export class KratosAuthComponent {
     this.error.set(null);
 
     try {
-      // 1. Создать registration flow
-      const flowRes = await fetch('/.ory/self-service/registration/api', { credentials: 'include' });
-      const flow = await flowRes.json();
-
-      // 2. Отправить данные
-      const body = new URLSearchParams();
-      body.set('method', 'password');
-      body.set('csrf_token', '');
-      body.set('traits.email', this.email);
-      body.set('traits.username', this.username);
-      body.set('traits.role', 'operator');
-      body.set('password', this.password);
-
-      const regRes = await fetch(this.fixActionUrl(flow.ui.action), {
-        method: flow.ui.method,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
-        body: body.toString(),
+      const res = await fetch('/api/kratos/registration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: this.email,
+          username: this.username,
+          password: this.password,
+        }),
         credentials: 'include',
-        redirect: 'manual',
       });
 
-      if (regRes.status === 422 || regRes.status === 400) {
-        const err = await regRes.json();
-        throw new Error(err?.ui?.messages?.[0]?.text || err?.error?.message || 'Ошибка регистрации');
-      }
-      if (!regRes.ok) throw new Error('Ошибка регистрации');
+      const data: KratosProxyResponse = await res.json();
 
-      // 3. Успех — на дашборд
+      if (!res.ok || !data.success) {
+        throw new Error(data.error?.message || 'Ошибка регистрации');
+      }
+
       this.router.navigate(['/dashboard']);
     } catch (err: any) {
       this.error.set(err?.message || 'Ошибка регистрации');
