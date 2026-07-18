@@ -1,8 +1,7 @@
-@if (authService.isAuthenticated()) {
+@if (kratosService.isAuthenticated()) {
   <div class="layout-wrapper">
     <a href="#main-content" class="skip-link">Перейти к содержимому</a>
 
-    <!-- Sidebar -->
     <aside class="layout-sidebar">
       <div class="sidebar-header">
         <i class="pi pi-industry text-3xl" style="color: var(--p-primary-color)" aria-hidden="true"></i>
@@ -25,9 +24,8 @@
         }
       </nav>
 
-      <!-- User info + logout -->
       <div class="sidebar-user">
-        @if (authService.currentUser(); as user) {
+        @if (kratosService.currentUser(); as user) {
           <div class="sidebar-user-info">
             <p-avatar
               [label]="user.username.charAt(0).toUpperCase()"
@@ -49,6 +47,7 @@
           (onClick)="logout()"
           pTooltip="Выйти"
           tooltipPosition="top"
+          aria-label="Выйти"
         />
       </div>
 
@@ -57,13 +56,10 @@
       </div>
     </aside>
 
-    <!-- Main content -->
     <main class="layout-main" id="main-content" tabindex="-1">
       <router-outlet />
     </main>
   </div>
 } @else {
-  <main>
-    <router-outlet />
-  </main>
+  <router-outlet />
 }

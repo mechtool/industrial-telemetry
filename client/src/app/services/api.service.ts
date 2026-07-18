@@ -17,7 +17,9 @@ export interface ApiResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  readonly baseUrl = '/api';
+
+  // In Yandex Cloud, set window.__API_URL__ in index.html to the API Gateway / ALB URL
+  readonly baseUrl = (typeof window !== 'undefined' && (window as any).__API_URL__) || '/api';
 
   get<T>(path: string, params?: Record<string, string | number>): Observable<ApiResponse<T>> {
     let httpParams = new HttpParams();

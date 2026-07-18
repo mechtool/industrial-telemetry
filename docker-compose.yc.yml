@@ -1,0 +1,45 @@
+# ========================================================
+# Industrial Telemetry — docker-compose.yc.yml
+# Yandex Cloud override: управляемые сервисы + Ory Kratos
+#
+# Сервисы Yandex Cloud:
+#   MQTT → IoT Core ИЛИ Compute Cloud VM с mosquitto
+#   PostgreSQL → Managed Service for PostgreSQL (для Kratos)
+#
+# Kratos работает на Compute Cloud VM (включён в этот compose)
+# ========================================================
+
+services:
+  # Отключаем локальный mosquitto — в Yandex Cloud используется IoT Core
+  mosquitto:
+    profiles:
+      - disabled
+
+  # --------------- Express API Server (Yandex Cloud) ---------------
+  server:
+    environment:
+      - KRATOS_PUBLIC_URL=http://kratos:4433
+      - KRATOS_ADMIN_URL=http://kratos:4434
+      - MQTT_BROKER_URL=${MQTT_BROKER_URL:?MQTT_BROKER_URL required}
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN required}
+      - SERVE_CLIENT=false
+    depends_on:
+      kratos:
+        condition: service_healthy
+
+  # --------------- Ory Kratos (переопределяем DSN для Managed PostgreSQL) ---------------
+  kratos:
+    environment:
+      - DSN=${KRATOS_DSN:?KRATOS_DSN required}
+
+  kratos-migrate:
+    environment:
+      - DSN=${KRATOS_DSN:?KRATOS_DSN required}
+
+  # --------------- Angular PWA Client ---------------
+  client:
+    profiles:
+      - ""  # active by default
+    # Для продакшена: загрузите dist/browser/ в Object Storage + CDN

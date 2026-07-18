@@ -44,24 +44,6 @@
   color: #4b5563;
 }
 
-.auth-error-msg {
-  display: flex;
-  margin-bottom: 1.25rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.field-error {
-  color: #b91c1c;
-  font-size: 0.8rem;
-  margin-top: 0.125rem;
-}
-
-/* Переключение между логином и регистрацией */
 .auth-toggle {
   display: flex;
   justify-content: center;
@@ -70,10 +52,6 @@
   margin-top: 1.25rem;
   padding-top: 1rem;
   border-top: 1px solid var(--p-surface-200, #e5e7eb);
-}
-
-.auth-toggle span {
-  color: #4b5563;
 }
 
 .auth-link {
@@ -86,11 +64,4 @@
 
 .auth-link:hover {
   text-decoration: underline;
-}
-
-.auth-footer {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.8rem;
-  color: #4b5563;
 }

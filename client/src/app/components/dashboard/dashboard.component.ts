@@ -5,7 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MqttClientService } from '../../services/mqtt.service';
-import { UsersService } from '../../services/users.service';
+import { KratosService } from '../../services/kratos.service';
 import { RouterLink } from '@angular/router';
 
 interface StatCard {
@@ -26,14 +26,14 @@ interface StatCard {
 })
 export class DashboardComponent implements OnInit {
   private readonly mqttService = inject(MqttClientService);
-  private readonly usersService = inject(UsersService);
+  readonly kratosService = inject(KratosService);
 
   mqttConnected = signal<boolean | null>(null);
   subscriptionCount = signal<number | null>(null);
 
   cards: StatCard[] = [
     { title: 'MQTT статус', value: '...', icon: 'pi pi-wifi', color: 'var(--color-mqtt-online)', link: '/mqtt' },
-    { title: 'Пользователи', value: '...', icon: 'pi pi-users', color: '#3b82f6', link: '/users' },
+    { title: 'Пользователь', value: '...', icon: 'pi pi-user', color: '#3b82f6', link: '' },
     { title: 'Топики', value: '...', icon: 'pi pi-sitemap', color: '#8b5cf6', link: '/mqtt' },
   ];
 
@@ -56,13 +56,7 @@ export class DashboardComponent implements OnInit {
       },
     });
 
-    this.usersService.getUsers(1, 1).subscribe({
-      next: (res) => {
-        this.cards[1].value = String(res.pagination?.total ?? 0);
-      },
-      error: () => {
-        this.cards[1].value = '—';
-      },
-    });
+    const user = this.kratosService.currentUser();
+    this.cards[1].value = user ? `${user.username} (${user.role})` : '—';
   }
 }

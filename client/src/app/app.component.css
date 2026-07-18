@@ -130,3 +130,18 @@
   overflow-y: auto;
   background: var(--p-surface-ground, var(--p-ground-background));
 }
+
+/* ---- Unauthenticated landing ---- */
+.unauth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--p-surface-ground, #f8f9fa);
+}
+
+.unauth-card {
+  text-align: center;
+  padding: 3rem;
+  max-width: 420px;
+}

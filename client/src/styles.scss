@@ -19,13 +19,45 @@
   --color-mqtt-online: #22c55e;
   --color-mqtt-offline: #6b7280;
 
-  // Accessibility: WCAG AA contrast (≥4.5:1)
+  // Accessibility: WCAG AA contrast (≥4.5:1 text, ≥3:1 non-text)
   --p-text-muted-color: #4b5563;
   --p-floatlabel-color: #4b5563;
   --p-floatlabel-focus-color: var(--p-primary-color);
   --p-floatlabel-invalid-color: #b91c1c;
-  --p-inputborder-color: #9ca3af;
-  --p-inputborder-hover-color: #6b7280;
+  --p-inputborder-color: #6b7280;
+  --p-inputborder-hover-color: #4b5563;
+
+  // Override PrimeNG text-500 utility for WCAG AA compliance
+  --p-gray-500: #4b5563;
+  --p-gray-400: #6b7280;
+
+  // WCAG AA primary color (#047857: 5.42:1 on white vs default #10b981: 2.53:1)
+  --p-primary-color: #047857;
+  --p-primary-contrast-color: #ffffff;
+  --p-primary-hover-color: #065f46;
+  --p-primary-active-color: #064e3b;
+}
+
+// ---- WCAG AA primary color: direct element overrides (CSS vars may not cascade from :root) ----
+// PrimeNG buttons: white text on primary background
+.p-button {
+  --p-button-primary-background: #047857;
+  --p-button-primary-border-color: #047857;
+  --p-button-primary-color: #ffffff;
+  --p-button-primary-hover-background: #065f46;
+  --p-button-primary-hover-border-color: #065f46;
+  --p-button-primary-active-background: #064e3b;
+  --p-button-primary-active-border-color: #064e3b;
+}
+
+// Links using primary color (auth-link, etc.)
+.auth-link {
+  color: #047857 !important;
+}
+
+// Any element using --p-primary-color as foreground
+a[href]:not([class*="nav-"]) {
+  color: #047857;
 }
 
 // ---- Сброс ----
@@ -83,4 +115,16 @@ html, body {
   &.online::before  { background: var(--color-sensor-normal); }
   &.warning::before { background: var(--color-sensor-warning); }
   &.offline::before { background: var(--color-sensor-critical); }
+}
+
+// ---- WCAG AA contrast overrides ----
+// PrimeNG text-500 по умолчанию #6b7280 → недостаточный контраст
+.text-500 {
+  color: #4b5563 !important;
+}
+
+// Input placeholder contrast
+::placeholder {
+  color: #6b7280 !important;
+  opacity: 1;
 }

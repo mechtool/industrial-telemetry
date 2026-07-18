@@ -22,17 +22,32 @@ FROM nginx:alpine
 
 COPY --from=builder /build/dist/browser /usr/share/nginx/html
 
-# SPA fallback + API proxy to server:3000
+# SPA fallback + API proxy + Kratos proxy
 RUN echo 'server { \
     listen 4000; \
     root /usr/share/nginx/html; \
     index index.html; \
+    gzip on; \
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript image/svg+xml; \
+    gzip_vary on; \
     location / { try_files $uri $uri/ /index.html; } \
+    location ~* \.(?:js|css|woff2?|png|jpg|jpeg|gif|ico|svg|webp|webmanifest)$ { \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
     location /api/ { \
         proxy_pass http://server:3000; \
         proxy_http_version 1.1; \
         proxy_set_header Host $host; \
         proxy_set_header X-Real-IP $remote_addr; \
+    } \
+    location /.ory/ { \
+        proxy_pass http://kratos:4433/; \
+        proxy_http_version 1.1; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+        proxy_pass_request_headers on; \
     } \
 }' > /etc/nginx/conf.d/default.conf
 

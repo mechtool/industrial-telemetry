@@ -1,38 +1,34 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './services/auth.guard';
-import { UserAuthenticationComponent } from './components/user-authentication/user-authentication.component';
+import { WelcomeComponent } from './components/welcome/welcome.component';
 
 export const routes: Routes = [
   {
+    path: '',
+    component: WelcomeComponent,
+    title: 'Industrial Telemetry',
+  },
+  {
     path: 'login',
-    component: UserAuthenticationComponent,
+    loadComponent: () => import('./components/kratos-auth/kratos-auth.component').then(m => m.KratosAuthComponent),
     title: 'Вход — Industrial Telemetry',
   },
   {
-    path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
+    path: 'registration',
+    loadComponent: () => import('./components/kratos-auth/kratos-auth.component').then(m => m.KratosAuthComponent),
+    title: 'Регистрация — Industrial Telemetry',
   },
   {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     title: 'Панель управления — Industrial Telemetry',
-    canActivate: [authGuard],
-  },
-  {
-    path: 'users',
-    loadComponent: () => import('./components/users/users.component').then(m => m.UsersComponent),
-    title: 'Пользователи — Industrial Telemetry',
-    canActivate: [authGuard],
   },
   {
     path: 'mqtt',
     loadComponent: () => import('./components/mqtt-telemetry/mqtt-telemetry.component').then(m => m.MqttTelemetryComponent),
     title: 'MQTT Телеметрия — Industrial Telemetry',
-    canActivate: [authGuard],
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: '',
   },
 ];

@@ -1,0 +1,65 @@
+<div class="auth-container">
+  <div class="auth-card-wrapper">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="auth-header">
+          <i class="pi pi-industry auth-logo" aria-hidden="true"></i>
+          <h1 class="auth-title">Industrial Telemetry</h1>
+          <p class="auth-subtitle">
+            @if (mode() === 'login') { Войдите в систему } @else { Создайте учётную запись }
+          </p>
+        </div>
+      </ng-template>
+
+      @if (error()) {
+        <p-message severity="error" variant="outlined" styleClass="w-full mb-3">{{ error() }}</p-message>
+      }
+
+      @if (mode() === 'login') {
+        <form (ngSubmit)="submitLogin()" class="flex flex-column gap-3">
+          <div class="flex flex-column gap-1">
+            <label for="kratos-email" class="text-sm font-medium">Email</label>
+            <input id="kratos-email" pInputText type="email" [(ngModel)]="email" name="email" class="w-full" autocomplete="email" required />
+          </div>
+          <div class="flex flex-column gap-1">
+            <label for="kratos-password" class="text-sm font-medium">Пароль</label>
+            <input id="kratos-password" pInputText type="password" [(ngModel)]="password" name="password" class="w-full" autocomplete="current-password" required />
+          </div>
+          <p-button type="submit" label="Войти" icon="pi pi-sign-in" [loading]="loading()" [disabled]="loading()" styleClass="w-full" />
+        </form>
+      }
+
+      @if (mode() === 'registration') {
+        <form (ngSubmit)="submitRegistration()" class="flex flex-column gap-3">
+          <div class="flex flex-column gap-1">
+            <label for="kratos-reg-email" class="text-sm font-medium">Email</label>
+            <input id="kratos-reg-email" pInputText type="email" [(ngModel)]="email" name="reg-email" class="w-full" autocomplete="email" required />
+          </div>
+          <div class="flex flex-column gap-1">
+            <label for="kratos-reg-username" class="text-sm font-medium">Имя пользователя</label>
+            <input id="kratos-reg-username" pInputText [(ngModel)]="username" name="reg-username" class="w-full" autocomplete="username" required />
+          </div>
+          <div class="flex flex-column gap-1">
+            <label for="kratos-reg-password" class="text-sm font-medium">Пароль</label>
+            <input id="kratos-reg-password" pInputText type="password" [(ngModel)]="password" name="reg-password" class="w-full" autocomplete="new-password" required />
+          </div>
+          <div class="flex flex-column gap-1">
+            <label for="kratos-reg-confirm" class="text-sm font-medium">Подтвердите пароль</label>
+            <input id="kratos-reg-confirm" pInputText type="password" [(ngModel)]="passwordConfirm" name="reg-confirm" class="w-full" autocomplete="new-password" required />
+          </div>
+          <p-button type="submit" label="Зарегистрироваться" icon="pi pi-user-plus" [loading]="loading()" [disabled]="loading()" styleClass="w-full" />
+        </form>
+      }
+
+      <div class="auth-toggle">
+        @if (mode() === 'login') {
+          <span class="text-sm text-500">Нет аккаунта?</span>
+          <a class="auth-link" (click)="setMode('registration'); $event.preventDefault()" href="#">Зарегистрироваться</a>
+        } @else {
+          <span class="text-sm text-500">Уже есть аккаунт?</span>
+          <a class="auth-link" (click)="setMode('login'); $event.preventDefault()" href="#">Войти</a>
+        }
+      </div>
+    </p-card>
+  </div>
+</div>

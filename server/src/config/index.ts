@@ -1,19 +1,22 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+const environment = process.env.NODE_ENV || 'development';
+const isProduction = environment === 'production';
+
 export const config = {
   port: parseInt(process.env.PORT || '3000', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv: environment,
 
-  jwt: {
-    secret: process.env.JWT_SECRET || 'industrial-telemetry-dev-secret-change-in-production',
-    expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+  serveClient: process.env.SERVE_CLIENT === 'true' || !isProduction,
+
+  // ---- Ory Kratos ----
+  kratos: {
+    publicUrl: process.env.KRATOS_PUBLIC_URL || 'http://localhost:4433',
+    adminUrl: process.env.KRATOS_ADMIN_URL || 'http://localhost:4434',
   },
 
-  mongo: {
-    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/industrial-telemetry',
-  },
-
+  // ---- MQTT ----
   mqtt: {
     brokerUrl: process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883',
     clientId: process.env.MQTT_CLIENT_ID || 'industrial-telemetry-server',
@@ -22,7 +25,10 @@ export const config = {
     topicPrefix: process.env.MQTT_TOPIC_PREFIX || 'industrial/',
   },
 
+  // ---- CORS ----
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:4200',
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map((s: string) => s.trim())
+      : ['http://localhost:4200'],
   },
 };

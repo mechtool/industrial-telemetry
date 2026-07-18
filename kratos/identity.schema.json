@@ -1,0 +1,49 @@
+{
+  "$id": "https://telemetry.local/identity.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Industrial Telemetry User",
+  "type": "object",
+  "properties": {
+    "traits": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "title": "Email",
+          "ory.sh/kratos": {
+            "credentials": {
+              "password": {
+                "identifier": true
+              }
+            },
+            "verification": {
+              "via": "email"
+            },
+            "recovery": {
+              "via": "email"
+            }
+          }
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "role": {
+          "type": "string",
+          "title": "Role",
+          "enum": ["operator", "engineer", "admin"],
+          "default": "operator"
+        },
+        "department": {
+          "type": "string",
+          "title": "Department"
+        }
+      },
+      "required": ["email", "username"],
+      "additionalProperties": false
+    }
+  }
+}

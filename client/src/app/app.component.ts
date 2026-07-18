@@ -1,44 +1,36 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { ToolbarModule } from 'primeng/toolbar';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { TooltipModule } from 'primeng/tooltip';
-import { AuthService } from './services/auth.service';
+import { KratosService } from './services/kratos.service';
 
 interface NavItem {
-  label: string;
-  icon: string;
   route: string;
+  icon: string;
+  label: string;
 }
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    ToolbarModule,
-    ButtonModule,
-    AvatarModule,
-    TooltipModule,
-  ],
+  imports: [RouterModule, ButtonModule, AvatarModule, TooltipModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  readonly kratosService = inject(KratosService);
   readonly router = inject(Router);
-  readonly authService = inject(AuthService);
 
   navItems: NavItem[] = [
-    { label: 'Панель', icon: 'pi pi-chart-bar', route: '/dashboard' },
-    { label: 'Пользователи', icon: 'pi pi-users', route: '/users' },
-    { label: 'MQTT', icon: 'pi pi-wifi', route: '/mqtt' },
+    { route: '/dashboard', icon: 'pi pi-th-large', label: 'Панель управления' },
+    { route: '/mqtt', icon: 'pi pi-wifi', label: 'MQTT Телеметрия' },
   ];
 
-  logout(): void {
-    this.authService.logout();
+  ngOnInit(): void {
+    this.kratosService.checkSession().subscribe();
   }
+
+  logout(): void { this.kratosService.logout(); }
 }
