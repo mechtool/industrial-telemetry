@@ -32,14 +32,10 @@ export class KratosVerificationComponent implements OnInit {
 
   ngOnInit(): void {
     this.flowId = this.route.snapshot.queryParams['flow'] ?? '';
-
-    if (!this.flowId) {
-      this.error.set('Недействительная ссылка для верификации.');
-    }
   }
 
   async submitVerification(): Promise<void> {
-    if (!this.email || !this.flowId) return;
+    if (!this.email) return;
     this.loading.set(true);
     this.error.set(null);
 
@@ -47,7 +43,7 @@ export class KratosVerificationComponent implements OnInit {
       const res = await fetch('/api/kratos/verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ flow: this.flowId, email: this.email }),
+        body: JSON.stringify({ email: this.email }),
       });
 
       const data: VerificationResponse = await res.json();

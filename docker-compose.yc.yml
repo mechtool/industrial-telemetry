@@ -1,45 +1,154 @@
 # ========================================================
 # Industrial Telemetry — docker-compose.yc.yml
-# Yandex Cloud override: управляемые сервисы + Ory Kratos
+# Эконом-вариант для Yandex Cloud: всё на одной VM
 #
-# Сервисы Yandex Cloud:
-#   MQTT → IoT Core ИЛИ Compute Cloud VM с mosquitto
-#   PostgreSQL → Managed Service for PostgreSQL (для Kratos)
+# Переменные окружения (из .env файла):
+#   APP_URL — публичный URL приложения (https://your-domain.ru)
+#   MQTT_BROKER_URL — адрес MQTT брокера (IoT Core или свой mosquitto)
+#   MQTT_USERNAME / MQTT_PASSWORD — учётные данные MQTT
+#   CORS_ORIGIN — CORS origin (обычно совпадает с APP_URL)
 #
-# Kratos работает на Compute Cloud VM (включён в этот compose)
+# Запуск:
+#   docker compose -f docker-compose.yc.yml up -d
 # ========================================================
 
 services:
-  # Отключаем локальный mosquitto — в Yandex Cloud используется IoT Core
-  mosquitto:
-    profiles:
-      - disabled
-
-  # --------------- Express API Server (Yandex Cloud) ---------------
-  server:
+  # --------------- PostgreSQL (для Kratos) ---------------
+  kratos-db:
+    image: postgres:16-alpine
+    container_name: it-kratos-db
+    restart: unless-stopped
     environment:
+      POSTGRES_USER: kratos
+      POSTGRES_PASSWORD: kratos
+      POSTGRES_DB: kratos
+    volumes:
+      - kratos-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U kratos -d kratos
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - it-network
+
+  # --------------- Ory Kratos (миграция БД) ---------------
+  kratos-migrate:
+    image: oryd/kratos:v1.3.1
+    container_name: it-kratos-migrate
+    restart: "no"
+    command: migrate sql -e --yes
+    environment:
+      - DSN=postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
+    volumes:
+      - ./kratos:/etc/config/kratos:ro
+    depends_on:
+      kratos-db:
+        condition: service_healthy
+    networks:
+      - it-network
+
+  # --------------- Ory Kratos ---------------
+  kratos:
+    image: oryd/kratos:v1.3.1
+    container_name: it-kratos
+    restart: unless-stopped
+    command: serve -c /etc/config/kratos/kratos.yc.yml --dev --watch-courier
+    # Порты не пробрасываем наружу — Kratos доступен только через nginx
+    expose:
+      - "4433"
+      - "4434"
+    environment:
+      - DSN=postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
+      - APP_URL=${APP_URL:?APP_URL required}
+      - KRATOS_PUBLIC_URL=http://kratos:4433
+    volumes:
+      - ./kratos:/etc/config/kratos:ro
+    depends_on:
+      kratos-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: wget -qO- http://localhost:4433/health/alive || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - it-network
+
+  # --------------- Express API Server ---------------
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: it-server
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SERVE_CLIENT=false
       - KRATOS_PUBLIC_URL=http://kratos:4433
       - KRATOS_ADMIN_URL=http://kratos:4434
-      - MQTT_BROKER_URL=${MQTT_BROKER_URL:?MQTT_BROKER_URL required}
-      - MQTT_USERNAME=${MQTT_USERNAME}
-      - MQTT_PASSWORD=${MQTT_PASSWORD}
-      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN required}
-      - SERVE_CLIENT=false
+      - MQTT_BROKER_URL=mqtt://mosquitto:1883
+      - MQTT_CLIENT_ID=industrial-telemetry-server
+      - MQTT_USERNAME=${MQTT_USERNAME:-}
+      - MQTT_PASSWORD=${MQTT_PASSWORD:-}
+      - MQTT_TOPIC_PREFIX=industrial/
+      - CORS_ORIGIN=${CORS_ORIGIN:-${APP_URL}}
     depends_on:
       kratos:
         condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    networks:
+      - it-network
 
-  # --------------- Ory Kratos (переопределяем DSN для Managed PostgreSQL) ---------------
-  kratos:
-    environment:
-      - DSN=${KRATOS_DSN:?KRATOS_DSN required}
+  # --------------- Mosquitto MQTT Broker ---------------
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: it-mosquitto
+    restart: unless-stopped
+    expose:
+      - "1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    healthcheck:
+      test: mosquitto_sub -t '$$SYS/#' -C 1 -W 3 2>/dev/null || exit 0
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - it-network
 
-  kratos-migrate:
-    environment:
-      - DSN=${KRATOS_DSN:?KRATOS_DSN required}
+  # --------------- Nginx (reverse proxy + статика) ---------------
+  nginx:
+    image: nginx:alpine
+    container_name: it-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.yc.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./client/dist/browser:/usr/share/nginx/html:ro
+    depends_on:
+      - server
+      - kratos
+    networks:
+      - it-network
 
-  # --------------- Angular PWA Client ---------------
-  client:
-    profiles:
-      - ""  # active by default
-    # Для продакшена: загрузите dist/browser/ в Object Storage + CDN
+volumes:
+  kratos-db-data:
+    driver: local
+  mosquitto-data:
+    driver: local
+  mosquitto-log:
+    driver: local
+
+networks:
+  it-network:
+    driver: bridge
+    name: it-network

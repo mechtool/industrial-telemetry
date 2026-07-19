@@ -34,14 +34,10 @@ export class KratosRecoveryComponent implements OnInit {
 
   ngOnInit(): void {
     this.flowId = this.route.snapshot.queryParams['flow'] ?? '';
-
-    if (!this.flowId) {
-      this.error.set('Недействительная ссылка для восстановления пароля.');
-    }
   }
 
   async submitRecovery(): Promise<void> {
-    if (!this.email || !this.flowId) return;
+    if (!this.email) return;
     this.loading.set(true);
     this.error.set(null);
 
@@ -49,7 +45,7 @@ export class KratosRecoveryComponent implements OnInit {
       const res = await fetch('/api/kratos/recovery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ flow: this.flowId, email: this.email }),
+        body: JSON.stringify({ email: this.email }),
       });
 
       const data: RecoveryResponse = await res.json();

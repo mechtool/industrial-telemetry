@@ -12,9 +12,16 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:build": "docker compose build --no-cache",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "docker:yc:up": "npm run build:client && docker compose -f docker-compose.yc.yml --env-file .env.yc up -d",
+    "docker:yc:down": "docker compose -f docker-compose.yc.yml down",
+    "docker:yc:build": "npm run build:client && docker compose -f docker-compose.yc.yml build --no-cache",
+    "docker:yc:logs": "docker compose -f docker-compose.yc.yml logs -f"
   },
   "engines": {
     "node": ">=22"
+  },
+  "dependencies": {
+    "http-proxy-middleware": "^4.2.0"
   }
 }

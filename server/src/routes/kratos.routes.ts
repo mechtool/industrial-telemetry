@@ -14,10 +14,20 @@ function extractCsrfToken(ui: any): string {
   return '';
 }
 
-/** Извлечь сообщение об ошибке из ui.messages */
+/** Извлечь сообщение об ошибке из ui.messages или node.messages */
 function extractErrorMessage(ui: any): string | null {
-  const messages: any[] = ui?.messages ?? [];
-  return messages[0]?.text ?? null;
+  // Top-level UI messages
+  const uiMessages: any[] = ui?.messages ?? [];
+  if (uiMessages[0]?.text) return uiMessages[0].text;
+
+  // Per-node messages (e.g. password validation errors)
+  const nodes: any[] = ui?.nodes ?? [];
+  for (const node of nodes) {
+    const nodeMessages: any[] = node.messages ?? [];
+    if (nodeMessages[0]?.text) return nodeMessages[0].text;
+  }
+
+  return null;
 }
 
 /**
@@ -45,16 +55,14 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const flow = await flowRes.json();
     const csrfToken = extractCsrfToken(flow.ui);
-    const actionUrl = flow.ui.action;
-
-    // 2. Отправить учётные данные на action URL
+    // 2. Отправить учётные данные напрямую в Kratos (не через actionUrl — там localhost)
     const body = new URLSearchParams();
     body.set('method', 'password');
     body.set('csrf_token', csrfToken);
     body.set('identifier', email);
     body.set('password', password);
 
-    const loginRes = await fetch(actionUrl, {
+    const loginRes = await fetch(`${config.kratos.publicUrl}/self-service/login?flow=${flow.id}`, {
       method: flow.ui.method,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
       body: body.toString(),
@@ -122,9 +130,7 @@ router.post('/registration', async (req: Request, res: Response) => {
 
     const flow = await flowRes.json();
     const csrfToken = extractCsrfToken(flow.ui);
-    const actionUrl = flow.ui.action;
-
-    // 2. Отправить данные регистрации на action URL
+    // 2. Отправить данные регистрации напрямую в Kratos
     const body = new URLSearchParams();
     body.set('method', 'password');
     body.set('csrf_token', csrfToken);
@@ -133,7 +139,7 @@ router.post('/registration', async (req: Request, res: Response) => {
     body.set('traits.role', 'operator');
     body.set('password', password);
 
-    const regRes = await fetch(actionUrl, {
+    const regRes = await fetch(`${config.kratos.publicUrl}/self-service/registration?flow=${flow.id}`, {
       method: flow.ui.method,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
       body: body.toString(),
@@ -230,37 +236,37 @@ router.get('/recovery', async (req: Request, res: Response) => {
 
 /**
  * POST /api/kratos/recovery
- * Отправить email для восстановления пароля
+ * Отправить email для восстановления пароля (всегда через новый API flow)
  */
 router.post('/recovery', async (req: Request, res: Response) => {
-  const { flow: flowId, email } = req.body;
+  const { email } = req.body;
 
-  if (!flowId || !email) {
-    res.status(400).json({ success: false, error: { message: 'Flow ID и email обязательны' } });
+  if (!email) {
+    res.status(400).json({ success: false, error: { message: 'Email обязателен' } });
     return;
   }
 
   try {
-    // Получить flow для извлечения CSRF токена и action URL
-    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${flowId}`, {
+    // 1. Создать новый API flow (не переиспользовать browser flow из URL)
+    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/api`, {
       headers: { 'Accept': 'application/json' },
     });
 
     if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Flow не найден или истек' } });
+      res.status(502).json({ success: false, error: { message: 'Не удалось инициализировать восстановление' } });
       return;
     }
 
     const flow = await flowRes.json();
     const csrfToken = extractCsrfToken(flow.ui);
-    const actionUrl = flow.ui.action;
 
+    // 2. Отправить email в Kratos
     const body = new URLSearchParams();
     body.set('method', 'code');
     body.set('csrf_token', csrfToken);
     body.set('email', email);
 
-    const submitRes = await fetch(actionUrl, {
+    const submitRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery?flow=${flow.id}`, {
       method: flow.ui.method,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
       body: body.toString(),
@@ -312,36 +318,37 @@ router.post('/verification/init', async (_req: Request, res: Response) => {
 
 /**
  * POST /api/kratos/verification
- * Отправить email для верификации
+ * Отправить email для верификации (всегда через новый API flow)
  */
 router.post('/verification', async (req: Request, res: Response) => {
-  const { flow: flowId, email } = req.body;
+  const { email } = req.body;
 
-  if (!flowId || !email) {
-    res.status(400).json({ success: false, error: { message: 'Flow ID и email обязательны' } });
+  if (!email) {
+    res.status(400).json({ success: false, error: { message: 'Email обязателен' } });
     return;
   }
 
   try {
-    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/verification/flows?id=${flowId}`, {
+    // 1. Создать новый API flow (не переиспользовать browser flow из URL)
+    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/verification/api`, {
       headers: { 'Accept': 'application/json' },
     });
 
     if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Flow не найден или истек' } });
+      res.status(502).json({ success: false, error: { message: 'Не удалось инициализировать верификацию' } });
       return;
     }
 
     const flow = await flowRes.json();
     const csrfToken = extractCsrfToken(flow.ui);
-    const actionUrl = flow.ui.action;
 
+    // 2. Отправить email в Kratos
     const body = new URLSearchParams();
     body.set('method', 'code');
     body.set('csrf_token', csrfToken);
     body.set('email', email);
 
-    const submitRes = await fetch(actionUrl, {
+    const submitRes = await fetch(`${config.kratos.publicUrl}/self-service/verification?flow=${flow.id}`, {
       method: flow.ui.method,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
       body: body.toString(),
