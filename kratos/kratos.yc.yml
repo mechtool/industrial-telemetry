@@ -1,6 +1,6 @@
-# ========================================================
-# Ory Kratos — kratos.yc.yml (Yandex Cloud)
-# Конфигурация для Industrial Telemetry
+﻿# ========================================================
+# Ory Kratos вЂ” kratos.yc.yml (Yandex Cloud)
+# РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ РґР»СЏ Industrial Telemetry
 # ========================================================
 
 version: v1.3.1
@@ -86,9 +86,9 @@ log:
 
 secrets:
   cookie:
-    - 70e2554b4468d42ef55117defc745f41a16f5bee90376a514185d1442dd19461
+    - REDACTED
   cipher:
-    - 49777f3f7e5b382d412145d3a843467f6dd8d61a06227af187ff3e3aa8dddb85
+    - REDACTED
 
 ciphers:
   algorithm: xchacha20-poly1305
