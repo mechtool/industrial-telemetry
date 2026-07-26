@@ -9,7 +9,7 @@ dsn: postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
 
 serve:
   public:
-    base_url: http://89.169.147.92/.ory
+    base_url: http://158.160.204.124/.ory
     cors:
       enabled: true
       allowed_origins:
@@ -32,12 +32,12 @@ serve:
     base_url: http://localhost:4434
 
 selfservice:
-  default_browser_return_url: http://89.169.147.92/dashboard
+  default_browser_return_url: http://158.160.204.124/dashboard
   allowed_return_urls:
-    - http://89.169.147.92
-    - http://89.169.147.92/dashboard
-    - http://89.169.147.92/login
-    - http://89.169.147.92/settings
+    - http://158.160.204.124
+    - http://158.160.204.124/dashboard
+    - http://158.160.204.124/login
+    - http://158.160.204.124/settings
 
   methods:
     password:
@@ -49,14 +49,14 @@ selfservice:
 
   flows:
     error:
-      ui_url: http://89.169.147.92/error
+      ui_url: http://158.160.204.124/error
 
     login:
-      ui_url: http://89.169.147.92/login
+      ui_url: http://158.160.204.124/login
       lifespan: 10m
 
     registration:
-      ui_url: http://89.169.147.92/registration
+      ui_url: http://158.160.204.124/registration
       lifespan: 10m
       after:
         password:
@@ -64,20 +64,20 @@ selfservice:
             - hook: session
 
     settings:
-      ui_url: http://89.169.147.92/settings
+      ui_url: http://158.160.204.124/settings
       privileged_session_max_age: 15m
 
     recovery:
       enabled: true
-      ui_url: http://89.169.147.92/recovery
+      ui_url: http://158.160.204.124/recovery
 
     verification:
       enabled: true
-      ui_url: http://89.169.147.92/verification
+      ui_url: http://158.160.204.124/verification
 
     logout:
       after:
-        default_browser_return_url: http://89.169.147.92/login
+        default_browser_return_url: http://158.160.204.124/login
 
 log:
   level: debug
@@ -86,9 +86,9 @@ log:
 
 secrets:
   cookie:
-    - change-me-cookie-secret-32-bytes
+    - 70e2554b4468d42ef55117defc745f41a16f5bee90376a514185d1442dd19461
   cipher:
-    - change-me-cipher-secret-32-bytes
+    - 49777f3f7e5b382d412145d3a843467f6dd8d61a06227af187ff3e3aa8dddb85
 
 ciphers:
   algorithm: xchacha20-poly1305
