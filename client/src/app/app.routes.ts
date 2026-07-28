@@ -1,11 +1,10 @@
 import { Routes } from '@angular/router';
-import { WelcomeComponent } from './components/welcome/welcome.component';
 
 export const routes: Routes = [
   {
     path: '',
-    component: WelcomeComponent,
-    title: 'Industrial Telemetry',
+    loadComponent: () => import('./components/kratos-auth/kratos-auth.component').then(m => m.KratosAuthComponent),
+    title: 'Вход — Industrial Telemetry',
   },
   {
     path: 'login',
