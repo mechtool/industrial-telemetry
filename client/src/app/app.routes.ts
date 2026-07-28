@@ -3,27 +3,27 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./components/kratos-auth/kratos-auth.component').then(m => m.KratosAuthComponent),
+    loadComponent: () => import('./components/kratos/auth/kratos-auth.component').then(m => m.KratosAuthComponent),
     title: 'Вход — Industrial Telemetry',
   },
   {
     path: 'login',
-    loadComponent: () => import('./components/kratos-auth/kratos-auth.component').then(m => m.KratosAuthComponent),
+    loadComponent: () => import('./components/kratos/auth/kratos-auth.component').then(m => m.KratosAuthComponent),
     title: 'Вход — Industrial Telemetry',
   },
   {
     path: 'registration',
-    loadComponent: () => import('./components/kratos-auth/kratos-auth.component').then(m => m.KratosAuthComponent),
+    loadComponent: () => import('./components/kratos/auth/kratos-auth.component').then(m => m.KratosAuthComponent),
     title: 'Регистрация — Industrial Telemetry',
   },
   {
     path: 'verification',
-    loadComponent: () => import('./components/kratos-verification/kratos-verification.component').then(m => m.KratosVerificationComponent),
+    loadComponent: () => import('./components/kratos/verification/kratos-verification.component').then(m => m.KratosVerificationComponent),
     title: 'Верификация — Industrial Telemetry',
   },
   {
     path: 'recovery',
-    loadComponent: () => import('./components/kratos-recovery/kratos-recovery.component').then(m => m.KratosRecoveryComponent),
+    loadComponent: () => import('./components/kratos/recovery/kratos-recovery.component').then(m => m.KratosRecoveryComponent),
     title: 'Восстановление пароля — Industrial Telemetry',
   },
   {
