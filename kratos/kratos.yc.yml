@@ -1,6 +1,6 @@
-﻿# ========================================================
-# Ory Kratos вЂ” kratos.yc.yml (Yandex Cloud)
-# РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ РґР»СЏ Industrial Telemetry
+# ========================================================
+# Ory Kratos — kratos.yc.yml (Yandex Cloud)
+# Конфигурация для Industrial Telemetry
 # ========================================================
 
 version: v1.3.1
@@ -9,7 +9,7 @@ dsn: postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
 
 serve:
   public:
-    base_url: http://industrial-telemetry.ru/.ory
+    base_url: https://industrial-telemetry.ru/.ory
     cors:
       enabled: true
       allowed_origins:
@@ -32,12 +32,12 @@ serve:
     base_url: http://localhost:4434
 
 selfservice:
-  default_browser_return_url: http://industrial-telemetry.ru/dashboard
+  default_browser_return_url: https://industrial-telemetry.ru/dashboard
   allowed_return_urls:
-    - http://industrial-telemetry.ru
-    - http://industrial-telemetry.ru/dashboard
-    - http://industrial-telemetry.ru/login
-    - http://industrial-telemetry.ru/settings
+    - https://industrial-telemetry.ru
+    - https://industrial-telemetry.ru/dashboard
+    - https://industrial-telemetry.ru/login
+    - https://industrial-telemetry.ru/settings
 
   methods:
     password:
@@ -49,14 +49,14 @@ selfservice:
 
   flows:
     error:
-      ui_url: http://industrial-telemetry.ru/error
+      ui_url: https://industrial-telemetry.ru/error
 
     login:
-      ui_url: http://industrial-telemetry.ru/login
+      ui_url: https://industrial-telemetry.ru/login
       lifespan: 10m
 
     registration:
-      ui_url: http://industrial-telemetry.ru/registration
+      ui_url: https://industrial-telemetry.ru/registration
       lifespan: 10m
       after:
         password:
@@ -64,20 +64,26 @@ selfservice:
             - hook: session
 
     settings:
-      ui_url: http://industrial-telemetry.ru/settings
+      ui_url: https://industrial-telemetry.ru/settings
       privileged_session_max_age: 15m
 
     recovery:
       enabled: true
-      ui_url: http://industrial-telemetry.ru/recovery
+      ui_url: https://industrial-telemetry.ru/recovery
 
     verification:
       enabled: true
-      ui_url: http://industrial-telemetry.ru/verification
+      ui_url: https://industrial-telemetry.ru/verification
 
     logout:
       after:
-        default_browser_return_url: http://industrial-telemetry.ru/login
+        default_browser_return_url: https://industrial-telemetry.ru/login
+
+# Сессионные куки: SameSite + Secure (авто при https base_url)
+session:
+  lifespan: 168h
+  cookie:
+    same_site: Lax
 
 log:
   level: debug
