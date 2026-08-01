@@ -16,10 +16,16 @@
       @if (mode() === 'login') {
         <form #loginForm="ngForm" (ngSubmit)="submitLogin()" class="auth-form">
           <input nz-input type="email" id="kratos-email" [(ngModel)]="email" name="email"
-            autocomplete="email" required placeholder="Email" />
+            #emailField="ngModel" autocomplete="email" required placeholder="Email" />
+          @if (emailField.touched && emailField.invalid) {
+            <div class="field-error">Введите корректный email</div>
+          }
 
           <input nz-input type="password" id="kratos-password" [(ngModel)]="password" name="password"
-            autocomplete="current-password" required placeholder="Пароль" />
+            #passwordField="ngModel" autocomplete="current-password" required placeholder="Пароль" />
+          @if (passwordField.touched && passwordField.invalid) {
+            <div class="field-error">Введите пароль</div>
+          }
 
           <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
             [disabled]="loading() || loginForm.invalid" type="submit">
@@ -37,16 +43,28 @@
       @if (mode() === 'registration') {
         <form #regForm="ngForm" (ngSubmit)="submitRegistration()" class="auth-form">
           <input nz-input type="email" id="kratos-reg-email" [(ngModel)]="email" name="reg-email"
-            autocomplete="email" required placeholder="Email" />
+            #regEmail="ngModel" autocomplete="email" required placeholder="Email" />
+          @if (regEmail.touched && regEmail.invalid) {
+            <div class="field-error">Введите корректный email</div>
+          }
 
           <input nz-input id="kratos-reg-username" [(ngModel)]="username" name="reg-username"
-            autocomplete="username" required placeholder="Имя пользователя" />
+            #regUsername="ngModel" autocomplete="username" required placeholder="Имя пользователя" />
+          @if (regUsername.touched && regUsername.invalid) {
+            <div class="field-error">Введите имя пользователя</div>
+          }
 
           <input nz-input type="password" id="kratos-reg-password" [(ngModel)]="password" name="reg-password"
-            autocomplete="new-password" required placeholder="Пароль" />
+            #regPassword="ngModel" autocomplete="new-password" required placeholder="Пароль" />
+          @if (regPassword.touched && regPassword.invalid) {
+            <div class="field-error">Введите пароль</div>
+          }
 
           <input nz-input type="password" id="kratos-reg-confirm" [(ngModel)]="passwordConfirm" name="reg-confirm"
-            autocomplete="new-password" required placeholder="Подтвердите пароль" />
+            #regConfirm="ngModel" autocomplete="new-password" required placeholder="Подтвердите пароль" />
+          @if (regConfirm.touched && regConfirm.invalid) {
+            <div class="field-error">Подтвердите пароль</div>
+          }
 
           <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
             [disabled]="loading() || regForm.invalid" type="submit">

@@ -56,8 +56,11 @@
 
 .auth-links {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 0.25rem;
+  button{
+      font-size: 12px;
+  }
 }
 
 .auth-toggle {
@@ -74,3 +77,21 @@
   color: #6b7280;
   font-size: 0.875rem;
 }
+.ant-btn-link{
+    font-size: 12px;
+}
+
+/* ---- Валидация полей ---- */
+input[nz-input].ng-touched.ng-invalid:focus,
+input[nz-input].ng-touched.ng-invalid {
+  border-color: #ff4d4f;
+    box-shadow: none;
+}
+
+.field-error {
+  color: #ff4d4f;
+  font-size: 0.75rem;
+  margin-top: -0.75rem;
+  margin-bottom: 0.25rem;
+}
+
