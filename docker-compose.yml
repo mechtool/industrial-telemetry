@@ -1,150 +1,64 @@
 # ========================================================
-# Industrial Telemetry — docker-compose.yml
-# Стек: Ory Kratos + Express API + MQTT + Angular PWA
-#
-# Использование:
-#   docker compose up -d              # Запуск всего стека
-#   docker compose down               # Остановка
-#   docker compose build --no-cache   # Пересборка образов
+# Industrial Telemetry — локальная разработка
+# PostgreSQL + Ory Kratos + Backend Server
 # ========================================================
 
 services:
-  # --------------- PostgreSQL (для Kratos) ---------------
+  # ---- PostgreSQL для Kratos ----
   kratos-db:
     image: postgres:16-alpine
-    container_name: it-kratos-db
+    container_name: telemetry-kratos-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: kratos
       POSTGRES_PASSWORD: kratos
       POSTGRES_DB: kratos
+    ports:
+      - "5432:5432"
     volumes:
       - kratos-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: pg_isready -U kratos -d kratos
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U kratos -d kratos"]
+      interval: 5s
+      timeout: 3s
       retries: 5
-    networks:
-      - it-network
 
-  # --------------- Ory Kratos (миграция БД) ---------------
+  # ---- Миграция схемы Kratos ----
   kratos-migrate:
     image: oryd/kratos:v1.3.1
-    container_name: it-kratos-migrate
+    container_name: telemetry-kratos-migrate
     restart: "no"
-    command: migrate sql -e --yes
-    environment:
-      - DSN=postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
-    volumes:
-      - ./kratos:/etc/config/kratos:ro
     depends_on:
       kratos-db:
         condition: service_healthy
-    networks:
-      - it-network
-
-  # --------------- Ory Kratos ---------------
-  kratos:
-    image: oryd/kratos:v1.3.1
-    container_name: it-kratos
-    restart: unless-stopped
-    command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
-    ports:
-      - "4433:4433"
-      - "4434:4434"
     environment:
       - DSN=postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
-      - APP_URL=http://localhost:4000
-      - KRATOS_PUBLIC_URL=http://kratos:4433
+    command: migrate sql -e --yes
     volumes:
       - ./kratos:/etc/config/kratos:ro
+
+  # ---- Ory Kratos ----
+  kratos:
+    image: oryd/kratos:v1.3.1
+    container_name: telemetry-kratos
+    restart: unless-stopped
     depends_on:
+      kratos-db:
+        condition: service_healthy
       kratos-migrate:
         condition: service_completed_successfully
-    healthcheck:
-      test: wget -qO- http://localhost:4433/health/alive || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - it-network
-
-  # --------------- Mosquitto MQTT Broker ---------------
-  mosquitto:
-    image: eclipse-mosquitto:2
-    container_name: it-mosquitto
-    restart: unless-stopped
     ports:
-      - "1883:1883"
-      - "9001:9001"
+      - "4433:4433"   # Public API
+      - "4434:4434"   # Admin API
+    environment:
+      - DSN=postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
+      - KRATOS_PUBLIC_BASE_URL=${KRATOS_PUBLIC_BASE_URL:-http://localhost:4433/.ory}
+      - UI_BASE_URL=${UI_BASE_URL:-http://localhost:4200}
+      - SMTP_URI=${SMTP_URI:-smtps://mit-2%40yandex.ru:REDACTED@smtp.yandex.ru:465/?skip_ssl_verify=false}
+    command: serve -c /etc/config/kratos/kratos.docker.yml --dev --watch-courier
     volumes:
-      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-      - mosquitto-data:/mosquitto/data
-      - mosquitto-log:/mosquitto/log
-    healthcheck:
-      test: mosquitto_sub -t '$$SYS/#' -C 1 -W 3 2>/dev/null || exit 0
-      interval: 15s
-      timeout: 5s
-      retries: 3
-    networks:
-      - it-network
-
-  # --------------- Express API Server ---------------
-  server:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
-    container_name: it-server
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - SERVE_CLIENT=false
-      - KRATOS_PUBLIC_URL=http://kratos:4433
-      - KRATOS_ADMIN_URL=http://kratos:4434
-      - MQTT_BROKER_URL=mqtt://mosquitto:1883
-      - MQTT_CLIENT_ID=industrial-telemetry-server
-      - MQTT_USERNAME=${MQTT_USERNAME:-}
-      - MQTT_PASSWORD=${MQTT_PASSWORD:-}
-      - MQTT_TOPIC_PREFIX=industrial/
-      - CORS_ORIGIN=http://localhost:4000
-    depends_on:
-      mosquitto:
-        condition: service_healthy
-      kratos:
-        condition: service_healthy
-    networks:
-      - it-network
-
-  # --------------- Angular PWA Client ---------------
-  client:
-    build:
-      context: .
-      dockerfile: Dockerfile.client
-    container_name: it-client
-    restart: unless-stopped
-    ports:
-      - "4000:4000"
-    environment:
-      - NODE_ENV=production
-      - PORT=4000
-    depends_on:
-      - server
-    networks:
-      - it-network
+      - ./kratos:/etc/config/kratos:ro
 
 volumes:
   kratos-db-data:
     driver: local
-  mosquitto-data:
-    driver: local
-  mosquitto-log:
-    driver: local
-
-networks:
-  it-network:
-    driver: bridge
-    name: it-network
