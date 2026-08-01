@@ -1,17 +1,48 @@
 #cloud-config
+# ========================================================
+# Industrial Telemetry — Yandex Cloud VM cloud-init
+#
+# Назначение: автоматическая настройка ВМ при создании
+# Пользователь: mit-2
+# Целевая ОС:   Ubuntu 24.04 LTS
+# ========================================================
+
 users:
-  - name: ubuntu
+  - name: mit-2
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
     ssh_authorized_keys:
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDqBxLVDrX3sBd4XJGRtYy9u5mlW6oAP03yVmT+S5vH7ohNejIXSKJitCm+vHjXUkgPHKtP5YcqxBLGbVZAHETX9eVL49uj9Bme73Keqzni0TVP5COpnIsv+E2w5keRev4Lax6fBLmzsiN7uOrKPliWHLwPT1ylnCQ04e0zt3nIHkr7iyG2mn+yKxII2NZOwehfN2i+07ZF1dWjY97y46/olFH4aoOMipy4eqs1mSZJv3LkTz6DDeE8PpjhO6AQONkLgKhJNcyPCq5DTzlJ8p6U5h8Smq34tu6+JWEqIRGLg61saYR4IsmdVMDv8w2yxD5rV5WVDDlLMuWJWLO2+TLL saturn@DESKTOP-5GTQHG1
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDMMH5Ejkyk57kEWpUHGylTb9MME5FJ/gX8Nf1QjaAtiwt45fk00W2b762JC1uB/OOq1S0Xu77QQlGSNrNL/VHpE0VFSzRBMogkvaOgfRGu/pIAdRoFhHIwDiD+90c8K6nEP8ko1IRaOzTXPijaLzq3kKIu3CYw6UOyNcOa1qg+fSq9CvqIY7bLfJhIqOPTj+8kDyqkpoD13dtXpPIbywt/nSB+Rx09r+xcbGCFHqjuN1ZB1PYXaYPCjqlVcnm17tinqJU/mmdPePT/VmgIQeKKLshIexEjldTQ+jTM6HdbRwC0QwB92qjmVJLKLVri07Itq0j5KQ5E3qgjdfAt6Vx9
 
 package_update: true
+package_upgrade: true
+
 packages:
   - docker.io
   - docker-compose-v2
   - git
 
 runcmd:
+  # Docker — включить и добавить mit-2 в группу
   - systemctl enable --now docker
-  - usermod -aG docker ubuntu
+  - usermod -aG docker mit-2
+
+  # Swap 2 GB (рекомендовано для ВМ с 4 GB RAM)
+  - fallocate -l 2G /swapfile
+  - chmod 600 /swapfile
+  - mkswap /swapfile
+  - swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+  # Node.js 22 (nodesource)
+  - curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+  - apt-get install -y nodejs
+
+  # Лог завершения
+  - echo "cloud-init done at $(date)" >> /var/log/cloud-init-done.log
+
+# ========================================================
+# После создания ВМ:
+#   1. ssh mit-2@<IP>
+#   2. Склонировать проект и развернуть по DEPLOYMENT_GUIDE.md
+# ========================================================

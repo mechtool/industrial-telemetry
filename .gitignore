@@ -5,7 +5,5 @@ dist/
 *.log
 .env
 .env.local
-/MANUAL_RUN_GUIDE.md
-/DEPLOYMENT_PLAN.md
-/NEXT_STEPS.md
 certbot/
+

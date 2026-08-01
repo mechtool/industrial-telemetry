@@ -103,8 +103,8 @@ services:
   # ---- Nginx + Angular PWA (основной вход) ----
   client:
     build:
-      context: ./client
-      dockerfile: ../Dockerfile.client
+      context: .
+      dockerfile: Dockerfile.client
     container_name: it-client
     restart: unless-stopped
     ports:

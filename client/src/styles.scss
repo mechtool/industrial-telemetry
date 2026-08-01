@@ -53,17 +53,6 @@
   --p-button-primary-active-border-color: #064e3b;
 }
 
-// Links using primary color (auth-link, etc.)
-.auth-link {
-  color: #047857 !important;
-}
-
-// Any element using --p-primary-color as foreground
-a[href]:not([class*="nav-"]) {
-  color: #047857;
-}
-
-// ---- Сброс ----
 *,
 *::before,
 *::after {
