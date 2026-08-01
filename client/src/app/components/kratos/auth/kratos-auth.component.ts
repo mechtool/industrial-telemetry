@@ -48,10 +48,12 @@ export class KratosAuthComponent implements OnInit {
       const data = await res.json();
       if (data.success) {
         this.router.navigate(['/recovery'], { queryParams: { flow: data.data.flowId } });
+        return;
       }
     } catch {
-      window.location.href = '/.ory/self-service/recovery/browser';
+      // Бэкенд недоступен — переходим напрямую
     }
+    this.router.navigate(['/recovery']);
   }
 
   async startVerification(): Promise<void> {
@@ -60,10 +62,12 @@ export class KratosAuthComponent implements OnInit {
       const data = await res.json();
       if (data.success) {
         this.router.navigate(['/verification'], { queryParams: { flow: data.data.flowId } });
+        return;
       }
     } catch {
-      window.location.href = '/.ory/self-service/verification/browser';
+      // Бэкенд недоступен — переходим напрямую
     }
+    this.router.navigate(['/verification']);
   }
 
   async submitLogin(): Promise<void> {

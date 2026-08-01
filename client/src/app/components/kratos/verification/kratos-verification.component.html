@@ -26,7 +26,7 @@
               placeholder="Введите email для верификации" />
           </div>
           <p-button type="submit" label="Подтвердить email" icon="pi pi-envelope"
-            [loading]="loading()" [disabled]="loading() || verificationForm.invalid || !flowId"
+            [loading]="loading()" [disabled]="loading() || verificationForm.invalid"
             styleClass="w-full" />
         </form>
       }
