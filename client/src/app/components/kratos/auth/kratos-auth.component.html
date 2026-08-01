@@ -22,7 +22,7 @@
             autocomplete="current-password" required placeholder="Пароль" />
 
           <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
-            [disabled]="loading()" type="submit">
+            [disabled]="loading() || loginForm.invalid" type="submit">
             <span nz-icon nzType="login"></span>
             Войти
           </button>
@@ -49,7 +49,7 @@
             autocomplete="new-password" required placeholder="Подтвердите пароль" />
 
           <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
-            [disabled]="loading()" type="submit">
+            [disabled]="loading() || regForm.invalid" type="submit">
             <span nz-icon nzType="user-add"></span>
             Зарегистрироваться
           </button>

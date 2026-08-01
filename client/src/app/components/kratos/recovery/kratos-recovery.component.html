@@ -22,7 +22,7 @@
             autocomplete="email" required placeholder="Введите email, указанный при регистрации" />
 
           <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
-            [disabled]="loading()" type="submit">
+            [disabled]="loading() || recoveryForm.invalid" type="submit">
             <span nz-icon nzType="mail"></span>
             Восстановить пароль
           </button>

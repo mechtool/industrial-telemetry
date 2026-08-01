@@ -22,7 +22,7 @@
             autocomplete="email" required placeholder="Введите email для верификации" />
 
           <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
-            [disabled]="loading()" type="submit">
+            [disabled]="loading() || verificationForm.invalid" type="submit">
             <span nz-icon nzType="mail"></span>
             Подтвердить email
           </button>
