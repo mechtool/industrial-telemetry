@@ -1,39 +1,33 @@
 # ========================================================
-# Industrial Telemetry — Express API Server
+# Industrial Telemetry — Express API Server (Docker)
 # ========================================================
+
+# ---- Stage 1: Build TypeScript ----
 FROM node:22-alpine AS builder
-
-WORKDIR /build
-
-# Copy server files preserving directory structure for tsconfig rootDir
-COPY server/package*.json ./server/
-COPY server/tsconfig.json ./server/
-COPY server/src/ ./server/src/
-
-WORKDIR /build/server
-RUN npm ci && npm cache clean --force
-
-RUN npx tsc --project tsconfig.json
-
-RUN npm prune --production
-
-# ========================================================
-# Production image
-# ========================================================
-FROM node:22-alpine
-RUN addgroup -S app && adduser -S app -G app
-
 WORKDIR /app
 
-COPY --from=builder /build/server/node_modules ./node_modules
-COPY --from=builder /build/server/dist ./dist
-COPY server/.env ./
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
 
-USER app
-EXPOSE 3000
+COPY tsconfig.json ./
+COPY src/ ./src/
+RUN npm run build
 
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://localhost:3000/api/health || exit 1
+# ---- Stage 2: Runtime ----
+FROM node:22-alpine
+WORKDIR /app
+
+# Копируем только production-зависимости
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --legacy-peer-deps
+
+# Копируем собранный JS
+COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+USER node
 CMD ["node", "dist/server/src/index.js"]
