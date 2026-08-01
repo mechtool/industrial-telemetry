@@ -113,6 +113,7 @@ identity:
 courier:
   smtp:
     connection_uri: smtps://mit-2%40yandex.ru:REDACTED@smtp.yandex.ru:465/?skip_ssl_verify=false
+    from_address: mit-2@yandex.ru
 
 feature_flags:
   use_continue_with_transitions: true
