@@ -1,39 +1,40 @@
 <div class="auth-container">
   <div class="auth-card-wrapper">
-    <p-card>
-      <ng-template pTemplate="header">
-        <div class="auth-header">
-          <i class="pi pi-industry auth-logo" aria-hidden="true"></i>
-          <h1 class="auth-title">Industrial Telemetry</h1>
-          <p class="auth-subtitle">Восстановление пароля</p>
-        </div>
-      </ng-template>
+    <nz-card>
+      <div class="auth-header">
+        <span nz-icon nzType="shop" class="auth-logo"></span>
+        <h1 class="auth-title">Industrial Telemetry</h1>
+        <p class="auth-subtitle">Восстановление пароля</p>
+      </div>
 
       @if (error()) {
-        <p-message severity="error" variant="outlined" styleClass="w-full mb-3">{{ error() }}</p-message>
+        <nz-alert nzType="error" [nzShowIcon]="true" [nzMessage]="error()!" class="auth-alert"></nz-alert>
       }
 
       @if (success()) {
-        <p-message severity="success" variant="outlined" styleClass="w-full mb-3">
-          Инструкции по восстановлению пароля отправлены на указанный email. Проверьте почту.
-        </p-message>
+        <nz-alert nzType="success" [nzShowIcon]="true"
+          nzMessage="Инструкции по восстановлению пароля отправлены на указанный email. Проверьте почту."
+          class="auth-alert">
+        </nz-alert>
       } @else {
-        <form #recoveryForm="ngForm" (ngSubmit)="submitRecovery()" class="flex flex-column gap-3">
-          <div class="flex flex-column gap-1">
-            <label for="kratos-recovery-email" class="text-sm font-medium">Email <span class="required">*</span></label>
-            <input id="kratos-recovery-email" pInputText type="email" [(ngModel)]="email" name="recovery-email"
-              class="w-full" autocomplete="email" required
-              placeholder="Введите email, указанный при регистрации" />
-          </div>
-          <p-button type="submit" label="Восстановить пароль" icon="pi pi-envelope"
-            [loading]="loading()" [disabled]="loading() || recoveryForm.invalid"
-            styleClass="w-full" />
+        <form #recoveryForm="ngForm" (ngSubmit)="submitRecovery()" class="auth-form">
+          <input nz-input type="email" id="kratos-recovery-email" [(ngModel)]="email" name="recovery-email"
+            autocomplete="email" required placeholder="Введите email, указанный при регистрации" />
+
+          <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
+            [disabled]="loading()" type="submit">
+            <span nz-icon nzType="mail"></span>
+            Восстановить пароль
+          </button>
         </form>
       }
+    </nz-card>
 
-      <div class="auth-toggle">
-        <a class="auth-link" routerLink="/login">← Вернуться ко входу</a>
-      </div>
-    </p-card>
+    <div class="auth-back">
+      <a nz-button nzType="link" routerLink="/login">
+        <span nz-icon nzType="arrow-left"></span>
+        Вернуться ко входу
+      </a>
+    </div>
   </div>
 </div>

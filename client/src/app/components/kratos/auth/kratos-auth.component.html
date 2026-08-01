@@ -1,67 +1,70 @@
 <div class="auth-container">
   <div class="auth-card-wrapper">
-    <p-card>
-      <ng-template pTemplate="header">
-        <div class="auth-header">
-          <i class="pi pi-industry auth-logo" aria-hidden="true"></i>
-          <h1 class="auth-title">Industrial Telemetry</h1>
-          <p class="auth-subtitle">
-            @if (mode() === 'login') { Войдите в систему } @else { Создайте учётную запись }
-          </p>
-        </div>
-      </ng-template>
+    <nz-card>
+      <div class="auth-header">
+        <span nz-icon nzType="shop" class="auth-logo"></span>
+        <h1 class="auth-title">Industrial Telemetry</h1>
+        <p class="auth-subtitle">
+          @if (mode() === 'login') { Войдите в систему } @else { Создайте учётную запись }
+        </p>
+      </div>
 
       @if (error()) {
-        <p-message severity="error" variant="outlined" styleClass="w-full mb-3">{{ error() }}</p-message>
+        <nz-alert nzType="error" [nzShowIcon]="true" [nzMessage]="error()!" class="auth-alert"></nz-alert>
       }
 
       @if (mode() === 'login') {
-        <form #loginForm="ngForm" (ngSubmit)="submitLogin()" class="flex flex-column gap-3">
-          <div class="flex flex-column gap-1">
-            <label for="kratos-email" class="text-sm font-medium">Email <span class="required">*</span></label>
-            <input id="kratos-email" pInputText type="email" [(ngModel)]="email" name="email" class="w-full" autocomplete="email" required />
+        <form #loginForm="ngForm" (ngSubmit)="submitLogin()" class="auth-form">
+          <input nz-input type="email" id="kratos-email" [(ngModel)]="email" name="email"
+            autocomplete="email" required placeholder="Email" />
+
+          <input nz-input type="password" id="kratos-password" [(ngModel)]="password" name="password"
+            autocomplete="current-password" required placeholder="Пароль" />
+
+          <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
+            [disabled]="loading()" type="submit">
+            <span nz-icon nzType="login"></span>
+            Войти
+          </button>
+
+          <div class="auth-links">
+            <button nz-button nzType="link" type="button" (click)="startRecovery()">Забыли пароль?</button>
+            <button nz-button nzType="link" type="button" (click)="startVerification()">Подтвердить email</button>
           </div>
-          <div class="flex flex-column gap-1">
-            <label for="kratos-password" class="text-sm font-medium">Пароль <span class="required">*</span></label>
-            <input id="kratos-password" pInputText type="password" [(ngModel)]="password" name="password" class="w-full" autocomplete="current-password" required />
-          </div>
-          <p-button [raised]="true" type="submit" label="Войти" icon="pi pi-sign-in" [loading]="loading()" [disabled]="loading() || loginForm.invalid" styleClass="w-full" />
-          <button type="button" class="auth-link recovery-link" (click)="startRecovery()">Забыли пароль?</button>
-          <button type="button" class="auth-link recovery-link" (click)="startVerification()">Подтвердить email</button>
         </form>
       }
 
       @if (mode() === 'registration') {
-        <form #regForm="ngForm" (ngSubmit)="submitRegistration()" class="flex flex-column gap-3">
-          <div class="flex flex-column gap-1">
-            <label for="kratos-reg-email" class="text-sm font-medium">Email <span class="required">*</span></label>
-            <input id="kratos-reg-email" pInputText type="email" [(ngModel)]="email" name="reg-email" class="w-full" autocomplete="email" required />
-          </div>
-          <div class="flex flex-column gap-1">
-            <label for="kratos-reg-username" class="text-sm font-medium">Имя пользователя <span class="required">*</span></label>
-            <input id="kratos-reg-username" pInputText [(ngModel)]="username" name="reg-username" class="w-full" autocomplete="username" required />
-          </div>
-          <div class="flex flex-column gap-1">
-            <label for="kratos-reg-password" class="text-sm font-medium">Пароль <span class="required">*</span></label>
-            <input id="kratos-reg-password" pInputText type="password" [(ngModel)]="password" name="reg-password" class="w-full" autocomplete="new-password" required />
-          </div>
-          <div class="flex flex-column gap-1">
-            <label for="kratos-reg-confirm" class="text-sm font-medium">Подтвердите пароль <span class="required">*</span></label>
-            <input id="kratos-reg-confirm" pInputText type="password" [(ngModel)]="passwordConfirm" name="reg-confirm" class="w-full" autocomplete="new-password" required />
-          </div>
-          <p-button type="submit" label="Зарегистрироваться" icon="pi pi-user-plus" [loading]="loading()" [disabled]="loading() || regForm.invalid" styleClass="w-full" />
+        <form #regForm="ngForm" (ngSubmit)="submitRegistration()" class="auth-form">
+          <input nz-input type="email" id="kratos-reg-email" [(ngModel)]="email" name="reg-email"
+            autocomplete="email" required placeholder="Email" />
+
+          <input nz-input id="kratos-reg-username" [(ngModel)]="username" name="reg-username"
+            autocomplete="username" required placeholder="Имя пользователя" />
+
+          <input nz-input type="password" id="kratos-reg-password" [(ngModel)]="password" name="reg-password"
+            autocomplete="new-password" required placeholder="Пароль" />
+
+          <input nz-input type="password" id="kratos-reg-confirm" [(ngModel)]="passwordConfirm" name="reg-confirm"
+            autocomplete="new-password" required placeholder="Подтвердите пароль" />
+
+          <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
+            [disabled]="loading()" type="submit">
+            <span nz-icon nzType="user-add"></span>
+            Зарегистрироваться
+          </button>
         </form>
       }
 
       <div class="auth-toggle">
         @if (mode() === 'login') {
-          <span class="text-sm text-500">Нет аккаунта?</span>
-          <a class="auth-link" (click)="setMode('registration'); $event.preventDefault()" href="#">Зарегистрироваться</a>
+          <span class="toggle-text">Нет аккаунта?</span>
+          <a nz-button nzType="link" (click)="setMode('registration'); $event.preventDefault()">Зарегистрироваться</a>
         } @else {
-          <span class="text-sm text-500">Уже есть аккаунт?</span>
-          <a class="auth-link" (click)="setMode('login'); $event.preventDefault()" href="#">Войти</a>
+          <span class="toggle-text">Уже есть аккаунт?</span>
+          <a nz-button nzType="link" (click)="setMode('login'); $event.preventDefault()">Войти</a>
         }
       </div>
-    </p-card>
+    </nz-card>
   </div>
 </div>

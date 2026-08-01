@@ -1,11 +1,12 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 interface RecoveryResponse {
   success: boolean;
@@ -16,14 +17,22 @@ interface RecoveryResponse {
 @Component({
   selector: 'app-kratos-recovery',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, CardModule, ButtonModule, InputTextModule, MessageModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    NzCardModule,
+    NzButtonModule,
+    NzInputModule,
+    NzAlertModule,
+    NzIconModule,
+  ],
   templateUrl: './kratos-recovery.component.html',
   styleUrl: './kratos-recovery.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KratosRecoveryComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
 
   email = '';
   error = signal<string | null>(null);

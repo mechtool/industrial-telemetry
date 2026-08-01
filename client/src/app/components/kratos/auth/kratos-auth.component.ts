@@ -2,10 +2,12 @@ import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@ang
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+
 type AuthMode = 'login' | 'registration';
 
 interface KratosProxyResponse {
@@ -17,7 +19,15 @@ interface KratosProxyResponse {
 @Component({
   selector: 'app-kratos-auth',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule, MessageModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NzCardModule,
+    NzButtonModule,
+    NzInputModule,
+    NzAlertModule,
+    NzIconModule,
+  ],
   templateUrl: './kratos-auth.component.html',
   styleUrl: './kratos-auth.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -99,7 +109,10 @@ export class KratosAuthComponent implements OnInit {
 
   async submitRegistration(): Promise<void> {
     if (!this.email || !this.username || !this.password) return;
-    if (this.password !== this.passwordConfirm) { this.error.set('Пароли не совпадают'); return; }
+    if (this.password !== this.passwordConfirm) {
+      this.error.set('Пароли не совпадают');
+      return;
+    }
     this.loading.set(true);
     this.error.set(null);
 
