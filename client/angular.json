@@ -36,24 +36,14 @@
               "node_modules/primeflex/primeflex.min.css",
               "src/styles.scss"
             ],
-            "scripts": [],
-            "serviceWorker": "ngsw-config.json"
+            "scripts": []
           },
-          "configurations": {
+            "configurations": {
             "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "3mb",
-                  "maximumError": "1.5mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "10kb",
-                  "maximumError": "20kb"
-                }
-              ],
-              "outputHashing": "all",
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "outputHashing": "none",
               "serviceWorker": "ngsw-config.json"
             },
             "development": {
