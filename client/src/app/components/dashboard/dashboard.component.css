@@ -1,9 +1,92 @@
-/* Dashboard — карточки статистики и состояние системы */
+/* ── Dashboard: ng-zorro layout — без скроллов, адаптивно по высоте и ширине ── */
 
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+:host > nz-layout {
+  height: 100%;
+}
+
+/* ── Sider ── */
+nz-sider {
+  overflow: auto;
+}
+
+/* ── Header ── */
+nz-header {
+  background: #fff;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.header-right a {
+  display: flex;
+  align-items: center;
+}
+
+.header-right nz-avatar {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.header-right nz-avatar:hover {
+  opacity: 0.8;
+}
+
+/* ── Content: flex-колонка, занимает всё доступное пространство ── */
+nz-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 16px;
+}
+
+nz-breadcrumb {
+  margin: 12px 0;
+  flex-shrink: 0;
+}
+
+.inner-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Footer ── */
+nz-footer {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Карточки: компактный грид ── */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .card-grid p-card {
@@ -13,4 +96,10 @@
 
 .card-grid p-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Нижняя секция: занимает оставшееся место ── */
+.bottom-section {
+  flex: 1;
+  min-height: 0;
 }

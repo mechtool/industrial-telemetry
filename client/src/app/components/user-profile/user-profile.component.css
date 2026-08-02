@@ -1,0 +1,96 @@
+/* ── User Profile ── */
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+:host > nz-layout {
+  height: 100%;
+}
+
+/* ── Header ── */
+.profile-header {
+  background: #fff;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ── Content ── */
+nz-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 16px;
+}
+
+nz-breadcrumb {
+  margin: 12px 0;
+  flex-shrink: 0;
+}
+
+.inner-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+/* ── Footer ── */
+nz-footer {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Profile card ── */
+.profile-card {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.profile-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* ── Empty state ── */
+.profile-empty {
+  text-align: center;
+  padding: 48px 0;
+  color: rgba(0, 0, 0, 0.45);
+}

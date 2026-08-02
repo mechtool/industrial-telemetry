@@ -1,0 +1,57 @@
+<nz-layout>
+  <nz-header class="profile-header">
+    <a routerLink="/dashboard" class="back-link">
+      <nz-icon nzType="arrow-left" />
+      <span>Панель управления</span>
+    </a>
+    <span class="header-title">Профиль пользователя</span>
+  </nz-header>
+
+  <nz-content>
+    <nz-breadcrumb>
+      <nz-breadcrumb-item>
+        <a routerLink="/dashboard">Главная</a>
+      </nz-breadcrumb-item>
+      <nz-breadcrumb-item>Профиль</nz-breadcrumb-item>
+    </nz-breadcrumb>
+
+    <div class="inner-content">
+      @if (user) {
+        <div class="profile-card">
+          <div class="profile-avatar">
+            <nz-avatar [nzText]="initial" [nzSize]="80" />
+            <h2 class="profile-name">{{ user.username }}</h2>
+            <p-tag [value]="user.role" severity="info" />
+          </div>
+
+          <nz-descriptions nzBordered nzSize="middle" [nzColumn]="{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }">
+            <nz-descriptions-item nzTitle="ID">
+              {{ user.id }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Имя пользователя">
+              {{ user.username }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Email">
+              {{ user.email }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Роль">
+              <p-tag [value]="user.role" severity="info" />
+            </nz-descriptions-item>
+            @if (user.department) {
+              <nz-descriptions-item nzTitle="Отдел">
+                {{ user.department }}
+              </nz-descriptions-item>
+            }
+          </nz-descriptions>
+        </div>
+      } @else {
+        <div class="profile-empty">
+          <p>Пользователь не найден.</p>
+          <p-button label="На панель управления" icon="pi pi-arrow-left" severity="secondary" routerLink="/dashboard" />
+        </div>
+      }
+    </div>
+  </nz-content>
+
+  <nz-footer>Industrial Telemetry ©{{ currentYear }}</nz-footer>
+</nz-layout>

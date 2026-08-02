@@ -1,69 +1,122 @@
-<div class="page-container">
-  <h1 class="page-title">Панель управления</h1>
-
-  <div class="card-grid">
-    @for (card of cards; track card.title) {
-      <p-card [routerLink]="card.link" styleClass="cursor-pointer hover:shadow-3 transition-duration-200">
-        <div class="flex align-items-center gap-3">
-          <span class="text-3xl" [style.color]="card.color">
-            <i [class]="card.icon"></i>
-          </span>
-          <div>
-            <div class="text-sm text-500">{{ card.title }}</div>
-            <div class="text-2xl font-bold mt-1">{{ card.value }}</div>
-          </div>
-        </div>
-      </p-card>
-    } @empty {
-      @for (i of [1,2,3]; track i) {
-        <p-card><p-skeleton width="100%" height="80px" /></p-card>
+<nz-header>
+    <div class="header-title">Industrial Telemetry</div>
+    <div class="header-right">
+      @if (userName) {
+        <a routerLink="/profile">
+          <nz-avatar
+            [nzText]="userInitial"
+            nz-tooltip
+            [nzTooltipTitle]="userName"
+            nzTooltipPlacement="bottom"
+          />
+        </a>
       }
-    }
-  </div>
+    </div>
+</nz-header>
+<nz-layout>
+  <nz-sider nzCollapsible nzWidth="220px" nzTheme="light">
+    <ul nz-menu nzMode="inline" nzTheme="light">
+      <li nz-menu-item nzMatchRouter routerLink="/dashboard">
+        <nz-icon nzType="pie-chart" />
+        <span>Панель управления</span>
+      </li>
+      @if (perms.canView('mqtt')) {
+        <li nz-menu-item nzMatchRouter routerLink="/mqtt">
+          <nz-icon nzType="desktop" />
+          <span>MQTT</span>
+        </li>
+      }
+      @if (perms.canManageUsers()) {
+        <li nz-menu-item routerLink="/users">
+          <nz-icon nzType="team" />
+          <span>Пользователи</span>
+        </li>
+      }
+      <li nz-menu-item>
+        <nz-icon nzType="file" />
+        <span>Отчёты</span>
+      </li>
+    </ul>
+  </nz-sider>
 
-  <div class="grid mt-4">
-    <div class="col-12 md:col-6">
-      <p-card header="Состояние системы">
-        <div class="flex flex-column gap-3">
-          <div class="flex justify-content-between align-items-center">
-            <span>MQTT брокер</span>
-            @if (mqttConnected() !== null) {
-              <p-tag
-                [value]="mqttConnected() ? 'Подключён' : 'Отключён'"
-                [severity]="mqttConnected() ? 'success' : 'danger'"
-              />
-            } @else {
-              <p-skeleton width="6rem" height="1.5rem" />
+  <nz-layout>
+      <nz-content>
+      <nz-breadcrumb>
+        <nz-breadcrumb-item>Главная</nz-breadcrumb-item>
+        <nz-breadcrumb-item>Панель управления</nz-breadcrumb-item>
+      </nz-breadcrumb>
+
+      <div class="inner-content">
+        <div class="card-grid">
+          @for (card of cards; track card.title) {
+            <p-card [routerLink]="card.link" styleClass="cursor-pointer hover:shadow-3 transition-duration-200">
+              <div class="flex align-items-center gap-3">
+                <span class="text-3xl" [style.color]="card.color">
+                  <i [class]="card.icon"></i>
+                </span>
+                <div>
+                  <div class="text-sm text-500">{{ card.title }}</div>
+                  <div class="text-2xl font-bold mt-1">{{ card.value }}</div>
+                </div>
+              </div>
+            </p-card>
+          } @empty {
+            @for (i of [1,2,3]; track i) {
+              <p-card><p-skeleton width="100%" height="80px" /></p-card>
             }
+          }
+        </div>
+
+        <div class="bottom-section">
+          <div class="grid">
+          <div class="col-12 md:col-6">
+            <p-card header="Состояние системы">
+              <div class="flex flex-column gap-3">
+                <div class="flex justify-content-between align-items-center">
+                  <span>MQTT брокер</span>
+                  @if (mqttConnected() !== null) {
+                    <p-tag
+                      [value]="mqttConnected() ? 'Подключён' : 'Отключён'"
+                      [severity]="mqttConnected() ? 'success' : 'danger'"
+                    />
+                  } @else {
+                    <p-skeleton width="6rem" height="1.5rem" />
+                  }
+                </div>
+                <div class="flex justify-content-between align-items-center">
+                  <span>База данных</span>
+                  <p-tag value="MongoDB" severity="info" />
+                </div>
+                <div class="flex justify-content-between align-items-center">
+                  <span>Подписок MQTT</span>
+                  @if (subscriptionCount() !== null) {
+                    <span class="font-bold">{{ subscriptionCount() }}</span>
+                  } @else {
+                    <p-skeleton width="2rem" height="1.5rem" />
+                  }
+                </div>
+              </div>
+            </p-card>
           </div>
-          <div class="flex justify-content-between align-items-center">
-            <span>База данных</span>
-            <p-tag value="MongoDB" severity="info" />
-          </div>
-          <div class="flex justify-content-between align-items-center">
-            <span>Подписок MQTT</span>
-            @if (subscriptionCount() !== null) {
-              <span class="font-bold">{{ subscriptionCount() }}</span>
-            } @else {
-              <p-skeleton width="2rem" height="1.5rem" />
-            }
+
+          <div class="col-12 md:col-6">
+            <p-card header="Быстрые действия">
+              <div class="flex flex-wrap gap-2">
+                @if (perms.canView('mqtt')) {
+                  <p-button label="MQTT" icon="pi pi-wifi" severity="help" routerLink="/mqtt" />
+                }
+                @if (perms.canManageUsers()) {
+                  <p-button label="Пользователи" icon="pi pi-users" severity="info" routerLink="/users" />
+                }
+                <p-button label="Обновить" icon="pi pi-refresh" severity="secondary" (onClick)="refresh()" />
+              </div>
+            </p-card>
           </div>
         </div>
-      </p-card>
-    </div>
-
-    <div class="col-12 md:col-6">
-      <p-card header="Быстрые действия">
-        <div class="flex flex-wrap gap-2">
-          @if (perms.canView('mqtt')) {
-            <p-button label="MQTT" icon="pi pi-wifi" severity="help" routerLink="/mqtt" />
-          }
-          @if (perms.canManageUsers()) {
-            <p-button label="Пользователи" icon="pi pi-users" severity="info" routerLink="/users" />
-          }
-          <p-button label="Обновить" icon="pi pi-refresh" severity="secondary" (onClick)="refresh()" />
         </div>
-      </p-card>
-    </div>
-  </div>
-</div>
+      </div>
+    </nz-content>
+
+    <nz-footer>Industrial Telemetry ©{{ currentYear }}</nz-footer>
+  </nz-layout>
+</nz-layout>

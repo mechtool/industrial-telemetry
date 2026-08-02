@@ -12,11 +12,15 @@ import {
   MailOutline,
   ShopOutline,
   ArrowLeftOutline,
+  PieChartOutline,
+  DesktopOutline,
+  TeamOutline,
+  FileOutline,
 } from '@ant-design/icons-angular/icons';
 import { routes } from './app.routes';
 import { MessageService } from 'primeng/api';
 
-const nzIcons = [LoginOutline, UserAddOutline, MailOutline, ShopOutline, ArrowLeftOutline];
+const nzIcons = [LoginOutline, UserAddOutline, MailOutline, ShopOutline, ArrowLeftOutline, PieChartOutline, DesktopOutline, TeamOutline, FileOutline];
 
 export const appConfig: ApplicationConfig = {
   providers: [
