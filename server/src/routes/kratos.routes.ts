@@ -216,41 +216,46 @@ router.get('/recovery', async (req: Request, res: Response) => {
     // If token present, submit it to continue the link recovery
     if (token) {
       const kratosUrl = `${config.kratos.publicUrl}/self-service/recovery?flow=${flowId}&token=${token}`;
-      console.log('[Kratos] Recovery GET →', kratosUrl);
-      const r = await fetch(kratosUrl, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        redirect: 'manual',
-      });
-      console.log('[Kratos] Recovery GET status:', r.status, r.headers.get('content-type'));
+      const ac = new AbortController();
+      const timer = setTimeout(() => ac.abort(), 10_000);
+      let r: Response;
+      try {
+        r = await fetch(kratosUrl, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          redirect: 'manual',
+          signal: ac.signal,
+        });
+      } catch (err: any) {
+        clearTimeout(timer);
+        res.status(err.name === 'AbortError' ? 504 : 502).json({
+          success: false,
+          error: { message: err.name === 'AbortError' ? 'Kratos not responding' : 'Auth service unreachable' },
+        });
+        return;
+      }
+      clearTimeout(timer);
       if (r.ok) {
         const flow = await r.json();
-        console.log('[Kratos] Recovery flow id:', flow.id, 'state:', flow.state, 'active:', flow.active, 'nodes:', flow.ui?.nodes?.length);
         res.json({ success: true, data: flow });
         return;
       }
       if (r.status === 302 || r.status === 303) {
         const loc = r.headers.get('location');
-        console.log('[Kratos] Recovery redirect →', loc);
         if (loc) {
           const u = new URL(loc);
           const newId = u.searchParams.get('flow') ?? u.searchParams.get('id');
-          console.log('[Kratos] Extracted flow ID:', newId);
           if (newId) {
             const fr = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${newId}`, {
               headers: { 'Accept': 'application/json' },
             });
-            console.log('[Kratos] Flow fetch status:', fr.status);
             if (fr.ok) {
               const d = await fr.json();
-              console.log('[Kratos] Redirect flow id:', d.id, 'state:', d.state, 'active:', d.active, 'nodes:', d.ui?.nodes?.length);
               res.json({ success: true, data: d }); return;
             }
           }
         }
       }
-      const errText = await r.text().catch(() => '');
-      console.log('[Kratos] Recovery error body:', errText.substring(0, 600));
       res.status(400).json({ success: false, error: { message: 'Invalid or expired recovery link' } });
       return;
     }
