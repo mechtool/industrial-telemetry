@@ -76,10 +76,8 @@
 
       <div class="auth-toggle">
         @if (mode() === 'login') {
-          <span class="toggle-text">Нет аккаунта?</span>
           <a nz-button nzType="link" (click)="setMode('registration'); $event.preventDefault()">Зарегистрироваться</a>
         } @else {
-          <span class="toggle-text">Уже есть аккаунт?</span>
           <a nz-button nzType="link" (click)="setMode('login'); $event.preventDefault()">Войти</a>
         }
       </div>

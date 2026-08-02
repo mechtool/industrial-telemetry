@@ -27,7 +27,7 @@
 
 .auth-logo {
   font-size: 2.5rem;
-  color: #047857;
+  color: #1890ff;
   margin-bottom: 0.5rem;
 }
 
@@ -57,7 +57,7 @@
 .auth-links {
   display: flex;
   justify-content: space-between;
-  gap: 0.25rem;
+    flex-wrap: wrap;
   button{
       font-size: 12px;
   }
@@ -67,16 +67,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.25rem;
   margin-top: 1.25rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
 }
 
-.toggle-text {
-  color: #6b7280;
-  font-size: 0.875rem;
-}
 .ant-btn-link{
     font-size: 12px;
 }

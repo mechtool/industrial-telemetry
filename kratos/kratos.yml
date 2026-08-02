@@ -70,7 +70,6 @@ selfservice:
     recovery:
       enabled: true
       ui_url: http://localhost:4000/recovery
-
     verification:
       enabled: true
       ui_url: http://localhost:4000/verification
@@ -109,4 +108,4 @@ courier:
     connection_uri: smtps://mit-2%40yandex.ru:REDACTED@smtp.yandex.ru:465/?skip_ssl_verify=false
 
 feature_flags:
-  use_continue_with_transitions: true
+  use_continue_with_transitions: false

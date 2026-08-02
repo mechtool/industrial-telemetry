@@ -16,10 +16,6 @@ export class MqttClientService {
     return this.api.get<MqttStatus>('/mqtt/status').pipe(map(r => r.data));
   }
 
-  getSubscriptions(): Observable<string[]> {
-    return this.api.get<string[]>('/mqtt/subscriptions').pipe(map(r => r.data));
-  }
-
   subscribe(topic: string): Observable<{ topic: string; subscriptions: string[] }> {
     return this.api.post<{ topic: string; subscriptions: string[] }>('/mqtt/subscribe', { topic }).pipe(map(r => r.data));
   }

@@ -13,7 +13,6 @@ export const config = {
   // ---- Ory Kratos ----
   kratos: {
     publicUrl: process.env.KRATOS_PUBLIC_URL || 'http://localhost:4433',
-    adminUrl: process.env.KRATOS_ADMIN_URL || 'http://localhost:4434',
   },
 
   // ---- MQTT ----

@@ -91,24 +91,6 @@ html, body {
   gap: 1rem;
 }
 
-.status-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  &::before {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-
-  &.online::before  { background: var(--color-sensor-normal); }
-  &.warning::before { background: var(--color-sensor-warning); }
-  &.offline::before { background: var(--color-sensor-critical); }
-}
-
 // ---- WCAG AA contrast overrides ----
 // PrimeNG text-500 по умолчанию #6b7280 → недостаточный контраст
 .text-500 {

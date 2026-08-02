@@ -4,36 +4,53 @@
       <div class="auth-header">
         <span nz-icon nzType="shop" class="auth-logo"></span>
         <h1 class="auth-title">Industrial Telemetry</h1>
-        <p class="auth-subtitle">Восстановление пароля</p>
+        <p class="auth-subtitle">Password Recovery</p>
       </div>
 
       @if (error()) {
         <nz-alert nzType="error" [nzShowIcon]="true" [nzMessage]="error()!" class="auth-alert"></nz-alert>
       }
 
-      @if (success()) {
-        <nz-alert nzType="success" [nzShowIcon]="true"
-          nzMessage="Инструкции по восстановлению пароля отправлены на указанный email. Проверьте почту."
-          class="auth-alert">
-        </nz-alert>
-      } @else {
-        <form #recoveryForm="ngForm" (ngSubmit)="submitRecovery()" class="auth-form">
-          <input nz-input type="email" id="kratos-recovery-email" [(ngModel)]="email" name="recovery-email"
-            autocomplete="email" required placeholder="Введите email, указанный при регистрации" />
-
+      <!-- Step 1: email -->
+      @if (step() === 'email') {
+        <form #f1="ngForm" (ngSubmit)="submitEmail()" class="auth-form">
+          <input nz-input type="email" [(ngModel)]="email" name="email"
+            autocomplete="email" required placeholder="Enter your email" />
           <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
-            [disabled]="loading() || recoveryForm.invalid" type="submit">
-            <span nz-icon nzType="mail"></span>
-            Восстановить пароль
+            [disabled]="loading() || f1.invalid" type="submit">
+            <span nz-icon nzType="mail"></span> Send recovery link
           </button>
         </form>
+      }
+
+      <!-- Step 2: new password -->
+      @if (step() === 'password') {
+        <nz-alert nzType="success" [nzShowIcon]="true"
+          nzMessage="Set your new password" class="auth-alert"></nz-alert>
+        <form #f3="ngForm" (ngSubmit)="submitPass()" class="auth-form">
+          <input nz-input type="password" [(ngModel)]="newPass" name="pass"
+            autocomplete="new-password" required minlength="8"
+            placeholder="New password (min 8 chars)" />
+          <input nz-input type="password" [(ngModel)]="newPassConfirm" name="pass2"
+            autocomplete="new-password" required placeholder="Confirm password" />
+          <button nz-button nzType="primary" nzBlock [nzLoading]="loading()"
+            [disabled]="loading() || f3.invalid" type="submit">
+            <span nz-icon nzType="save"></span> Save password
+          </button>
+        </form>
+      }
+
+      <!-- Step 3: done -->
+      @if (step() === 'done') {
+        <nz-alert nzType="success" [nzShowIcon]="true"
+          nzMessage="Recovery link sent! Check your email and follow the link."
+          class="auth-alert"></nz-alert>
       }
     </nz-card>
 
     <div class="auth-back">
       <a nz-button nzType="link" routerLink="/login">
-        <span nz-icon nzType="arrow-left"></span>
-        Вернуться ко входу
+        <span nz-icon nzType="arrow-left"></span> Back to login
       </a>
     </div>
   </div>

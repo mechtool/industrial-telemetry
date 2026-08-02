@@ -3,7 +3,7 @@ import { config } from '../config/index.js';
 
 const router = Router();
 
-/** Извлечь CSRF-токен из ui.nodes ответа Kratos */
+/** Extract CSRF token from Kratos ui.nodes */
 function extractCsrfToken(ui: any): string {
   const nodes: any[] = ui?.nodes ?? [];
   for (const node of nodes) {
@@ -14,123 +14,87 @@ function extractCsrfToken(ui: any): string {
   return '';
 }
 
-/** Извлечь сообщение об ошибке из ui.messages или node.messages */
+/** Extract error message from ui.messages or node.messages */
 function extractErrorMessage(ui: any): string | null {
-  // Top-level UI messages
   const uiMessages: any[] = ui?.messages ?? [];
   if (uiMessages[0]?.text) return uiMessages[0].text;
-
-  // Per-node messages (e.g. password validation errors)
   const nodes: any[] = ui?.nodes ?? [];
   for (const node of nodes) {
     const nodeMessages: any[] = node.messages ?? [];
     if (nodeMessages[0]?.text) return nodeMessages[0].text;
   }
-
   return null;
 }
 
-/**
- * POST /api/kratos/login
- * Проксирует Kratos login API flow через сервер (без Origin header → без CSRF-блокировки)
- */
+// ============================================================
+// Login
+// ============================================================
 router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
-    res.status(400).json({ success: false, error: { message: 'Email и пароль обязательны' } });
+    res.status(400).json({ success: false, error: { message: 'Email and password required' } });
     return;
   }
-
   try {
-    // 1. Инициализировать login flow через Kratos API
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/login/api`, {
       headers: { 'Accept': 'application/json' },
     });
-
     if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Не удалось инициализировать вход' } });
+      res.status(502).json({ success: false, error: { message: 'Unable to create login flow' } });
       return;
     }
-
     const flow = await flowRes.json();
     const csrfToken = extractCsrfToken(flow.ui);
-    // 2. Отправить учётные данные напрямую в Kratos (не через actionUrl — там localhost)
     const body = new URLSearchParams();
     body.set('method', 'password');
     body.set('csrf_token', csrfToken);
     body.set('identifier', email);
     body.set('password', password);
-
     const loginRes = await fetch(`${config.kratos.publicUrl}/self-service/login?flow=${flow.id}`, {
       method: flow.ui.method,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
       body: body.toString(),
       redirect: 'manual',
     });
-
-    // 3. Пробросить Set-Cookie заголовки от Kratos клиенту
     const setCookie = loginRes.headers.get('set-cookie');
-    if (setCookie) {
-      res.setHeader('Set-Cookie', setCookie);
-    }
-
-    // 4. Обработать ответ
+    if (setCookie) res.setHeader('Set-Cookie', setCookie);
     if (loginRes.status === 422 || loginRes.status === 400) {
       const err = await loginRes.json();
-      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Неверный email или пароль';
-      res.status(401).json({ success: false, error: { message: msg } });
+      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Login error';
+      res.status(400).json({ success: false, error: { message: msg } });
       return;
     }
-
     if (!loginRes.ok) {
-      const text = await loginRes.text();
-      res.status(502).json({ success: false, error: { message: `Ошибка входа (${loginRes.status})` } });
+      res.status(502).json({ success: false, error: { message: `Login error (${loginRes.status})` } });
       return;
     }
-
     const result = await loginRes.json();
-    res.json({
-      success: true,
-      data: {
-        id: result.session?.identity?.id ?? '',
-        email,
-        username: result.session?.identity?.traits?.username ?? email,
-        role: result.session?.identity?.traits?.role ?? 'operator',
-      },
-    });
+    res.json({ success: true, data: result });
   } catch (err: any) {
-    console.error('[Kratos Proxy] Ошибка логина:', err.message);
-    res.status(502).json({ success: false, error: { message: 'Сервис аутентификации недоступен' } });
+    console.error('[Kratos] Login error:', err.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
   }
 });
 
-/**
- * POST /api/kratos/registration
- * Проксирует Kratos registration API flow через сервер
- */
+// ============================================================
+// Registration
+// ============================================================
 router.post('/registration', async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
-
   if (!email || !username || !password) {
-    res.status(400).json({ success: false, error: { message: 'Email, имя пользователя и пароль обязательны' } });
+    res.status(400).json({ success: false, error: { message: 'Email, username and password required' } });
     return;
   }
-
   try {
-    // 1. Инициализировать registration flow через Kratos API
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/registration/api`, {
       headers: { 'Accept': 'application/json' },
     });
-
     if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Не удалось инициализировать регистрацию' } });
+      res.status(502).json({ success: false, error: { message: 'Unable to create registration flow' } });
       return;
     }
-
     const flow = await flowRes.json();
     const csrfToken = extractCsrfToken(flow.ui);
-    // 2. Отправить данные регистрации напрямую в Kratos
     const body = new URLSearchParams();
     body.set('method', 'password');
     body.set('csrf_token', csrfToken);
@@ -138,240 +102,288 @@ router.post('/registration', async (req: Request, res: Response) => {
     body.set('traits.username', username);
     body.set('traits.role', 'operator');
     body.set('password', password);
-
     const regRes = await fetch(`${config.kratos.publicUrl}/self-service/registration?flow=${flow.id}`, {
       method: flow.ui.method,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
       body: body.toString(),
       redirect: 'manual',
     });
-
-    // 3. Пробросить Set-Cookie заголовки от Kratos клиенту
     const setCookie = regRes.headers.get('set-cookie');
-    if (setCookie) {
-      res.setHeader('Set-Cookie', setCookie);
-    }
-
-    // 4. Обработать ответ
+    if (setCookie) res.setHeader('Set-Cookie', setCookie);
     if (regRes.status === 422 || regRes.status === 400) {
       const err = await regRes.json();
-      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Ошибка регистрации';
+      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Registration error';
       res.status(400).json({ success: false, error: { message: msg } });
       return;
     }
-
     if (!regRes.ok) {
-      res.status(502).json({ success: false, error: { message: `Ошибка регистрации (${regRes.status})` } });
+      res.status(502).json({ success: false, error: { message: `Registration error (${regRes.status})` } });
       return;
     }
-
     const result = await regRes.json();
-    res.status(201).json({
-      success: true,
-      data: {
-        id: result.session?.identity?.id ?? '',
-        email,
-        username,
-        role: 'operator',
-      },
-    });
+    res.json({ success: true, data: result });
   } catch (err: any) {
-    console.error('[Kratos Proxy] Ошибка регистрации:', err.message);
-    res.status(502).json({ success: false, error: { message: 'Сервис аутентификации недоступен' } });
+    console.error('[Kratos] Registration error:', err.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
   }
 });
 
+// ============================================================
+// Recovery — link method
+// ============================================================
+
 /**
  * POST /api/kratos/recovery/init
- * Инициализировать recovery flow через Kratos API, вернуть flow ID
+ * Create a recovery flow (no email required — just init)
  */
 router.post('/recovery/init', async (_req: Request, res: Response) => {
   try {
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/api`, {
       headers: { 'Accept': 'application/json' },
     });
-
     if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Не удалось инициализировать восстановление' } });
+      res.status(502).json({ success: false, error: { message: 'Recovery init failed' } });
       return;
     }
-
     const flow = await flowRes.json();
     res.json({ success: true, data: { flowId: flow.id } });
   } catch (err: any) {
-    console.error('[Kratos Proxy] Ошибка инициализации recovery:', err.message);
-    res.status(502).json({ success: false, error: { message: 'Сервис аутентификации недоступен' } });
-  }
-});
-
-/**
- * GET /api/kratos/recovery?flow=<id>
- * Получить данные recovery flow из Kratos
- */
-router.get('/recovery', async (req: Request, res: Response) => {
-  const flowId = req.query.flow as string;
-
-  if (!flowId) {
-    res.status(400).json({ success: false, error: { message: 'Не указан flow ID' } });
-    return;
-  }
-
-  try {
-    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${flowId}`, {
-      headers: { 'Accept': 'application/json' },
-    });
-
-    if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Flow не найден или истек' } });
-      return;
-    }
-
-    const flow = await flowRes.json();
-    res.json({ success: true, data: flow });
-  } catch (err: any) {
-    console.error('[Kratos Proxy] Ошибка получения recovery flow:', err.message);
-    res.status(502).json({ success: false, error: { message: 'Сервис аутентификации недоступен' } });
+    console.error('[Kratos] Recovery init:', err.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
   }
 });
 
 /**
  * POST /api/kratos/recovery
- * Отправить email для восстановления пароля (всегда через новый API flow)
+ * Send recovery link to email
  */
 router.post('/recovery', async (req: Request, res: Response) => {
   const { email } = req.body;
-
   if (!email) {
-    res.status(400).json({ success: false, error: { message: 'Email обязателен' } });
+    res.status(400).json({ success: false, error: { message: 'Email required' } });
     return;
   }
-
   try {
-    // 1. Создать новый API flow (не переиспользовать browser flow из URL)
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/api`, {
       headers: { 'Accept': 'application/json' },
     });
-
     if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Не удалось инициализировать восстановление' } });
+      res.status(502).json({ success: false, error: { message: 'Unable to create recovery flow' } });
       return;
     }
-
     const flow = await flowRes.json();
     const csrfToken = extractCsrfToken(flow.ui);
-
-    // 2. Отправить email в Kratos
     const body = new URLSearchParams();
-    body.set('method', 'code');
+    body.set('method', 'link');
     body.set('csrf_token', csrfToken);
     body.set('email', email);
-
     const submitRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery?flow=${flow.id}`, {
       method: flow.ui.method,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
       body: body.toString(),
       redirect: 'manual',
     });
-
     if (submitRes.status === 422 || submitRes.status === 400) {
       const err = await submitRes.json();
-      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Ошибка восстановления';
+      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Recovery error';
       res.status(400).json({ success: false, error: { message: msg } });
       return;
     }
-
     if (!submitRes.ok) {
-      res.status(502).json({ success: false, error: { message: `Ошибка восстановления (${submitRes.status})` } });
+      res.status(502).json({ success: false, error: { message: `Recovery error (${submitRes.status})` } });
       return;
     }
-
     const result = await submitRes.json();
     res.json({ success: true, data: result });
   } catch (err: any) {
-    console.error('[Kratos Proxy] Ошибка восстановления:', err.message);
-    res.status(502).json({ success: false, error: { message: 'Сервис аутентификации недоступен' } });
+    console.error('[Kratos] Recovery:', err.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
   }
 });
 
 /**
- * POST /api/kratos/verification/init
- * Инициализировать verification flow через Kratos API, вернуть flow ID
+ * GET /api/kratos/recovery?flow=<id>&token=<token>
+ * Fetch recovery flow (with optional token for link-based recovery)
  */
+router.get('/recovery', async (req: Request, res: Response) => {
+  const flowId = req.query.flow as string;
+  const token = req.query.token as string;
+  if (!flowId) {
+    res.status(400).json({ success: false, error: { message: 'flow ID required' } });
+    return;
+  }
+  try {
+    // If token present, submit it to continue the link recovery
+    if (token) {
+      const kratosUrl = `${config.kratos.publicUrl}/self-service/recovery?flow=${flowId}&token=${token}`;
+      console.log('[Kratos] Recovery GET →', kratosUrl);
+      const r = await fetch(kratosUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        redirect: 'manual',
+      });
+      console.log('[Kratos] Recovery GET status:', r.status, r.headers.get('content-type'));
+      if (r.ok) {
+        const flow = await r.json();
+        console.log('[Kratos] Recovery flow id:', flow.id, 'state:', flow.state, 'active:', flow.active, 'nodes:', flow.ui?.nodes?.length);
+        res.json({ success: true, data: flow });
+        return;
+      }
+      if (r.status === 302 || r.status === 303) {
+        const loc = r.headers.get('location');
+        console.log('[Kratos] Recovery redirect →', loc);
+        if (loc) {
+          const u = new URL(loc);
+          const newId = u.searchParams.get('flow') ?? u.searchParams.get('id');
+          console.log('[Kratos] Extracted flow ID:', newId);
+          if (newId) {
+            const fr = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${newId}`, {
+              headers: { 'Accept': 'application/json' },
+            });
+            console.log('[Kratos] Flow fetch status:', fr.status);
+            if (fr.ok) {
+              const d = await fr.json();
+              console.log('[Kratos] Redirect flow id:', d.id, 'state:', d.state, 'active:', d.active, 'nodes:', d.ui?.nodes?.length);
+              res.json({ success: true, data: d }); return;
+            }
+          }
+        }
+      }
+      const errText = await r.text().catch(() => '');
+      console.log('[Kratos] Recovery error body:', errText.substring(0, 600));
+      res.status(400).json({ success: false, error: { message: 'Invalid or expired recovery link' } });
+      return;
+    }
+    // No token — just fetch flow data
+    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${flowId}`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!flowRes.ok) {
+      res.status(502).json({ success: false, error: { message: 'Flow not found or expired' } });
+      return;
+    }
+    const flow = await flowRes.json();
+    res.json({ success: true, data: flow });
+  } catch (err: any) {
+    console.error('[Kratos] Recovery GET:', err.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
+  }
+});
+
+/**
+ * POST /api/kratos/recovery/submit
+ * Submit password to complete recovery
+ */
+router.post('/recovery/submit', async (req: Request, res: Response) => {
+  const { flowId, csrfToken, ...fields } = req.body;
+  if (!flowId) {
+    res.status(400).json({ success: false, error: { message: 'flowId required' } });
+    return;
+  }
+  try {
+    const body = new URLSearchParams();
+    body.set('csrf_token', csrfToken);
+    for (const [k, v] of Object.entries(fields)) { if (v != null) body.set(k, String(v)); }
+    const r = await fetch(`${config.kratos.publicUrl}/self-service/recovery?flow=${flowId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+      body: body.toString(),
+      redirect: 'manual',
+    });
+    if (r.status === 422 || r.status === 400) {
+      const e = await r.json();
+      const m = extractErrorMessage(e?.ui) ?? e?.error?.message ?? 'Recovery error';
+      res.status(400).json({ success: false, error: { message: m } });
+      return;
+    }
+    if (r.status === 302 || r.status === 303) {
+      const loc = r.headers.get('location');
+      if (loc) {
+        const u = new URL(loc);
+        const newId = u.searchParams.get('flow') ?? u.searchParams.get('id');
+        if (newId) {
+          const fr = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${newId}`, {
+            headers: { 'Accept': 'application/json' },
+          });
+          if (fr.ok) { const d = await fr.json(); res.json({ success: true, data: d }); return; }
+        }
+      }
+      res.status(502).json({ success: false, error: { message: 'Redirect failed' } });
+      return;
+    }
+    if (!r.ok) {
+      res.status(502).json({ success: false, error: { message: 'Recovery error (' + r.status + ')' } });
+      return;
+    }
+    const d = await r.json();
+    res.json({ success: true, data: d });
+  } catch (e: any) {
+    console.error('[Kratos] Recovery submit:', e.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
+  }
+});
+
+// ============================================================
+// Verification
+// ============================================================
 router.post('/verification/init', async (_req: Request, res: Response) => {
   try {
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/verification/api`, {
       headers: { 'Accept': 'application/json' },
     });
-
     if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Не удалось инициализировать верификацию' } });
+      res.status(502).json({ success: false, error: { message: 'Verification init failed' } });
       return;
     }
-
     const flow = await flowRes.json();
     res.json({ success: true, data: { flowId: flow.id } });
   } catch (err: any) {
-    console.error('[Kratos Proxy] Ошибка инициализации verification:', err.message);
-    res.status(502).json({ success: false, error: { message: 'Сервис аутентификации недоступен' } });
+    console.error('[Kratos] Verification init:', err.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
   }
 });
 
-/**
- * POST /api/kratos/verification
- * Отправить email для верификации (всегда через новый API flow)
- */
 router.post('/verification', async (req: Request, res: Response) => {
   const { email } = req.body;
-
   if (!email) {
-    res.status(400).json({ success: false, error: { message: 'Email обязателен' } });
+    res.status(400).json({ success: false, error: { message: 'Email required' } });
     return;
   }
-
   try {
-    // 1. Создать новый API flow (не переиспользовать browser flow из URL)
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/verification/api`, {
       headers: { 'Accept': 'application/json' },
     });
-
     if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Не удалось инициализировать верификацию' } });
+      res.status(502).json({ success: false, error: { message: 'Verification init failed' } });
       return;
     }
-
     const flow = await flowRes.json();
     const csrfToken = extractCsrfToken(flow.ui);
-
-    // 2. Отправить email в Kratos
     const body = new URLSearchParams();
     body.set('method', 'code');
     body.set('csrf_token', csrfToken);
     body.set('email', email);
-
     const submitRes = await fetch(`${config.kratos.publicUrl}/self-service/verification?flow=${flow.id}`, {
       method: flow.ui.method,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
       body: body.toString(),
       redirect: 'manual',
     });
-
     if (submitRes.status === 422 || submitRes.status === 400) {
       const err = await submitRes.json();
-      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Ошибка верификации';
+      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Verification error';
       res.status(400).json({ success: false, error: { message: msg } });
       return;
     }
-
     if (!submitRes.ok) {
-      res.status(502).json({ success: false, error: { message: `Ошибка верификации (${submitRes.status})` } });
+      res.status(502).json({ success: false, error: { message: 'Verification error (' + submitRes.status + ')' } });
       return;
     }
-
     const result = await submitRes.json();
     res.json({ success: true, data: result });
   } catch (err: any) {
-    console.error('[Kratos Proxy] Ошибка верификации:', err.message);
-    res.status(502).json({ success: false, error: { message: 'Сервис аутентификации недоступен' } });
+    console.error('[Kratos] Verification:', err.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
   }
 });
 

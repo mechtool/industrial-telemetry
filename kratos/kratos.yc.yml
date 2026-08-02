@@ -70,7 +70,6 @@ selfservice:
     recovery:
       enabled: true
       ui_url: https://industrial-telemetry.ru/recovery
-
     verification:
       enabled: true
       ui_url: https://industrial-telemetry.ru/verification
@@ -116,4 +115,4 @@ courier:
     from_address: mit-2@yandex.ru
 
 feature_flags:
-  use_continue_with_transitions: true
+  use_continue_with_transitions: false

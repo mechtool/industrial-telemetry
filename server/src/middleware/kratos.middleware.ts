@@ -75,30 +75,3 @@ export async function kratosAuth(req: Request, res: Response, next: NextFunction
     });
   }
 }
-
-/**
- * Опциональная аутентификация: не блокирует запрос, но добавляет user если сессия есть.
- */
-export async function kratosOptional(req: Request, _res: Response, next: NextFunction): Promise<void> {
-  const cookie = req.headers.cookie;
-  if (!cookie) return next();
-
-  try {
-    const response = await fetch(`${config.kratos.publicUrl}/sessions/whoami`, {
-      headers: { Cookie: cookie },
-    });
-    if (response.ok) {
-      const session = await response.json() as any;
-      req.user = {
-        id: session.identity.id,
-        email: session.identity.traits.email,
-        username: session.identity.traits.username,
-        role: session.identity.traits.role || 'operator',
-        department: session.identity.traits.department,
-      };
-    }
-  } catch {
-    // silently ignore
-  }
-  next();
-}

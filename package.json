@@ -21,7 +21,5 @@
   "engines": {
     "node": ">=22"
   },
-  "dependencies": {
-    "http-proxy-middleware": "^4.2.0"
-  }
+  "dependencies": {}
 }
