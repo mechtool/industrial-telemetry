@@ -15,6 +15,12 @@ export const config = {
     publicUrl: process.env.KRATOS_PUBLIC_URL || 'http://localhost:4433',
   },
 
+  // ---- Ory Keto (RBAC) ----
+  keto: {
+    readUrl: process.env.KETO_READ_URL || 'http://localhost:4466',
+    writeUrl: process.env.KETO_WRITE_URL || 'http://localhost:4467',
+  },
+
   // ---- MQTT ----
   mqtt: {
     brokerUrl: process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883',

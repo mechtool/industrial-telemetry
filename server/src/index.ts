@@ -3,6 +3,8 @@ import cors from 'cors';
 import compression from 'compression';
 import path from 'node:path';
 import { config } from './config/index.js';
+import { ketoService } from './services/keto.service.js';
+import { loadPermissions, requirePermission } from './middleware/keto.middleware.js';
 import { mqttService } from './services/mqtt.service.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { kratosAuth } from './middleware/kratos.middleware.js';

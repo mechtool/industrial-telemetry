@@ -6,6 +6,7 @@ import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MqttClientService } from '../../services/mqtt.service';
 import { KratosService } from '../../services/kratos.service';
+import { PermissionsService } from '../../services/permissions.service';
 import { RouterLink } from '@angular/router';
 
 interface StatCard {
@@ -27,6 +28,7 @@ interface StatCard {
 export class DashboardComponent implements OnInit {
   private readonly mqttService = inject(MqttClientService);
   readonly kratosService = inject(KratosService);
+  readonly perms = inject(PermissionsService);
 
   mqttConnected = signal<boolean | null>(null);
   subscriptionCount = signal<number | null>(null);

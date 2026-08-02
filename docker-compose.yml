@@ -59,6 +59,36 @@ services:
     volumes:
       - ./kratos:/etc/config/kratos:ro
 
+  # ---- Ory Keto: Permission Server (RBAC) ----
+  keto-migrate:
+    image: oryd/keto:v0.14.0-alpha.0
+    container_name: telemetry-keto-migrate
+    restart: "no"
+    depends_on:
+      kratos-db:
+        condition: service_healthy
+    environment:
+      - DSN=postgres://kratos:kratos@kratos-db:5432/keto?sslmode=disable
+    command: migrate up -y
+    volumes:
+      - ./keto:/etc/config/keto:ro
+
+  keto:
+    image: oryd/keto:v0.14.0-alpha.0
+    container_name: telemetry-keto
+    restart: unless-stopped
+    depends_on:
+      keto-migrate:
+        condition: service_completed_successfully
+    ports:
+      - "4466:4466"   # Read API
+      - "4467:4467"   # Write API
+    environment:
+      - DSN=postgres://kratos:kratos@kratos-db:5432/keto?sslmode=disable
+    command: serve -c /etc/config/keto/keto.yml
+    volumes:
+      - ./keto:/etc/config/keto:ro
+
 volumes:
   kratos-db-data:
     driver: local

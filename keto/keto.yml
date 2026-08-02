@@ -1,0 +1,28 @@
+# ========================================================
+# Ory Keto v0.13 — Permission Server
+# Industrial Telemetry — Role-Based Access Control
+# ========================================================
+
+version: v0.14.0-alpha.0
+
+dsn: postgres://kratos:kratos@kratos-db:5432/keto?sslmode=disable
+
+serve:
+  read:
+    host: 0.0.0.0
+    port: 4466
+  write:
+    host: 0.0.0.0
+    port: 4467
+
+namespaces:
+  location: file:///etc/config/keto/namespaces.keto.ts
+
+log:
+  level: info
+  format: text
+  leak_sensitive_values: false
+
+# Limits
+limit:
+  max_read_depth: 10

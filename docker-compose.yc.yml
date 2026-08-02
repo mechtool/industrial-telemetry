@@ -61,6 +61,37 @@ services:
     networks:
       - it-network
 
+  # ---- Ory Keto: Permission Server ----
+  keto-migrate:
+    image: oryd/keto:v0.14.0-alpha.0
+    container_name: it-keto-migrate
+    restart: "no"
+    depends_on:
+      kratos-db:
+        condition: service_healthy
+    environment:
+      - DSN=postgres://kratos:${DB_PASSWORD:-kratos}@kratos-db:5432/keto?sslmode=disable
+    command: migrate up -y
+    volumes:
+      - ./keto:/etc/config/keto:ro
+    networks:
+      - it-network
+
+  keto:
+    image: oryd/keto:v0.14.0-alpha.0
+    container_name: it-keto
+    restart: unless-stopped
+    depends_on:
+      keto-migrate:
+        condition: service_completed_successfully
+    environment:
+      - DSN=postgres://kratos:${DB_PASSWORD:-kratos}@kratos-db:5432/keto?sslmode=disable
+    command: serve -c /etc/config/keto/keto.yml
+    volumes:
+      - ./keto:/etc/config/keto:ro
+    networks:
+      - it-network
+
   # ---- Express API Server ----
   server:
     build:
@@ -73,7 +104,8 @@ services:
       - PORT=3000
       - SERVE_CLIENT=false
       - KRATOS_PUBLIC_URL=http://kratos:4433
-      - KRATOS_ADMIN_URL=http://kratos:4434
+      - KETO_READ_URL=http://keto:4466
+      - KETO_WRITE_URL=http://keto:4467
       - MQTT_BROKER_URL=mqtt://mosquitto:1883
       - MQTT_CLIENT_ID=industrial-telemetry-server
       - MQTT_USERNAME=${MQTT_USERNAME:-}
