@@ -15,41 +15,6 @@ nz-sider {
   overflow: auto;
 }
 
-/* ── Header ── */
-nz-header {
-  background: #fff;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  flex-shrink: 0;
-}
-
-.header-title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.header-right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-}
-
-.header-right a {
-  display: flex;
-  align-items: center;
-}
-
-.header-right nz-avatar {
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.header-right nz-avatar:hover {
-  opacity: 0.8;
-}
-
 /* ── Content: flex-колонка, занимает всё доступное пространство ── */
 nz-content {
   display: flex;
@@ -69,7 +34,6 @@ nz-breadcrumb {
   overflow: auto;
   padding: 16px 20px;
   background: #fff;
-  border-radius: 8px;
   display: flex;
   flex-direction: column;
   gap: 12px;

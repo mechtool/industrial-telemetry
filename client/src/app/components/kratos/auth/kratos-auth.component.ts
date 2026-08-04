@@ -47,8 +47,6 @@ export class KratosAuthComponent implements OnInit {
   ngOnInit(): void {
     if (this.router.url.includes('/registration')) {
       this.mode.set('registration');
-    }else{
-        this.router.navigate(['/recovery']); // my
     }
   }
 

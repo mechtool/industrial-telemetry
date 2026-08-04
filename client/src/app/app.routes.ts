@@ -37,11 +37,6 @@ export const routes: Routes = [
     title: 'Профиль — Industrial Telemetry',
   },
   {
-    path: 'dashboard-flex',
-    loadComponent: () => import('./components/dashboard-flex/dashboard-flex.component').then(m => m.DashboardFlexComponent),
-    title: 'Панель управления — Industrial Telemetry',
-  },
-  {
     path: 'mqtt',
     loadComponent: () => import('./components/mqtt-telemetry/mqtt-telemetry.component').then(m => m.MqttTelemetryComponent),
     title: 'MQTT Телеметрия — Industrial Telemetry',

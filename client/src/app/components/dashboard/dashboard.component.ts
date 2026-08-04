@@ -9,8 +9,6 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { MqttClientService } from '../../services/mqtt.service';
 import { KratosService } from '../../services/kratos.service';
 import { PermissionsService } from '../../services/permissions.service';
@@ -37,8 +35,6 @@ interface StatCard {
     NzMenuModule,
     NzBreadCrumbModule,
     NzIconModule,
-    NzAvatarModule,
-    NzTooltipModule,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -53,15 +49,6 @@ export class DashboardComponent implements OnInit {
 
   mqttConnected = signal<boolean | null>(null);
   subscriptionCount = signal<number | null>(null);
-
-  get userName(): string {
-    const u = this.kratosService.currentUser();
-    return u ? u.username : 'Name';
-  }
-
-  get userInitial(): string {
-    return this.userName.charAt(0).toUpperCase() || '?';
-  }
 
   cards: StatCard[] = [
     { title: 'MQTT статус', value: '...', icon: 'pi pi-wifi', color: 'var(--color-mqtt-online)', link: '/mqtt' },

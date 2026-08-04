@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+﻿import { Router, Request, Response as ExpressResponse } from 'express';
 import { config } from '../config/index.js';
 
 const router = Router();
@@ -29,7 +29,7 @@ function extractErrorMessage(ui: any): string | null {
 // ============================================================
 // Login
 // ============================================================
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', async (req: Request, res: ExpressResponse) => {
   const { email, password } = req.body;
   if (!email || !password) {
     res.status(400).json({ success: false, error: { message: 'Email and password required' } });
@@ -79,7 +79,7 @@ router.post('/login', async (req: Request, res: Response) => {
 // ============================================================
 // Registration
 // ============================================================
-router.post('/registration', async (req: Request, res: Response) => {
+router.post('/registration', async (req: Request, res: ExpressResponse) => {
   const { email, username, password } = req.body;
   if (!email || !username || !password) {
     res.status(400).json({ success: false, error: { message: 'Email, username and password required' } });
@@ -129,14 +129,14 @@ router.post('/registration', async (req: Request, res: Response) => {
 });
 
 // ============================================================
-// Recovery — link method
+// Recovery вЂ” link method
 // ============================================================
 
 /**
  * POST /api/kratos/recovery/init
- * Create a recovery flow (no email required — just init)
+ * Create a recovery flow (no email required вЂ” just init)
  */
-router.post('/recovery/init', async (_req: Request, res: Response) => {
+router.post('/recovery/init', async (_req: Request, res: ExpressResponse) => {
   try {
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/api`, {
       headers: { 'Accept': 'application/json' },
@@ -157,7 +157,7 @@ router.post('/recovery/init', async (_req: Request, res: Response) => {
  * POST /api/kratos/recovery
  * Send recovery link to email
  */
-router.post('/recovery', async (req: Request, res: Response) => {
+router.post('/recovery', async (req: Request, res: ExpressResponse) => {
   const { email } = req.body;
   if (!email) {
     res.status(400).json({ success: false, error: { message: 'Email required' } });
@@ -205,7 +205,7 @@ router.post('/recovery', async (req: Request, res: Response) => {
  * GET /api/kratos/recovery?flow=<id>&token=<token>
  * Fetch recovery flow (with optional token for link-based recovery)
  */
-router.get('/recovery', async (req: Request, res: Response) => {
+router.get('/recovery', async (req: Request, res: ExpressResponse) => {
   const flowId = req.query.flow as string;
   const token = req.query.token as string;
   if (!flowId) {
@@ -259,7 +259,7 @@ router.get('/recovery', async (req: Request, res: Response) => {
       res.status(400).json({ success: false, error: { message: 'Invalid or expired recovery link' } });
       return;
     }
-    // No token — just fetch flow data
+    // No token вЂ” just fetch flow data
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${flowId}`, {
       headers: { 'Accept': 'application/json' },
     });
@@ -279,7 +279,7 @@ router.get('/recovery', async (req: Request, res: Response) => {
  * POST /api/kratos/recovery/submit
  * Submit password to complete recovery
  */
-router.post('/recovery/submit', async (req: Request, res: Response) => {
+router.post('/recovery/submit', async (req: Request, res: ExpressResponse) => {
   const { flowId, csrfToken, ...fields } = req.body;
   if (!flowId) {
     res.status(400).json({ success: false, error: { message: 'flowId required' } });
@@ -331,7 +331,7 @@ router.post('/recovery/submit', async (req: Request, res: Response) => {
 // ============================================================
 // Verification
 // ============================================================
-router.post('/verification/init', async (_req: Request, res: Response) => {
+router.post('/verification/init', async (_req: Request, res: ExpressResponse) => {
   try {
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/verification/api`, {
       headers: { 'Accept': 'application/json' },
@@ -348,7 +348,7 @@ router.post('/verification/init', async (_req: Request, res: Response) => {
   }
 });
 
-router.post('/verification', async (req: Request, res: Response) => {
+router.post('/verification', async (req: Request, res: ExpressResponse) => {
   const { email } = req.body;
   if (!email) {
     res.status(400).json({ success: false, error: { message: 'Email required' } });

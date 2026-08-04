@@ -16,10 +16,8 @@ class MqttService {
       connectTimeout: 30_000,
     };
 
-    if (config.mqtt.username) {
+    if (config.mqtt.username && config.mqtt.password) {
       opts.username = config.mqtt.username;
-    }
-    if (config.mqtt.password) {
       opts.password = config.mqtt.password;
     }
 
