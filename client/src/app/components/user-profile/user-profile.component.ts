@@ -1,9 +1,9 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CardModule } from 'primeng/card';
-import { TagModule } from 'primeng/tag';
-import { ButtonModule } from 'primeng/button';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -17,9 +17,9 @@ import { KratosService } from '../../services/kratos.service';
   imports: [
     CommonModule,
     RouterLink,
-    CardModule,
-    TagModule,
-    ButtonModule,
+    NzCardModule,
+    NzTagModule,
+    NzButtonModule,
     NzLayoutModule,
     NzBreadCrumbModule,
     NzIconModule,

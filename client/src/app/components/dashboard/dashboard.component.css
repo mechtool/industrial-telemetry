@@ -1,4 +1,4 @@
-/* ── Dashboard: ng-zorro layout — без скроллов, адаптивно по высоте и ширине ── */
+/* ── Dashboard: ng-zorro layout ── */
 
 :host {
   display: block;
@@ -15,7 +15,7 @@ nz-sider {
   overflow: auto;
 }
 
-/* ── Content: flex-колонка, занимает всё доступное пространство ── */
+/* ── Content ── */
 nz-content {
   display: flex;
   flex-direction: column;
@@ -36,7 +36,7 @@ nz-breadcrumb {
   background: #fff;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 /* ── Footer ── */
@@ -45,25 +45,70 @@ nz-footer {
   flex-shrink: 0;
 }
 
-/* ── Карточки: компактный грид ── */
+/* ── Stat cards grid ── */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.75rem;
+  gap: 12px;
   flex-shrink: 0;
 }
 
-.card-grid p-card {
+.stat-card {
   cursor: pointer;
   transition: box-shadow 0.2s ease;
 }
 
-.card-grid p-card:hover {
+.stat-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* ── Нижняя секция: занимает оставшееся место ── */
+.stat-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-card-icon {
+  font-size: 1.75rem;
+}
+
+.stat-card-label {
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.stat-card-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* ── Bottom section ── */
 .bottom-section {
   flex: 1;
   min-height: 0;
+}
+
+/* ── Status list ── */
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-count {
+  font-weight: 700;
+}
+
+/* ── Quick actions ── */
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }

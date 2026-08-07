@@ -1,14 +1,14 @@
 import { Component, inject, signal, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { TagModule } from 'primeng/tag';
-import { DividerModule } from 'primeng/divider';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
-import { SkeletonModule } from 'primeng/skeleton';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { MqttClientService } from '../../services/mqtt.service';
 import { interval, Subscription } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
@@ -17,8 +17,15 @@ import { startWith, switchMap } from 'rxjs/operators';
   selector: 'app-mqtt-telemetry',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule,
-    TagModule, DividerModule, ToastModule, SkeletonModule,
+    CommonModule,
+    FormsModule,
+    NzCardModule,
+    NzButtonModule,
+    NzInputModule,
+    NzTagModule,
+    NzDividerModule,
+    NzSkeletonModule,
+    NzIconModule,
   ],
   templateUrl: './mqtt-telemetry.component.html',
   styleUrl: './mqtt-telemetry.component.css',
@@ -26,7 +33,7 @@ import { startWith, switchMap } from 'rxjs/operators';
 })
 export class MqttTelemetryComponent implements OnInit, OnDestroy {
   private readonly mqttService = inject(MqttClientService);
-  private readonly messageService = inject(MessageService);
+  private readonly message = inject(NzMessageService);
 
   connected = signal(false);
   subscriptions = signal<string[]>([]);
@@ -62,12 +69,12 @@ export class MqttTelemetryComponent implements OnInit, OnDestroy {
     this.subscribing.set(true);
     this.mqttService.subscribe(topic).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'MQTT', detail: `Подписан на ${topic}` });
+        this.message.success(`Подписан на ${topic}`);
         this.subscribing.set(false);
         this.loadStatus();
       },
       error: (err) => {
-        this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err?.error?.error?.message ?? 'Не удалось подписаться' });
+        this.message.error(err?.error?.error?.message ?? 'Не удалось подписаться');
         this.subscribing.set(false);
       },
     });
@@ -79,12 +86,12 @@ export class MqttTelemetryComponent implements OnInit, OnDestroy {
     this.subscribing.set(true);
     this.mqttService.unsubscribe(topic).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'info', summary: 'MQTT', detail: `Отписан от ${topic}` });
+        this.message.info(`Отписан от ${topic}`);
         this.subscribing.set(false);
         this.loadStatus();
       },
       error: (err) => {
-        this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err?.error?.error?.message ?? 'Не удалось отписаться' });
+        this.message.error(err?.error?.error?.message ?? 'Не удалось отписаться');
         this.subscribing.set(false);
       },
     });
@@ -97,11 +104,11 @@ export class MqttTelemetryComponent implements OnInit, OnDestroy {
     this.publishing.set(true);
     this.mqttService.publish(topic, msg).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'MQTT', detail: `Опубликовано в ${topic}` });
+        this.message.success(`Опубликовано в ${topic}`);
         this.publishing.set(false);
       },
       error: (err) => {
-        this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: err?.error?.error?.message ?? 'Не удалось опубликовать' });
+        this.message.error(err?.error?.error?.message ?? 'Не удалось опубликовать');
         this.publishing.set(false);
       },
     });

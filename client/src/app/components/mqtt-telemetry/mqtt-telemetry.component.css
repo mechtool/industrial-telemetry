@@ -1,1 +1,113 @@
-/* MQTT Telemetry — стили не требуются (используются PrimeFlex utility-классы) */
+/* ── MQTT Telemetry ── */
+
+.page-container {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: #1e293b;
+}
+
+/* ── Status cards ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.status-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-card-icon {
+  font-size: 1.75rem;
+}
+
+.status-card-label {
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.status-card-count {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* ── Subscribe row ── */
+.subscribe-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.subscribe-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ── Field label ── */
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ── Section subtitle ── */
+.section-subtitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* ── Tag list ── */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.clickable-tag {
+  cursor: pointer;
+}
+
+/* ── Muted text ── */
+.text-muted {
+  color: #4b5563;
+  font-size: 0.8rem;
+}
+
+/* ── Publish form ── */
+.publish-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.publish-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.publish-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 200px;
+}

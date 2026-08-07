@@ -3,12 +3,11 @@ import { provideRouter, withPreloading, PreloadAllModules } from '@angular/route
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import {
   LoginOutline,
   UserAddOutline,
+  UserOutline,
   MailOutline,
   ShopOutline,
   ArrowLeftOutline,
@@ -16,11 +15,35 @@ import {
   DesktopOutline,
   TeamOutline,
   FileOutline,
+  WifiOutline,
+  ApartmentOutline,
+  ReloadOutline,
+  PlusOutline,
+  MinusOutline,
+  SendOutline,
+  SaveOutline,
 } from '@ant-design/icons-angular/icons';
 import { routes } from './app.routes';
-import { MessageService } from 'primeng/api';
 
-const nzIcons = [LoginOutline, UserAddOutline, MailOutline, ShopOutline, ArrowLeftOutline, PieChartOutline, DesktopOutline, TeamOutline, FileOutline];
+const nzIcons = [
+  LoginOutline,
+  UserAddOutline,
+  UserOutline,
+  MailOutline,
+  ShopOutline,
+  ArrowLeftOutline,
+  PieChartOutline,
+  DesktopOutline,
+  TeamOutline,
+  FileOutline,
+  WifiOutline,
+  ApartmentOutline,
+  ReloadOutline,
+  PlusOutline,
+  MinusOutline,
+  SendOutline,
+  SaveOutline,
+];
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -28,16 +51,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(withFetch()),
     provideAnimations(),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-      },
-    }),
     provideNzIcons(nzIcons),
     provideServiceWorker('ngsw-worker.js', {
       enabled: true,
       registrationStrategy: 'registerWhenStable:30000',
     }),
-    MessageService,
   ],
 };

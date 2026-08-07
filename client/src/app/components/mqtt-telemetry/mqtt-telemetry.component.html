@@ -1,66 +1,94 @@
-<p-toast />
 <div class="page-container">
   <h1 class="page-title">MQTT Телеметрия</h1>
 
   <!-- Статус -->
   <div class="card-grid mb-3">
-    <p-card>
-      <div class="flex align-items-center gap-3">
-        <i class="pi pi-wifi text-3xl" [style.color]="connected() ? 'var(--color-mqtt-online)' : 'var(--color-mqtt-offline)'"></i>
+    <nz-card>
+      <div class="status-card-inner">
+        <nz-icon
+          nzType="wifi"
+          class="status-card-icon"
+          [style.color]="connected() ? 'var(--color-mqtt-online)' : 'var(--color-mqtt-offline)'"
+        />
         <div>
-          <div class="text-sm text-500">MQTT брокер</div>
-          <p-tag [value]="connected() ? 'Подключён' : 'Отключён'" [severity]="connected() ? 'success' : 'danger'" />
+          <div class="status-card-label">MQTT брокер</div>
+          <nz-tag [nzColor]="connected() ? 'green' : 'red'">
+            {{ connected() ? 'Подключён' : 'Отключён' }}
+          </nz-tag>
         </div>
       </div>
-    </p-card>
-    <p-card>
-      <div class="flex align-items-center gap-3">
-        <i class="pi pi-sitemap text-3xl" style="color:#8b5cf6"></i>
+    </nz-card>
+    <nz-card>
+      <div class="status-card-inner">
+        <nz-icon nzType="apartment" class="status-card-icon" style="color:#8b5cf6" />
         <div>
-          <div class="text-sm text-500">Активных подписок</div>
-          <span class="text-2xl font-bold">{{ subscriptions().length }}</span>
+          <div class="status-card-label">Активных подписок</div>
+          <span class="status-card-count">{{ subscriptions().length }}</span>
         </div>
       </div>
-    </p-card>
+    </nz-card>
   </div>
 
-  <!-- Подписка на топик -->
-  <p-card header="Управление подписками" styleClass="mb-3">
-    <div class="flex flex-wrap gap-2 align-items-end">
-      <div class="flex flex-column gap-1 flex-1" style="min-width:200px">
-        <label class="text-sm font-medium">Топик</label>
-        <input pInputText [(ngModel)]="newTopic" placeholder="sensors/temperature" />
+  <!-- Управление подписками -->
+  <nz-card nzTitle="Управление подписками" class="mb-3">
+    <div class="subscribe-row">
+      <div class="subscribe-input">
+        <label class="field-label">Топик</label>
+        <input nz-input [(ngModel)]="newTopic" placeholder="sensors/temperature" />
       </div>
-      <p-button label="Подписаться" icon="pi pi-plus" (onClick)="subscribe()" [disabled]="!newTopic() || subscribing()" [loading]="subscribing()" />
-      <p-button label="Отписаться" icon="pi pi-minus" severity="danger" (onClick)="unsubscribe()" [disabled]="!newTopic() || subscribing()" />
+      <button
+        nz-button
+        nzType="primary"
+        [nzLoading]="subscribing()"
+        [disabled]="!newTopic() || subscribing()"
+        (click)="subscribe()"
+      >
+        <nz-icon nzType="plus" /> Подписаться
+      </button>
+      <button
+        nz-button
+        nzDanger
+        [disabled]="!newTopic() || subscribing()"
+        (click)="unsubscribe()"
+      >
+        <nz-icon nzType="minus" /> Отписаться
+      </button>
     </div>
-    <p-divider />
-    <h3 class="text-base font-semibold mb-2">Активные подписки</h3>
+    <nz-divider />
+    <h3 class="section-subtitle">Активные подписки</h3>
     @if (subscriptions().length > 0) {
-      <div class="flex flex-wrap gap-2">
+      <div class="tag-list">
         @for (sub of subscriptions(); track sub) {
-          <p-tag [value]="sub" severity="info" styleClass="cursor-pointer" (click)="newTopic.set(sub)" />
+          <nz-tag nzColor="blue" class="clickable-tag" (click)="newTopic.set(sub)">{{ sub }}</nz-tag>
         }
       </div>
     } @else {
-      <span class="text-500 text-sm">Нет активных подписок</span>
+      <span class="text-muted">Нет активных подписок</span>
     }
-  </p-card>
+  </nz-card>
 
   <!-- Публикация -->
-  <p-card header="Публикация сообщения">
-    <div class="flex flex-column gap-3">
-      <div class="flex flex-wrap gap-2 align-items-end">
-        <div class="flex flex-column gap-1 flex-1" style="min-width:200px">
-          <label class="text-sm font-medium">Топик</label>
-          <input pInputText [(ngModel)]="publishTopic" placeholder="sensors/alarm" />
+  <nz-card nzTitle="Публикация сообщения">
+    <div class="publish-form">
+      <div class="publish-row">
+        <div class="publish-input">
+          <label class="field-label">Топик</label>
+          <input nz-input [(ngModel)]="publishTopic" placeholder="sensors/alarm" />
         </div>
-        <div class="flex flex-column gap-1 flex-1" style="min-width:200px">
-          <label class="text-sm font-medium">Сообщение</label>
-          <input pInputText [(ngModel)]="publishMessage" placeholder='{"value": 42}' />
+        <div class="publish-input">
+          <label class="field-label">Сообщение</label>
+          <input nz-input [(ngModel)]="publishMessage" placeholder='{"value": 42}' />
         </div>
-        <p-button label="Отправить" icon="pi pi-send" (onClick)="publish()" [disabled]="!publishTopic() || !publishMessage() || publishing()" [loading]="publishing()" />
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="publishing()"
+          [disabled]="!publishTopic() || !publishMessage() || publishing()"
+          (click)="publish()"
+        >
+          <nz-icon nzType="send" /> Отправить
+        </button>
       </div>
     </div>
-  </p-card>
+  </nz-card>
 </div>
