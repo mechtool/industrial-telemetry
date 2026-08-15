@@ -1,354 +1,320 @@
-# Industrial Telemetry — Руководство по развёртыванию
+# Industrial Telemetry — Руководство по развёртыванию (Production)
 
-**Версия:** 2.0
-**Дата:** 2026-08-02
-**Стек:** Angular 22 (PWA) + Express + MQTT (Mosquitto) + Ory Kratos + Ory Keto (RBAC) + PostgreSQL + Nginx
+**Версия:** 3.0
+**Дата:** 2026-08-15
+**Стек:** Angular 22 (PWA, NG-ZORRO) · Express (TypeScript ESM) · Mosquitto MQTT · Ory Kratos v1.3.1 · Ory Keto v0.14 · PostgreSQL 16 · Nginx
+**Домен:** `industrial-telemetry.ru`
+**Репозиторий:** `https://github.com/mechtool/industrial-telemetry.git` (публичный)
 **Целевая ВМ:** Yandex Cloud, Ubuntu 24.04, 2 vCPU, 4 GB RAM, 20 GB SSD
+
+> Что изменилось по сравнению с версией 2.0:
+> 1. Секреты полностью вынесены из git (см. раздел «Управление секретами»).
+> 2. Деплой переведён на `git pull` (на ВМ настроен git, репозиторий публичный).
+> 3. Исправлен путь запуска сервера в `Dockerfile.server`.
+> 4. История git переписана — секреты из старых коммитов удалены.
 
 ---
 
 ## Оглавление
 
 1. [Архитектура](#1-архитектура)
-2. [Требования](#2-требования)
-3. [Этап 0: Подготовка конфигов](#3-этап-0-подготовка-конфигов)
-4. [Этап 1: Настройка ВМ](#4-этап-1-настройка-вм)
-5. [Этап 2: Перенос проекта и сборка](#5-этап-2-перенос-проекта-и-сборка)
-6. [Этап 3: Конфигурация .env.yc](#6-этап-3-конфигурация-envyc)
-7. [Этап 4: Запуск Docker-стека](#7-этап-4-запуск-docker-стека)
-8. [Этап 5: Настройка RBAC (Keto)](#8-этап-5-настройка-rbac-keto)
-9. [Этап 6: Открытие портов](#9-этап-6-открытие-портов)
-10. [Этап 7: DNS и домен](#10-этап-7-dns-и-домен)
-11. [Этап 8: HTTPS (Let's Encrypt)](#11-этап-8-https-lets-encrypt)
-12. [Верификация](#12-верификация)
-13. [Устранение неполадок](#13-устранение-неполадок)
-14. [Обслуживание](#14-обслуживание)
+2. [Управление секретами](#2-управление-секретами)
+3. [Первичная настройка ВМ](#3-первичная-настройка-вм)
+4. [Клонирование и конфигурация](#4-клонирование-и-конфигурация)
+5. [Сборка и запуск](#5-сборка-и-запуск)
+6. [Обновление приложения (деплой)](#6-обновление-приложения-деплой)
+7. [HTTPS (Let's Encrypt)](#7-https-lets-encrypt)
+8. [Проверка после деплоя](#8-проверка-после-деплоя)
+9. [Откат](#9-откат)
+10. [Известные ограничения и план](#10-известные-ограничения-и-план)
 
 ---
 
 ## 1. Архитектура
 
 ```
-Браузер → Nginx :80/443 → /api/*          → Express Server :3000
-                          → /.ory/*        → Ory Kratos :4433
-                          → /*             → Angular PWA (статика)
+Браузер ──► Nginx :80/:443 ──► /api/*          ──► Express Server :3000
+                              ├─► /.ory/*       ──► Ory Kratos :4433
+                              └─► /*            ──► Angular PWA (статика)
 
-Express Server → Keto :4466/4467 (проверка прав)
-Express Server → Mosquitto MQTT :1883
-Kratos → PostgreSQL :5432 (база `kratos`)
-Keto   → PostgreSQL :5432 (база `keto`)
+Express Server ──► Keto :4466/4467 (проверка прав — middleware объявлен, см. §10)
+Express Server ──► Mosquitto :1883 (MQTT)
+Kratos ──► PostgreSQL :5432 (база `kratos`)
+Keto   ──► PostgreSQL :5432 (база `keto`)
 ```
 
-| Контейнер | Порт(ы) | Образ | Назначение |
+| Контейнер | Образ | Порт(ы) | Назначение |
 |---|---|---|---|
-| `it-kratos-db` | 5432 (internal) | `postgres:16-alpine` | База данных (Kratos + Keto) |
-| `it-kratos-migrate` | — | `oryd/kratos:v1.3.1` | Миграция схемы Kratos (одноразовый) |
-| `it-kratos` | 4433, 4434 | `oryd/kratos:v1.3.1` | Identity Provider |
-| `it-keto-migrate` | — | `oryd/keto:v0.14` | Миграция схемы Keto (одноразовый) |
-| `it-keto` | 4466, 4467 | `oryd/keto:v0.14` | Permission Server (RBAC) |
-| `it-mosquitto` | 1883 (internal) | `eclipse-mosquitto:2` | MQTT-брокер |
-| `it-server` | 3000 (internal) | Сборка `Dockerfile.server` | Express API |
-| `it-client` | 80, 443 | Сборка `Dockerfile.client` | Nginx + Angular PWA |
+| `it-kratos-db` | `postgres:16-alpine` | 5432 (internal) | База данных (Kratos + Keto) |
+| `it-kratos-migrate` | `oryd/kratos:v1.3.1` | — | Миграция схемы Kratos (одноразовая) |
+| `it-kratos` | `oryd/kratos:v1.3.1` | 4433, 4434 | Identity Provider |
+| `it-keto-migrate` | `oryd/keto:v0.14.0-alpha.0` | — | Миграция схемы Keto (одноразовая) |
+| `it-keto` | `oryd/keto:v0.14.0-alpha.0` | 4466, 4467 | Permission Server (RBAC) |
+| `it-server` | `Dockerfile.server` | 3000 (internal) | Express API + MQTT-мост |
+| `it-client` | `Dockerfile.client` | 80, 443 | Nginx + Angular PWA |
+| `it-mosquitto` | `eclipse-mosquitto:2` | 1883 | MQTT-брокер |
+| `it-certbot` | `certbot/certbot` | — (profile `ssl`) | Автообновление сертификатов |
+
+Оба собственных образа (`it-server`, `it-client`) собираются **внутри Docker** (многостадийные `Dockerfile`), поэтому на ВМ не нужен ни Node, ни предварительная сборка.
 
 ---
 
-## 2. Требования
+## 2. Управление секретами
 
-### Локальная машина
-- Git, Node.js ≥ 22, SSH-клиент
+**Секреты не хранятся в git.** В репозитории лежат только шаблоны, а реальные значения живут в gitignored-файлах на ВМ.
 
-### ВМ (Yandex Cloud)
-- Ubuntu 24.04 LTS, 2 vCPU, ≥ 4 GB RAM, ≥ 20 GB диск
-- Пользователь с `sudo` (NOPASSWD), внешний IP
+| Файл в репо (tracked) | Файл на ВМ (gitignored) | Что содержит |
+|---|---|---|
+| `.env.yc.example` | `.env.yc` | `DOMAIN`, `DB_PASSWORD`, `MQTT_USERNAME`, `MQTT_PASSWORD` |
+| `kratos/kratos.yc.example.yml` | `kratos/kratos.yc.yml` | Конфигурация Kratos: `secrets.cookie`, `secrets.cipher`, `courier.smtp.connection_uri` |
 
----
+`.gitignore` уже содержит `.env`, `.env.*`, `.env.yc*` (кроме `*.example`), `.codewhale/`, `certbot/`, `kratos/kratos.yc.yml`.
 
-## 3. Этап 0: Подготовка конфигов
-
-Выполняется **на локальной машине**, один раз.
-
-### 3.1 Клонирование
+### 2.1 Генерация секретов Kratos
 
 ```bash
-git clone https://github.com/mechtool/industrial-telemetry.git
-cd industrial-telemetry
+# cookie и cipher — РОВНО 32 hex-символа (16 байт):
+node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 ```
 
-### 3.2 Настройка IP/домена
+> ⚠️ Важно: Kratos требует `secrets.cookie` и `secrets.cipher` **ровно 32 символа** (min=max=32). Значение длиной 64 символа вызовет ошибку `length must be <= 32`.
+>
+> ⚠️ Kratos **не поддерживает** подстановку `${VAR}` в конфиг-файле — такие плейсхолдеры он трактует буквально и падает с ошибкой валидации. Секреты должны быть прописаны в `kratos/kratos.yc.yml` напрямую.
 
-Заменить `<ВАШ_IP_ИЛИ_ДОМЕН>` в файлах:
+### 2.2 Пример `.env.yc` (на ВМ)
 
-**.env.yc:**
 ```ini
-APP_URL=https://<ВАШ_IP_ИЛИ_ДОМЕН>
-CORS_ORIGIN=https://<ВАШ_IP_ИЛИ_ДОМЕН>
+DOMAIN=industrial-telemetry.ru
+DB_PASSWORD=<пароль-БД>
+MQTT_USERNAME=
+MQTT_PASSWORD=
 ```
 
-**kratos/kratos.yc.yml** — 14 строк с `base_url`, `allowed_return_urls`, все `ui_url`.
+### 2.3 Пример `kratos/kratos.yc.yml` (на ВМ)
 
-**nginx/nginx.yc.conf:**
-```nginx
-server_name <ВАШ_IP_ИЛИ_ДОМЕН>;
-```
-
-### 3.3 Секреты
-
-Сгенерировать секреты для Kratos:
-```bash
-node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"  # ×2
-```
-
-Заменить в `kratos/kratos.yc.yml` → `secrets.cookie` и `secrets.cipher`.
-
-Заменить SMTP-пароль в `courier.smtp.connection_uri`.
+Копируется из `kratos/kratos.yc.example.yml` и заполняется реальными `secrets.cookie`, `secrets.cipher` (32 hex) и `courier.smtp.connection_uri`.
 
 ---
 
-## 4. Этап 1: Настройка ВМ
+## 3. Первичная настройка ВМ
 
-```bash
-ssh -i <ключ> <пользователь>@<IP_ВМ>
+### 3.1 Создание ВМ (Yandex Cloud)
+
+При создании ВМ вставить содержимое `cloud-config.yaml` в поле «cloud-init». Это автоматически:
+- создаёт пользователя `mit-2` с `sudo` без пароля и SSH-ключом;
+- устанавливает Docker, Docker Compose, Git, Node.js 22;
+- настраивает swap 2 GB.
+
+### 3.2 Доступ по SSH
+
+В `~/.ssh/config` (локально) настроен алиас:
+
+```
+Host yc-vm
+    HostName 158.160.204.124
+    User mit-2
+    IdentityFile ~/.ssh/keys/yc-vm-key
+    StrictHostKeyChecking no
 ```
 
-### 4.1 Система
+Проверка:
 
 ```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y ca-certificates curl gnupg lsb-release
+ssh yc-vm "hostname && docker --version"
 ```
 
-### 4.2 Docker
+### 3.3 Ручная установка (если без cloud-init)
 
 ```bash
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-# → выйти из SSH и зайти заново
-```
+# Docker
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER   # перелогиниться
 
-### 4.3 Node.js 22
-
-```bash
+# Node.js 22 (нужен только если собирать вне Docker)
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
-```
 
-### 4.4 Swap (рекомендовано)
-
-```bash
-sudo fallocate -l 2G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
+# Swap 2 GB
+sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
 
 ---
 
-## 5. Этап 2: Перенос проекта и сборка
-
-### 5.1 Клонирование на ВМ
+## 4. Клонирование и конфигурация
 
 ```bash
+ssh yc-vm
 cd ~
 git clone https://github.com/mechtool/industrial-telemetry.git
 cd industrial-telemetry
 ```
 
-### 5.2 Установка и сборка
+### 4.1 Создать реальные конфиги из шаблонов
 
 ```bash
-cd server && npm ci && npm run build && cd ..
-cd client && npm ci --legacy-peer-deps && npm run build && cd ..
+# .env.yc — заполнить реальными значениями
+cp .env.yc.example .env.yc
+nano .env.yc
+
+# kratos.yc.yml — заполнить реальными секретами (см. §2)
+cp kratos/kratos.yc.example.yml kratos/kratos.yc.yml
+nano kratos/kratos.yc.yml
+```
+
+> Эти два файла gitignored — `git pull` их не тронет. Они живут только на ВМ.
+
+### 4.2 SSL-сертификат (Let's Encrypt)
+
+Получается один раз (до старта nginx, порт 80 свободен):
+
+```bash
+docker run --rm \
+  -v /etc/letsencrypt:/etc/letsencrypt \
+  -v $(pwd)/certbot-www:/var/www/certbot \
+  -p 80:80 \
+  certbot/certbot certonly --standalone \
+  --agree-tos --email admin@industrial-telemetry.ru \
+  -d industrial-telemetry.ru --non-interactive
 ```
 
 ---
 
-## 6. Этап 3: Конфигурация .env.yc
-
-```bash
-cat ~/industrial-telemetry/.env.yc
-```
-
-Ожидаемое содержимое:
-```ini
-APP_URL=https://<ДОМЕН>
-CORS_ORIGIN=https://<ДОМЕН>
-MQTT_USERNAME=
-MQTT_PASSWORD=
-DB_PASSWORD=kratos
-```
-
----
-
-## 7. Этап 4: Запуск Docker-стека
+## 5. Сборка и запуск
 
 ```bash
 cd ~/industrial-telemetry
-docker compose -f docker-compose.yc.yml --env-file .env.yc build --no-cache
+docker compose -f docker-compose.yc.yml --env-file .env.yc build
 docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
 ```
 
-Порядок запуска:
-1. `it-kratos-db` — PostgreSQL
-2. `it-kratos-migrate` + `it-keto-migrate` — миграции
-3. `it-mosquitto` — MQTT
-4. `it-kratos` + `it-keto` — Identity + Permissions
-5. `it-server` — Express API
-6. `it-client` — Nginx + Angular
+Порядок подъёма (определён `depends_on` + `healthcheck`):
+1. `it-kratos-db` (PostgreSQL)
+2. `it-kratos-migrate` + `it-keto-migrate` (миграции, одноразовые)
+3. `it-kratos` + `it-keto`
+4. `it-mosquitto` + `it-server`
+5. `it-client` (nginx)
 
-### Проверка статуса
-
-```bash
-docker compose -f docker-compose.yc.yml ps
-```
-
-Ожидаемый вывод: 6 контейнеров `Up`, 2 `Exited (0)` (миграции).
-
----
-
-## 8. Этап 5: Настройка RBAC (Keto)
-
-Keto автоматически seed'ит роли и разрешения при старте сервера. Ролевая модель:
-
-| Ресурс | operator | engineer | admin |
-|---|---|---|---|
-| Dashboard | просмотр | просмотр + edit | полный |
-| MQTT | просмотр | просмотр + edit | полный |
-| MQTT Topics | просмотр | просмотр + edit | полный |
-| Users | — | просмотр | полный |
-| Settings | — | просмотр + edit | полный |
-
-### Назначение роли пользователю
-
-После регистрации пользователь получает роль `operator` по умолчанию (Kratos identity traits). Для повышения роли — API:
+Проверить статус:
 
 ```bash
-# Назначить роль admin пользователю с ID <user-uuid>
-curl -X PUT http://localhost:4467/admin/relation-tuples \
-  -H 'Content-Type: application/json' \
-  -d '{"namespace":"Role","object":"admin","relation":"member","subject_id":"<user-uuid>"}'
+docker compose -f docker-compose.yc.yml --env-file .env.yc ps
 ```
 
 ---
 
-## 9. Этап 6: Открытие портов
+## 6. Обновление приложения (деплой)
 
-В Security Group Yandex Cloud открыть порты 80 и 443:
+Деплой теперь идёт через git — на ВМ настроен `git` в `~/industrial-telemetry` с `origin = github.com/mechtool/industrial-telemetry.git` и трекингом `master`.
+
+### 6.1 Локально: коммит и пуш
 
 ```bash
-yc vpc security-group update-rules <sg-id> \
-  --add-rule direction=ingress,port=80,protocol=tcp,v4-cidrs=0.0.0.0/0
-yc vpc security-group update-rules <sg-id> \
-  --add-rule direction=ingress,port=443,protocol=tcp,v4-cidrs=0.0.0.0/0
+git add -A
+git commit -m "описание изменений"
+git push origin master
 ```
 
----
-
-## 10. Этап 7: DNS и домен
-
-1. В панели регистратора: A-запись домена → внешний IP ВМ
-2. Проверка: `nslookup <домен>` (должен показать IP ВМ)
-
----
-
-## 11. Этап 8: HTTPS (Let's Encrypt)
+### 6.2 На ВМ: подтянуть и пересобрать
 
 ```bash
-# Установка Certbot
-sudo apt install -y certbot
-
-# Выпуск сертификата (webroot, порт 80 должен быть открыт)
-sudo certbot certonly --webroot -w /var/www/certbot \
-  -d <домен> --email <email> --agree-tos --non-interactive
-
-# Проверка автообновления
-sudo certbot renew --dry-run
-```
-
-Сертификаты монтируются в `it-client` через volume `/etc/letsencrypt:/etc/letsencrypt:ro`. Certbot-контейнер в docker-compose автоматически обновляет сертификаты каждые 12 часов.
-
----
-
-## 12. Верификация
-
-| Endpoint | Ожидаемый ответ |
-|---|---|
-| `https://<домен>/` | Angular PWA |
-| `https://<домен>/api/health` | `{"success":true,"data":{"status":"healthy"}}` |
-| `https://<домен>/.ory/health/alive` | `{"status":"ok"}` |
-| `https://<домен>/api/permissions` | `{"success":true,"data":{...}}` |
-
-### End-to-end
-
-1. Открыть `https://<домен>/` → страница входа
-2. Регистрация: email + username + пароль
-3. После верификации → редирект на `/dashboard`
-4. В консоли браузера: `GET /api/permissions` → `{"canViewDashboard":true,...}`
-5. Logout → редирект на `/login`
-
----
-
-## 13. Устранение неполадок
-
-| Симптом | Проверка | Решение |
-|---|---|---|
-| 502 Bad Gateway | `docker logs it-server` | Kratos/Keto не отвечает — проверить статус контейнеров |
-| 504 Gateway Timeout | `docker logs it-server` | Keto recovery fetch завис — увеличить таймаут или перезапустить |
-| 401 Unauthorized | Куки сессии | Сессия истекла — перелогиниться |
-| 403 Forbidden | `GET /api/permissions` | Нет прав — проверить роль через Keto |
-| Nginx 404 | `docker logs it-client` | Статика не собрана — `npm run build` в `client/` |
-
----
-
-## 14. Обслуживание
-
-### Обновление приложения
-
-```bash
+ssh yc-vm
 cd ~/industrial-telemetry
-git pull
-cd client && npm ci --legacy-peer-deps && npm run build && cd ..
-cd server && npm ci && npm run build && cd ..
-docker compose -f docker-compose.yc.yml build --no-cache
-docker compose -f docker-compose.yc.yml up -d
+git pull origin master
+
+# пересобрать только изменённый сервис (client и/или server)
+docker compose -f docker-compose.yc.yml --env-file .env.yc build client
+docker compose -f docker-compose.yc.yml --env-file .env.yc up -d client
 ```
 
-### Бэкап БД
+Какие сервисы пересобирать:
+- изменился только клиент (Angular) → `build client`;
+- изменился сервер → `build server`;
+- изменились конфиги Kratos/Keto/Mosquitto → достаточно `up -d <сервис>` (конфиги монтируются как volume, пересборка образа не нужна).
+
+> Один и тот же стек/имена контейнеров — при `up -d` compose пересоздаст только изменённые контейнеры; БД и сертификаты сохраняются в Docker-томах и `/etc/letsencrypt`.
+
+---
+
+## 7. HTTPS (Let's Encrypt)
+
+Сертификаты монтируются в `it-client` (`/etc/letsencrypt:/etc/letsencrypt:ro`). Автообновление — контейнер `it-certbot` (profile `ssl`), каждые 12 часов:
 
 ```bash
-# Kratos
-docker exec it-kratos-db pg_dump -U kratos kratos > kratos-backup-$(date +%Y%m%d).sql
-
-# Keto
-docker exec it-kratos-db pg_dump -U kratos keto > keto-backup-$(date +%Y%m%d).sql
+docker compose -f docker-compose.yc.yml --env-file .env.yc --profile ssl up -d certbot
 ```
 
-### Мониторинг
+Nginx-конфиг (`nginx/nginx.yc.conf`) уже содержит HTTP→HTTPS redirect, ACME-challenge и security-заголовки (HSTS, X-Frame-Options, CSP и др.).
+
+---
+
+## 8. Проверка после деплоя
 
 ```bash
-docker ps --format "table {{.Names}}\t{{.Status}}"
-docker stats --no-stream
-df -h /
+# статус контейнеров
+docker compose -f docker-compose.yc.yml --env-file .env.yc ps
+
+# API-сервер
+curl -s https://industrial-telemetry.ru/api/health
+# → {"success":true,"data":{"status":"healthy",...,"mqtt":"connected"}}
+
+# Kratos жив
+curl -s https://industrial-telemetry.ru/.ory/health/alive
+
+# главная страница (PWA)
+curl -s -o /dev/null -w "%{http_code}\n" https://industrial-telemetry.ru/
+# → 200
+
+# логи
+docker logs -f it-kratos
+docker logs -f it-server
+docker logs -f it-client
 ```
 
-### Шпаргалка
+Чек-лист:
+- [ ] `/` отдаёт 200
+- [ ] `/api/health` → `status: healthy`
+- [ ] `/.ory/health/alive` → `ok`
+- [ ] регистрация нового пользователя
+- [ ] логин созданным аккаунтом
+- [ ] дашборд показывает MQTT-статус
+- [ ] logout → редирект на логин
+
+---
+
+## 9. Откат
 
 ```bash
-# Статус
+ssh yc-vm
 cd ~/industrial-telemetry
-docker compose -f docker-compose.yc.yml ps
-
-# Логи
-docker compose -f docker-compose.yc.yml logs --tail=50
-
-# Перезапуск одного сервиса
-docker compose -f docker-compose.yc.yml restart server
-
-# Полная остановка
-docker compose -f docker-compose.yc.yml down        # сохранить данные
-docker compose -f docker-compose.yc.yml down -v     # удалить всё
+git log --oneline -5          # найти стабильный коммит
+git checkout <commit>         # или git reset --hard <commit>
+docker compose -f docker-compose.yc.yml --env-file .env.yc build
+docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
 ```
+
+Затем вернуть `master` на место: `git checkout master` (или `git reset --hard origin/master`).
+
+---
+
+## 10. Известные ограничения и план
+
+### 10.1 RBAC (Keto) пока не подключён
+
+Код RBAC написан, но **не активирован**:
+- `ketoService.seedDefaults()` не вызывается при старте сервера → роли/права не сидятся;
+- `requirePermission` / `requireRole` / `loadPermissions` не применены к маршрутам `/api/mqtt/*`;
+- маршрута `/api/permissions` на сервере нет, а клиентский `PermissionsService.load()` нигде не вызывается.
+
+Следствие: сейчас `/api/mqtt/*` защищён только аутентификацией (`kratosAuth`), а dashboard не скрывает/показывает кнопки по ролям. Это задача ближайшего спринта (см. `user-data/NEXT_STEPS.md`).
+
+### 10.2 Секреты, требующие ротации
+
+- **SMTP-пароль Яндекса** — был в git-истории до перезаписи; сменить (пароль приложения в аккаунте Яндекса) и обновить `courier.smtp.connection_uri` в `kratos/kratos.yc.yml`.
+- **Пароль БД** (`kratos` по умолчанию) — сменить через `ALTER USER` и обновить `DB_PASSWORD` в `.env.yc` + `dsn` в `kratos/kratos.yc.yml`/`keto/keto.yml`.
+- **MQTT** — `mosquitto.conf` использует `allow_anonymous true`; включить аутентификацию (`allow_anonymous false` + `password_file`).
+
+### 10.3 История git
+
+История переписана (`git filter-repo`), секреты из старых коммитов удалены, репозиторий публичный. Force-push меняет хеши всех коммитов — после него любые локальные клоны нужно пересинхронизировать (`git fetch origin && git reset --hard origin/master`).
