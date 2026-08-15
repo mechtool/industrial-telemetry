@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: kratos
-      POSTGRES_PASSWORD: kratos
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-kratos}
       POSTGRES_DB: kratos
     ports:
       - "5432:5432"
@@ -54,7 +54,7 @@ services:
       - DSN=postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
       - KRATOS_PUBLIC_BASE_URL=${KRATOS_PUBLIC_BASE_URL:-http://localhost:4433/.ory}
       - UI_BASE_URL=${UI_BASE_URL:-http://localhost:4200}
-      - SMTP_URI=${SMTP_URI:-smtps://mit-2%40yandex.ru:REDACTED@smtp.yandex.ru:465/?skip_ssl_verify=false}
+      - SMTP_URI=${SMTP_URI:-}
     command: serve -c /etc/config/kratos/kratos.docker.yml --dev --watch-courier
     volumes:
       - ./kratos:/etc/config/kratos:ro

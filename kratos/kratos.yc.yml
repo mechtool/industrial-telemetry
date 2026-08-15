@@ -5,7 +5,7 @@
 
 version: v1.3.1
 
-dsn: postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
+dsn: ${DSN}
 
 serve:
   public:
@@ -91,9 +91,9 @@ log:
 
 secrets:
   cookie:
-    - REDACTED
+    - ${KRATOS_COOKIE_SECRET}
   cipher:
-    - REDACTED
+    - ${KRATOS_CIPHER_SECRET}
 
 ciphers:
   algorithm: xchacha20-poly1305
@@ -111,7 +111,7 @@ identity:
 
 courier:
   smtp:
-    connection_uri: smtps://mit-2%40yandex.ru:REDACTED@smtp.yandex.ru:465/?skip_ssl_verify=false
+    connection_uri: ${SMTP_URI}
     from_address: mit-2@yandex.ru
 
 feature_flags:

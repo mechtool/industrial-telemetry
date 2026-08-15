@@ -5,5 +5,8 @@ dist/
 *.log
 .env
 .env.local
+.env.yc
+.env.yc.*
+!.env.yc.example
+.codewhale/
 certbot/
-

@@ -435,7 +435,7 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"  # вы
 
 Заменить `secrets.cookie` и `secrets.cipher` в `kratos/kratos.yc.yml` на сгенерированные значения.
 
-Репозиторий содержит тестовые секреты (`ba9800ec...`, `4ea869dc...`) — **в продакшене их нужно заменить**.
+Секреты задаются переменными окружения в `.env.yc` (`KRATOS_COOKIE_SECRET`, `KRATOS_CIPHER_SECRET`, `SMTP_URI`, `DB_PASSWORD`), а не хранятся в конфиге.
 
 #### Шаг 4: Сборка Docker-образов и запуск
 
