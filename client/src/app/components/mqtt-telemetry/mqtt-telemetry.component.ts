@@ -6,7 +6,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { MqttClientService } from '../../services/mqtt.service';
@@ -24,7 +23,6 @@ import { startWith, switchMap } from 'rxjs/operators';
     NzInputModule,
     NzTagModule,
     NzDividerModule,
-    NzSkeletonModule,
     NzIconModule,
   ],
   templateUrl: './mqtt-telemetry.component.html',

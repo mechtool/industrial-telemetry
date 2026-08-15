@@ -54,7 +54,7 @@ export class DashboardComponent implements OnInit {
 
   cards: StatCard[] = [
     { title: 'MQTT статус', value: '...', icon: 'wifi', color: 'var(--color-mqtt-online)', link: '/mqtt' },
-    { title: 'Пользователь', value: '...', icon: 'user', color: '#3b82f6', link: '' },
+    { title: 'Пользователь', value: '...', icon: 'user', color: '#3b82f6', link: '/profile' },
     { title: 'Топики', value: '...', icon: 'apartment', color: '#8b5cf6', link: '/mqtt' },
   ];
 

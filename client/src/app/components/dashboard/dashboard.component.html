@@ -11,16 +11,6 @@
           <span>MQTT</span>
         </li>
       }
-      @if (perms.canManageUsers()) {
-        <li nz-menu-item routerLink="/users">
-          <nz-icon nzType="team" />
-          <span>Пользователи</span>
-        </li>
-      }
-      <li nz-menu-item>
-        <nz-icon nzType="file" />
-        <span>Отчёты</span>
-      </li>
     </ul>
   </nz-sider>
 
@@ -90,9 +80,6 @@
                 <div class="quick-actions">
                   @if (perms.canView('mqtt')) {
                     <button nz-button routerLink="/mqtt"><nz-icon nzType="wifi" /> MQTT</button>
-                  }
-                  @if (perms.canManageUsers()) {
-                    <button nz-button nzType="primary" routerLink="/users"><nz-icon nzType="team" /> Пользователи</button>
                   }
                   <button nz-button (click)="refresh()"><nz-icon nzType="reload" /> Обновить</button>
                 </div>

@@ -1,7 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -17,7 +16,6 @@ import { KratosService } from '../../services/kratos.service';
   imports: [
     CommonModule,
     RouterLink,
-    NzCardModule,
     NzTagModule,
     NzButtonModule,
     NzLayoutModule,
