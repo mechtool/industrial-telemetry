@@ -10,3 +10,4 @@ dist/
 !.env.yc.example
 .codewhale/
 certbot/
+kratos/kratos.yc.yml

@@ -1,11 +1,16 @@
 # ========================================================
-# Ory Kratos — kratos.yc.yml (Yandex Cloud)
-# Конфигурация для Industrial Telemetry
+# Ory Kratos — kratos.yc.example.yml (шаблон для Yandex Cloud)
+#
+# Скопировать:   cp kratos/kratos.yc.example.yml kratos/kratos.yc.yml
+# Затем заменить плейсхолдеры на реальные значения:
+#   - secrets.cookie / secrets.cipher — ровно 32 hex-символа
+#     (node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")
+#   - courier.smtp.connection_uri — пароль приложения Яндекса
 # ========================================================
 
 version: v1.3.1
 
-dsn: ${DSN}
+dsn: postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
 
 serve:
   public:
@@ -91,9 +96,9 @@ log:
 
 secrets:
   cookie:
-    - ${KRATOS_COOKIE_SECRET}
+    - change-me-cookie-secret-00000000
   cipher:
-    - ${KRATOS_CIPHER_SECRET}
+    - change-me-cipher-secret-00000000
 
 ciphers:
   algorithm: xchacha20-poly1305
@@ -111,7 +116,7 @@ identity:
 
 courier:
   smtp:
-    connection_uri: ${SMTP_URI}
+    connection_uri: smtps://user%40example.com:app-password@smtp.example.com:465/?skip_ssl_verify=false
     from_address: mit-2@yandex.ru
 
 feature_flags:

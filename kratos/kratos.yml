@@ -85,9 +85,9 @@ log:
 
 secrets:
   cookie:
-    - change-me-cookie-secret-32-bytes
+    - change-me-cookie-secret-00000000
   cipher:
-    - change-me-cipher-secret-32-bytes
+    - change-me-cipher-secret-00000000
 
 ciphers:
   algorithm: xchacha20-poly1305
@@ -105,7 +105,7 @@ identity:
 
 courier:
   smtp:
-    connection_uri: ${SMTP_URI}
+    connection_uri: smtps://user%40example.com:app-password@smtp.example.com:465/?skip_ssl_verify=false
 
 feature_flags:
   use_continue_with_transitions: false
