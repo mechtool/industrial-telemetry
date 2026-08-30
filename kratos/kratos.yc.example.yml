@@ -42,7 +42,7 @@ selfservice:
     - https://industrial-telemetry.ru
     - https://industrial-telemetry.ru/dashboard
     - https://industrial-telemetry.ru/login
-    - https://industrial-telemetry.ru/settings
+    - https://industrial-telemetry.ru/recovery
 
   methods:
     password:
@@ -69,7 +69,7 @@ selfservice:
             - hook: session
 
     settings:
-      ui_url: https://industrial-telemetry.ru/settings
+      ui_url: https://industrial-telemetry.ru/recovery
       privileged_session_max_age: 15m
 
     recovery:
