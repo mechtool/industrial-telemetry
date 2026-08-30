@@ -26,6 +26,26 @@ function extractErrorMessage(ui: any): string | null {
   return null;
 }
 
+/** Возвращает все Set-Cookie заголовки ответа (session cookies Kratos). */
+function getSetCookies(from: Response): string[] {
+  const headers = from.headers as any;
+  if (typeof headers.getSetCookie === 'function') return headers.getSetCookie();
+  const sc = from.headers.get('set-cookie');
+  return sc ? [sc] : [];
+}
+
+/** Проксирует Set-Cookie от Kratos клиенту (сессионные cookie для флоу). */
+function forwardSetCookie(from: Response, to: ExpressResponse): void {
+  for (const c of getSetCookies(from)) to.append('Set-Cookie', c);
+}
+
+/** Получает settings-флоу Kratos, пробрасывая cookie клиента. */
+function fetchSettingsFlow(flowId: string, cookie?: string): Promise<Response> {
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (cookie) headers['Cookie'] = cookie;
+  return fetch(`${config.kratos.publicUrl}/self-service/settings/flows?id=${flowId}`, { headers });
+}
+
 // ============================================================
 // Login
 // ============================================================
@@ -215,6 +235,7 @@ router.get('/recovery', async (req: Request, res: ExpressResponse) => {
   try {
     // If token present, submit it to continue the link recovery
     if (token) {
+      const cookie = req.headers.cookie;
       const kratosUrl = `${config.kratos.publicUrl}/self-service/recovery?flow=${flowId}&token=${token}`;
       const ac = new AbortController();
       const timer = setTimeout(() => ac.abort(), 10_000);
@@ -222,7 +243,7 @@ router.get('/recovery', async (req: Request, res: ExpressResponse) => {
       try {
         r = await fetch(kratosUrl, {
           method: 'GET',
-          headers: { 'Accept': 'application/json' },
+          headers: { 'Accept': 'application/json', ...(cookie ? { Cookie: cookie } : {}) },
           redirect: 'manual',
           signal: ac.signal,
         });
@@ -235,6 +256,7 @@ router.get('/recovery', async (req: Request, res: ExpressResponse) => {
         return;
       }
       clearTimeout(timer);
+      forwardSetCookie(r, res);
       if (r.ok) {
         const flow = await r.json();
         res.json({ success: true, data: flow });
@@ -246,10 +268,10 @@ router.get('/recovery', async (req: Request, res: ExpressResponse) => {
           const u = new URL(loc);
           const newId = u.searchParams.get('flow') ?? u.searchParams.get('id');
           if (newId) {
-            const fr = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${newId}`, {
-              headers: { 'Accept': 'application/json' },
-            });
+            const sessionCookie = getSetCookies(r).map((c) => c.split(';')[0]).join('; ');
+            const fr = await fetchSettingsFlow(newId, sessionCookie || cookie);
             if (fr.ok) {
+              forwardSetCookie(fr, res);
               const d = await fr.json();
               res.json({ success: true, data: d }); return;
             }
@@ -260,13 +282,13 @@ router.get('/recovery', async (req: Request, res: ExpressResponse) => {
       return;
     }
     // No token вЂ” just fetch flow data
-    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${flowId}`, {
-      headers: { 'Accept': 'application/json' },
-    });
+    const cookie = req.headers.cookie;
+    const flowRes = await fetchSettingsFlow(flowId, cookie);
     if (!flowRes.ok) {
       res.status(502).json({ success: false, error: { message: 'Flow not found or expired' } });
       return;
     }
+    forwardSetCookie(flowRes, res);
     const flow = await flowRes.json();
     res.json({ success: true, data: flow });
   } catch (err: any) {
@@ -286,15 +308,22 @@ router.post('/recovery/submit', async (req: Request, res: ExpressResponse) => {
     return;
   }
   try {
+    const cookie = req.headers.cookie;
     const body = new URLSearchParams();
     body.set('csrf_token', csrfToken);
     for (const [k, v] of Object.entries(fields)) { if (v != null) body.set(k, String(v)); }
-    const r = await fetch(`${config.kratos.publicUrl}/self-service/recovery?flow=${flowId}`, {
+    // После перехода по recovery-ссылке смена пароля выполняется на settings-флоу
+    const r = await fetch(`${config.kratos.publicUrl}/self-service/settings?flow=${flowId}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+        ...(cookie ? { Cookie: cookie } : {}),
+      },
       body: body.toString(),
       redirect: 'manual',
     });
+    forwardSetCookie(r, res);
     if (r.status === 422 || r.status === 400) {
       const e = await r.json();
       const m = extractErrorMessage(e?.ui) ?? e?.error?.message ?? 'Recovery error';
@@ -307,10 +336,8 @@ router.post('/recovery/submit', async (req: Request, res: ExpressResponse) => {
         const u = new URL(loc);
         const newId = u.searchParams.get('flow') ?? u.searchParams.get('id');
         if (newId) {
-          const fr = await fetch(`${config.kratos.publicUrl}/self-service/recovery/flows?id=${newId}`, {
-            headers: { 'Accept': 'application/json' },
-          });
-          if (fr.ok) { const d = await fr.json(); res.json({ success: true, data: d }); return; }
+          const fr = await fetchSettingsFlow(newId, cookie);
+          if (fr.ok) { forwardSetCookie(fr, res); const d = await fr.json(); res.json({ success: true, data: d }); return; }
         }
       }
       res.status(502).json({ success: false, error: { message: 'Redirect failed' } });

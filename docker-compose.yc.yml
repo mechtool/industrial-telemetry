@@ -18,6 +18,7 @@ services:
       POSTGRES_DB: kratos
     volumes:
       - kratos-db-data:/var/lib/postgresql/data
+      - ./keto/init-keto.sql:/docker-entrypoint-initdb.d/init-keto.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U kratos -d kratos"]
       interval: 10s
@@ -63,7 +64,7 @@ services:
 
   # ---- Ory Keto: Permission Server ----
   keto-migrate:
-    image: oryd/keto:v0.14.0-alpha.0
+    image: oryd/keto:v0.14.0
     container_name: it-keto-migrate
     restart: "no"
     depends_on:
@@ -71,14 +72,14 @@ services:
         condition: service_healthy
     environment:
       - DSN=postgres://kratos:${DB_PASSWORD:-kratos}@kratos-db:5432/keto?sslmode=disable
-    command: migrate up -y
+    command: migrate up -y -c /etc/config/keto/keto.yml
     volumes:
       - ./keto:/etc/config/keto:ro
     networks:
       - it-network
 
   keto:
-    image: oryd/keto:v0.14.0-alpha.0
+    image: oryd/keto:v0.14.0
     container_name: it-keto
     restart: unless-stopped
     depends_on:

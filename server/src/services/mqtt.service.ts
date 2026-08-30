@@ -3,6 +3,31 @@ import { config } from '../config/index.js';
 
 type MessageHandler = (topic: string, payload: Buffer) => void;
 
+/**
+ * Проверяет, соответствует ли конкретный топик подписочному паттерну MQTT.
+ * Поддерживает wildcard: `+` (один уровень) и `#` (любое число уровней, только в конце).
+ */
+function topicMatches(pattern: string, topic: string): boolean {
+  const patternLevels = pattern.split('/');
+  const topicLevels = topic.split('/');
+
+  for (let i = 0; i < patternLevels.length; i++) {
+    const p = patternLevels[i];
+    if (p === '#') {
+      // `#` совпадает с любым числом оставшихся уровней (включая ноль)
+      return true;
+    }
+    if (i >= topicLevels.length) {
+      return false;
+    }
+    if (p !== '+' && p !== topicLevels[i]) {
+      return false;
+    }
+  }
+
+  return patternLevels.length === topicLevels.length;
+}
+
 class MqttService {
   private client: MqttClient | null = null;
   private handlers = new Map<string, Set<MessageHandler>>();
@@ -32,8 +57,10 @@ class MqttService {
       });
 
       this.client.on('message', (topic: string, payload: Buffer) => {
-        const topicHandlers = this.handlers.get(topic);
-        if (topicHandlers) {
+        for (const [pattern, topicHandlers] of this.handlers) {
+          if (!topicMatches(pattern, topic)) {
+            continue;
+          }
           for (const handler of topicHandlers) {
             try {
               handler(topic, payload);

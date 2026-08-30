@@ -52,17 +52,7 @@ export class KratosAuthComponent implements OnInit {
 
   setMode(m: AuthMode): void { this.mode.set(m); this.error.set(null); }
 
-  async startRecovery(): Promise<void> {
-    try {
-      const res = await fetch('/api/kratos/recovery/init', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        this.router.navigate(['/recovery'], { queryParams: { flow: data.data.flowId } });
-        return;
-      }
-    } catch {
-      // Бэкенд недоступен — переходим напрямую
-    }
+  startRecovery(): void {
     this.router.navigate(['/recovery']);
   }
 

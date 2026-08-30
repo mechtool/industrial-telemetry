@@ -82,7 +82,25 @@ export class KratosRecoveryComponent implements OnInit {
       // User clicked recovery link — validate token and go to password step
       this.loadFlowWithToken(flow, token);
     } else if (flow) {
-      this.flowId = flow;
+      // After the link, Kratos redirects here with the settings flow id
+      this.loadFlow(flow);
+    }
+  }
+
+  private async loadFlow(flowId: string): Promise<void> {
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      const r = await fetch(`/api/kratos/recovery?flow=${flowId}`);
+      const d: RecoveryResponse = await r.json();
+      if (!r.ok || !d.success) throw new Error(d.error?.message || 'Invalid recovery flow');
+      this.handle(d.data!);
+    } catch {
+      // Ссылка недействительна/истекла — возвращаемся к шагу ввода email
+      this.error.set('Ссылка недействительна или истекла. Запросите новую ссылку.');
+      this.step.set('email');
+    } finally {
+      this.loading.set(false);
     }
   }
 
@@ -187,6 +205,12 @@ export class KratosRecoveryComponent implements OnInit {
   }
 
   private extractMethod(flow: KratosFlowData): string {
+    // Для восстановления пароля нужен метод из группы password
+    for (const n of flow.ui.nodes) {
+      if (n.attributes?.name === 'method' && n.group === 'password') {
+        return n.attributes.value ?? '';
+      }
+    }
     for (const n of flow.ui.nodes) {
       if (n.attributes?.name === 'method') return n.attributes.value ?? '';
     }

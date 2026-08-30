@@ -17,6 +17,7 @@ services:
       - "5432:5432"
     volumes:
       - kratos-db-data:/var/lib/postgresql/data
+      - ./keto/init-keto.sql:/docker-entrypoint-initdb.d/init-keto.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U kratos -d kratos"]
       interval: 5s
@@ -61,7 +62,7 @@ services:
 
   # ---- Ory Keto: Permission Server (RBAC) ----
   keto-migrate:
-    image: oryd/keto:v0.14.0-alpha.0
+    image: oryd/keto:v0.14.0
     container_name: telemetry-keto-migrate
     restart: "no"
     depends_on:
@@ -69,12 +70,12 @@ services:
         condition: service_healthy
     environment:
       - DSN=postgres://kratos:kratos@kratos-db:5432/keto?sslmode=disable
-    command: migrate up -y
+    command: migrate up -y -c /etc/config/keto/keto.yml
     volumes:
       - ./keto:/etc/config/keto:ro
 
   keto:
-    image: oryd/keto:v0.14.0-alpha.0
+    image: oryd/keto:v0.14.0
     container_name: telemetry-keto
     restart: unless-stopped
     depends_on:
@@ -88,6 +89,16 @@ services:
     command: serve -c /etc/config/keto/keto.yml
     volumes:
       - ./keto:/etc/config/keto:ro
+
+  # ---- MailSlurper: локальный SMTP-перехватчик (dev-почта) ----
+  mailslurper:
+    image: oryd/mailslurper:latest-smtps
+    container_name: telemetry-mailslurper
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP (plain)
+      - "4436:4436"   # Web UI (HTTP)
+      - "4437:4437"   # Web UI (HTTPS)
 
 volumes:
   kratos-db-data:

@@ -1,6 +1,11 @@
 # ========================================================
-# Ory Kratos — Docker-конфигурация
-# Industrial Telemetry — локальная разработка
+# Ory Kratos — Docker-конфигурация (ШАБЛОН для локальной разработки)
+# Industrial Telemetry
+#
+# Скопировать:   cp kratos/kratos.docker.example.yml kratos/kratos.docker.yml
+# Затем в kratos/kratos.docker.yml подставить реальный пароль приложения
+# Яндекса в courier.smtp.connection_uri (место YOUR_YANDEX_APP_PASSWORD).
+# Реальный файл kratos/kratos.docker.yml — gitignored.
 # ========================================================
 
 version: v1.3.1
@@ -32,14 +37,14 @@ serve:
     base_url: http://0.0.0.0:4434
 
 selfservice:
-  default_browser_return_url: http://localhost:3000/dashboard
+  default_browser_return_url: http://localhost:4200/dashboard
   allowed_return_urls:
-    - http://localhost:3000
-    - http://localhost:3000/dashboard
-    - http://localhost:3000/login
-    - http://localhost:3000/settings
-    - http://localhost:3000/recovery
-    - http://localhost:3000/verification
+    - http://localhost:4200
+    - http://localhost:4200/dashboard
+    - http://localhost:4200/login
+    - http://localhost:4200/registration
+    - http://localhost:4200/recovery
+    - http://localhost:4200/verification
 
   methods:
     password:
@@ -51,14 +56,14 @@ selfservice:
 
   flows:
     error:
-      ui_url: http://localhost:3000/error
+      ui_url: http://localhost:4200/error
 
     login:
-      ui_url: http://localhost:3000/login
+      ui_url: http://localhost:4200/login
       lifespan: 10m
 
     registration:
-      ui_url: http://localhost:3000/registration
+      ui_url: http://localhost:4200/registration
       lifespan: 10m
       after:
         password:
@@ -66,19 +71,19 @@ selfservice:
             - hook: session
 
     settings:
-      ui_url: http://localhost:3000/settings
+      ui_url: http://localhost:4200/recovery
       privileged_session_max_age: 15m
 
     recovery:
       enabled: true
-      ui_url: http://localhost:3000/recovery
+      ui_url: http://localhost:4200/recovery
     verification:
       enabled: true
-      ui_url: http://localhost:3000/verification
+      ui_url: http://localhost:4200/verification
 
     logout:
       after:
-        default_browser_return_url: http://localhost:3000/login
+        default_browser_return_url: http://localhost:4200/login
 
 log:
   level: debug
@@ -107,7 +112,7 @@ identity:
 
 courier:
   smtp:
-    connection_uri: smtps://user%40example.com:app-password@smtp.example.com:465/?skip_ssl_verify=false
+    connection_uri: smtps://mit-2%40yandex.ru:YOUR_YANDEX_APP_PASSWORD@smtp.yandex.ru:465/?skip_ssl_verify=false
     from_address: mit-2@yandex.ru
 
 feature_flags:

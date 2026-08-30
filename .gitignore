@@ -11,3 +11,4 @@ dist/
 .codewhale/
 certbot/
 kratos/kratos.yc.yml
+kratos/kratos.docker.yml
