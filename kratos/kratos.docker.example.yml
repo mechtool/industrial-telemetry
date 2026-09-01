@@ -44,7 +44,6 @@ selfservice:
     - http://localhost:4200/login
     - http://localhost:4200/registration
     - http://localhost:4200/recovery
-    - http://localhost:4200/verification
 
   methods:
     password:
@@ -77,9 +76,6 @@ selfservice:
     recovery:
       enabled: true
       ui_url: http://localhost:4200/recovery
-    verification:
-      enabled: true
-      ui_url: http://localhost:4200/verification
 
     logout:
       after:

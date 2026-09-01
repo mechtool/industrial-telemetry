@@ -75,9 +75,6 @@ selfservice:
     recovery:
       enabled: true
       ui_url: https://industrial-telemetry.ru/recovery
-    verification:
-      enabled: true
-      ui_url: https://industrial-telemetry.ru/verification
 
     logout:
       after:

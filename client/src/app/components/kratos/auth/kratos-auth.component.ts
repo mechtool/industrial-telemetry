@@ -56,20 +56,6 @@ export class KratosAuthComponent implements OnInit {
     this.router.navigate(['/recovery']);
   }
 
-  async startVerification(): Promise<void> {
-    try {
-      const res = await fetch('/api/kratos/verification/init', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        this.router.navigate(['/verification'], { queryParams: { flow: data.data.flowId } });
-        return;
-      }
-    } catch {
-      // Бэкенд недоступен — переходим напрямую
-    }
-    this.router.navigate(['/verification']);
-  }
-
   async submitLogin(): Promise<void> {
     if (!this.email || !this.password) return;
     this.loading.set(true);

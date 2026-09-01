@@ -35,7 +35,7 @@
 
           <div class="auth-links">
             <button nz-button nzType="link" type="button" (click)="startRecovery()">Забыли пароль?</button>
-            <button nz-button nzType="link" type="button" (click)="startVerification()">Подтвердить email</button>
+            <a nz-button nzType="link" (click)="setMode('registration'); $event.preventDefault()">Зарегистрироваться</a>
           </div>
         </form>
       }
@@ -74,13 +74,11 @@
         </form>
       }
 
-      <div class="auth-toggle">
-        @if (mode() === 'login') {
-          <a nz-button nzType="link" (click)="setMode('registration'); $event.preventDefault()">Зарегистрироваться</a>
-        } @else {
+      @if (mode() === 'registration') {
+        <div class="auth-toggle">
           <a nz-button nzType="link" (click)="setMode('login'); $event.preventDefault()">Войти</a>
-        }
-      </div>
+        </div>
+      }
     </nz-card>
   </div>
 </div>

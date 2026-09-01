@@ -8,7 +8,7 @@
 ## ✅ Реализовано
 
 ### Аутентификация и авторизация
-- [x] Ory Kratos — регистрация, логин, верификация email, восстановление пароля (link-based)
+- [x] Ory Kratos — регистрация, логин, восстановление пароля (link-based)
 - [x] Ory Keto — ролевая модель (admin/engineer/operator), middleware `requirePermission`, `requireRole`
 - [x] Keto seed при старте сервера (26 разрешений для 3 ролей на 5 ресурсов)
 - [x] Angular `PermissionsService` — `canView`, `canEdit`, `canManageUsers`
@@ -33,7 +33,7 @@
 
 ### Сервер
 - [x] Express + TypeScript (ESM)
-- [x] Kratos-прокси (login, registration, recovery, verification)
+- [x] Kratos-прокси (login, registration, recovery)
 - [x] Keto-клиент (`check`, `hasRole`, `assignRole`, `grantPermission`)
 - [x] RBAC middleware (`requirePermission`, `requireRole`, `loadPermissions`)
 - [x] MQTT-мост (подписка, публикация, статус)

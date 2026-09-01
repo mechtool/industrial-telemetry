@@ -121,7 +121,7 @@ docker compose up -d
 |---|---|---|---|
 | **PostgreSQL 16** | БД (Kratos + Keto) | 5432 | `postgres:16-alpine` |
 | **Kratos Migrate** | Миграция схемы (одноразовая) | — | `oryd/kratos:v1.3.1` |
-| **Ory Kratos** | Identity Provider (регистрация, логин, recovery, verification) | 4433 (public), 4434 (admin) | `oryd/kratos:v1.3.1` |
+| **Ory Kratos** | Identity Provider (регистрация, логин, recovery) | 4433 (public), 4434 (admin) | `oryd/kratos:v1.3.1` |
 | **Keto Migrate** | Миграция схемы (одноразовая) | — | `oryd/keto:v0.14.0` |
 | **Ory Keto** | Permission Server (RBAC) | 4466 (read), 4467 (write) | `oryd/keto:v0.14.0` |
 | **Mosquitto** | MQTT-брокер (телеметрия) | 1883 | `eclipse-mosquitto:2` |
@@ -134,7 +134,6 @@ docker compose up -d
 |---|---|
 | `/`, `/login` | Вход (`kratos-auth`) |
 | `/registration` | Регистрация (`kratos-auth`, режим registration) |
-| `/verification` | Верификация email |
 | `/recovery` | Восстановление пароля |
 | `/dashboard` | Панель управления |
 | `/profile` | Профиль пользователя |
@@ -151,7 +150,6 @@ docker compose up -d
 | POST | `/api/kratos/recovery/init` | Инициализация recovery |
 | POST | `/api/kratos/recovery` | Отправка recovery-ссылки |
 | POST | `/api/kratos/recovery/submit` | Установка нового пароля |
-| POST | `/api/kratos/verification` | Верификация email |
 | GET | `/api/mqtt/status` | Статус MQTT |
 | GET | `/api/mqtt/subscriptions` | Список подписок |
 | POST | `/api/mqtt/subscribe` | Подписаться на топик |

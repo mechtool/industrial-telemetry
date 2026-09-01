@@ -70,9 +70,6 @@ selfservice:
     recovery:
       enabled: true
       ui_url: http://localhost:4000/recovery
-    verification:
-      enabled: true
-      ui_url: http://localhost:4000/verification
 
     logout:
       after:

@@ -12,7 +12,7 @@
 | Компонент | Статус | Комментарий |
 |---|---|---|
 | PostgreSQL 16 (Kratos + Keto) | ✅ Готов | Две базы: `kratos`, `keto` |
-| Ory Kratos v1.3.1 (Auth) | ✅ Готов | Регистрация, логин, recovery, верификация |
+| Ory Kratos v1.3.1 (Auth) | ✅ Готов | Регистрация, логин, recovery |
 | Ory Keto v0.14 (RBAC) | ✅ Готов | Роли admin/engineer/operator, seed при старте |
 | Mosquitto MQTT | ✅ Готов | Топик `industrial/sensors/#` |
 | Express API Server | ✅ Готов | Health, прокси Kratos, Keto-клиент, MQTT-мост |
