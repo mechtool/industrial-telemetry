@@ -10,6 +10,7 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { MqttClientService } from '../../services/mqtt.service';
 import { KratosService } from '../../services/kratos.service';
 import { PermissionsService } from '../../services/permissions.service';
@@ -37,6 +38,7 @@ interface StatCard {
     NzBreadCrumbModule,
     NzIconModule,
     NzGridModule,
+    NzAvatarModule,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -57,6 +59,11 @@ export class DashboardComponent implements OnInit {
     { title: 'Пользователь', value: '...', icon: 'user', color: '#3b82f6', link: '/profile' },
     { title: 'Топики', value: '...', icon: 'apartment', color: '#8b5cf6', link: '/mqtt' },
   ];
+
+  get avatarInitial(): string {
+    const user = this.kratosService.currentUser();
+    return user ? user.username.charAt(0).toUpperCase() : 'U';
+  }
 
   ngOnInit(): void {
     this.refresh();

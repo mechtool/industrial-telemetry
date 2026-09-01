@@ -10,6 +10,21 @@
   height: 100%;
 }
 
+/* ── Header ── */
+nz-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 24px;
+}
+
+.header-avatar {
+  margin-left: auto;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
 /* ── Sider ── */
 nz-sider {
   overflow: auto;
