@@ -46,6 +46,50 @@ function fetchSettingsFlow(flowId: string, cookie?: string): Promise<Response> {
   return fetch(`${config.kratos.publicUrl}/self-service/settings/flows?id=${flowId}`, { headers });
 }
 
+/** Извлекает id флоу из Location-заголовка Kratos. */
+function getFlowIdFromLocation(location: string | null): string | null {
+  if (!location) return null;
+  try {
+    return new URL(location).searchParams.get('flow');
+  } catch {
+    return null;
+  }
+}
+
+/** Преобразует Set-Cookie заголовки в значение Cookie для исходящего запроса. */
+function toCookieHeader(setCookies: string[]): string {
+  return setCookies.map((c) => c.split(';')[0]).join('; ');
+}
+
+/**
+ * Инициализирует browser-флоу Kratos (login/registration).
+ * Browser-флоу нужен, чтобы Kratos вернул `ory_kratos_session` cookie,
+ * а не только `session_token` (как в API-флоу).
+ */
+async function initBrowserFlow(path: string): Promise<{ flowId: string; cookie: string }> {
+  const initRes = await fetch(`${config.kratos.publicUrl}${path}`, {
+    headers: { 'Accept': 'text/html' },
+    redirect: 'manual',
+  });
+  const flowId = getFlowIdFromLocation(initRes.headers.get('location'));
+  if (!flowId) {
+    throw new Error(`Unable to initiate ${path} (status ${initRes.status})`);
+  }
+  return { flowId, cookie: toCookieHeader(getSetCookies(initRes)) };
+}
+
+/** Получает JSON флоу и csrf-токен по id флоу. */
+async function fetchFlow(flowId: string, cookie: string, flowName: 'login' | 'registration'): Promise<{ flow: any; csrfToken: string }> {
+  const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/${flowName}/flows?id=${flowId}`, {
+    headers: { 'Accept': 'application/json', ...(cookie ? { Cookie: cookie } : {}) },
+  });
+  if (!flowRes.ok) {
+    throw new Error(`Unable to fetch ${flowName} flow (status ${flowRes.status})`);
+  }
+  const flow = await flowRes.json();
+  return { flow, csrfToken: extractCsrfToken(flow.ui) };
+}
+
 // ============================================================
 // Login
 // ============================================================
@@ -56,28 +100,28 @@ router.post('/login', async (req: Request, res: ExpressResponse) => {
     return;
   }
   try {
-    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/login/api`, {
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Unable to create login flow' } });
-      return;
-    }
-    const flow = await flowRes.json();
-    const csrfToken = extractCsrfToken(flow.ui);
+    const { flowId, cookie } = await initBrowserFlow('/self-service/login/browser');
+    const { flow, csrfToken } = await fetchFlow(flowId, cookie, 'login');
+
     const body = new URLSearchParams();
     body.set('method', 'password');
     body.set('csrf_token', csrfToken);
     body.set('identifier', email);
     body.set('password', password);
+
     const loginRes = await fetch(`${config.kratos.publicUrl}/self-service/login?flow=${flow.id}`, {
-      method: flow.ui.method,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+        ...(cookie ? { Cookie: cookie } : {}),
+      },
       body: body.toString(),
       redirect: 'manual',
     });
-    const setCookie = loginRes.headers.get('set-cookie');
-    if (setCookie) res.setHeader('Set-Cookie', setCookie);
+
+    forwardSetCookie(loginRes, res);
+
     if (loginRes.status === 422 || loginRes.status === 400) {
       const err = await loginRes.json();
       const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Login error';
@@ -106,15 +150,9 @@ router.post('/registration', async (req: Request, res: ExpressResponse) => {
     return;
   }
   try {
-    const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/registration/api`, {
-      headers: { 'Accept': 'application/json' },
-    });
-    if (!flowRes.ok) {
-      res.status(502).json({ success: false, error: { message: 'Unable to create registration flow' } });
-      return;
-    }
-    const flow = await flowRes.json();
-    const csrfToken = extractCsrfToken(flow.ui);
+    const { flowId, cookie } = await initBrowserFlow('/self-service/registration/browser');
+    const { flow, csrfToken } = await fetchFlow(flowId, cookie, 'registration');
+
     const body = new URLSearchParams();
     body.set('method', 'password');
     body.set('csrf_token', csrfToken);
@@ -122,14 +160,20 @@ router.post('/registration', async (req: Request, res: ExpressResponse) => {
     body.set('traits.username', username);
     body.set('traits.role', 'operator');
     body.set('password', password);
+
     const regRes = await fetch(`${config.kratos.publicUrl}/self-service/registration?flow=${flow.id}`, {
-      method: flow.ui.method,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+        ...(cookie ? { Cookie: cookie } : {}),
+      },
       body: body.toString(),
       redirect: 'manual',
     });
-    const setCookie = regRes.headers.get('set-cookie');
-    if (setCookie) res.setHeader('Set-Cookie', setCookie);
+
+    forwardSetCookie(regRes, res);
+
     if (regRes.status === 422 || regRes.status === 400) {
       const err = await regRes.json();
       const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Registration error';
