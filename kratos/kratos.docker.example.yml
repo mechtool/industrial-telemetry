@@ -37,9 +37,10 @@ serve:
     base_url: http://0.0.0.0:4434
 
 selfservice:
-  default_browser_return_url: http://localhost:4200/dashboard
+  default_browser_return_url: http://localhost:4200/projects
   allowed_return_urls:
     - http://localhost:4200
+    - http://localhost:4200/projects
     - http://localhost:4200/dashboard
     - http://localhost:4200/login
     - http://localhost:4200/registration

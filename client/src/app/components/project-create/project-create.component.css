@@ -1,0 +1,103 @@
+/* ── Project Create ── */
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+:host > nz-layout {
+  height: 100%;
+}
+
+/* ── Header ── */
+.create-header {
+  background: #fff;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ── Content ── */
+nz-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 16px;
+}
+
+nz-breadcrumb {
+  margin: 12px 0;
+  flex-shrink: 0;
+}
+
+.inner-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+/* ── Footer ── */
+nz-footer {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Form ── */
+.create-card {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.field-error {
+  color: #ff4d4f;
+  font-size: 12px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

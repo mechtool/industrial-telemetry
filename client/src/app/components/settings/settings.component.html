@@ -1,0 +1,85 @@
+<nz-layout>
+    <nz-header class="app-header">
+        <div class="logo"></div>
+        <ul nz-menu nzTheme="dark" nzMode="horizontal">
+            <li nz-menu-item nzMatchRouter routerLink="/settings">Настройки</li>
+            <li nz-menu-item nzMatchRouter routerLink="/users">Пользователи</li>
+            <li nz-menu-item nzMatchRouter routerLink="/dashboard">Панель управления</li>
+        </ul>
+        <a class="header-avatar" routerLink="/profile" title="Профиль">
+            <nz-avatar [nzText]="avatarInitial" [nzSize]="40" />
+        </a>
+    </nz-header>
+
+    <nz-layout>
+        <nz-content>
+            <nz-breadcrumb>
+                <nz-breadcrumb-item>Главная</nz-breadcrumb-item>
+                <nz-breadcrumb-item>Настройки</nz-breadcrumb-item>
+            </nz-breadcrumb>
+
+            <div class="inner-content">
+                <h2 class="page-title">Настройки приложения</h2>
+
+                <nz-card nzTitle="Основные настройки" class="settings-card">
+                    @if (loading()) {
+                        <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+                    } @else {
+                        <form (ngSubmit)="save()" class="settings-form">
+                            <div class="field">
+                                <label class="field-label" for="app-name">Название приложения</label>
+                                <input
+                                    nz-input
+                                    type="text"
+                                    id="app-name"
+                                    [(ngModel)]="appName"
+                                    name="appName"
+                                    required
+                                />
+                            </div>
+
+                            <div class="field">
+                                <label class="field-label" for="app-language">Язык</label>
+                                <nz-select
+                                    id="app-language"
+                                    [(ngModel)]="language"
+                                    name="language"
+                                    [nzOptions]="languageOptions"
+                                ></nz-select>
+                            </div>
+
+                            <div class="field">
+                                <label class="field-label" for="app-theme">Тема</label>
+                                <nz-select
+                                    id="app-theme"
+                                    [(ngModel)]="theme"
+                                    name="theme"
+                                    [nzOptions]="themeOptions"
+                                ></nz-select>
+                            </div>
+
+                            <div class="field">
+                                <span class="field-label">Версия</span>
+                                <span class="version">{{ version }}</span>
+                            </div>
+
+                            <div class="form-actions">
+                                <button
+                                    nz-button
+                                    nzType="primary"
+                                    type="submit"
+                                    [nzLoading]="saving()"
+                                    [disabled]="saving() || !appName"
+                                >
+                                    Сохранить
+                                </button>
+                            </div>
+                        </form>
+                    }
+                </nz-card>
+            </div>
+        </nz-content>
+
+        <nz-footer>Industrial Telemetry &copy;{{ currentYear }}</nz-footer>
+    </nz-layout>
+</nz-layout>

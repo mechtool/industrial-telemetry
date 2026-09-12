@@ -27,6 +27,26 @@ export const routes: Routes = [
     title: 'Панель управления — Industrial Telemetry',
   },
   {
+    path: 'projects/new',
+    loadComponent: () => import('./components/project-create/project-create.component').then(m => m.ProjectCreateComponent),
+    title: 'Новый проект — Industrial Telemetry',
+  },
+  {
+    path: 'projects',
+    loadComponent: () => import('./components/projects/projects.component').then(m => m.ProjectsComponent),
+    title: 'Проекты — Industrial Telemetry',
+  },
+  {
+    path: 'users',
+    loadComponent: () => import('./components/users/users.component').then(m => m.UsersComponent),
+    title: 'Пользователи и роли — Industrial Telemetry',
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent),
+    title: 'Настройки — Industrial Telemetry',
+  },
+  {
     path: 'profile',
     loadComponent: () => import('./components/user-profile/user-profile.component').then(m => m.UserProfileComponent),
     title: 'Профиль — Industrial Telemetry',

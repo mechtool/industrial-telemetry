@@ -75,7 +75,7 @@ export class KratosAuthComponent implements OnInit {
         throw new Error(data.error?.message || 'Неверный email или пароль');
       }
 
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/projects']);
     } catch (err: any) {
       this.error.set(err?.message || 'Ошибка входа');
     } finally {
@@ -110,7 +110,7 @@ export class KratosAuthComponent implements OnInit {
         throw new Error(data.error?.message || 'Ошибка регистрации');
       }
 
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/projects']);
     } catch (err: any) {
       this.error.set(err?.message || 'Ошибка регистрации');
     } finally {

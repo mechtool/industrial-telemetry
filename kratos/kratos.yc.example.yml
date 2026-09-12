@@ -37,9 +37,10 @@ serve:
     base_url: http://localhost:4434
 
 selfservice:
-  default_browser_return_url: https://industrial-telemetry.ru/dashboard
+  default_browser_return_url: https://industrial-telemetry.ru/projects
   allowed_return_urls:
     - https://industrial-telemetry.ru
+    - https://industrial-telemetry.ru/projects
     - https://industrial-telemetry.ru/dashboard
     - https://industrial-telemetry.ru/login
     - https://industrial-telemetry.ru/recovery

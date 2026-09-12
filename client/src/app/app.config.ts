@@ -20,6 +20,7 @@ import {
   MinusOutline,
   SendOutline,
   SaveOutline,
+  ProjectOutline,
 } from '@ant-design/icons-angular/icons';
 import { routes } from './app.routes';
 
@@ -39,6 +40,7 @@ const nzIcons = [
   MinusOutline,
   SendOutline,
   SaveOutline,
+  ProjectOutline,
 ];
 
 export const appConfig: ApplicationConfig = {

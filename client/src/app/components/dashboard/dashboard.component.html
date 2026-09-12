@@ -17,6 +17,10 @@
                     <nz-icon nzType="pie-chart" />
                     <span>Панель управления</span>
                 </li>
+                <li nz-menu-item nzMatchRouter routerLink="/projects">
+                    <nz-icon nzType="project" />
+                    <span>Проекты</span>
+                </li>
                 @if (perms.canView('mqtt')) {
                     <li nz-menu-item nzMatchRouter routerLink="/mqtt">
                         <nz-icon nzType="desktop" />

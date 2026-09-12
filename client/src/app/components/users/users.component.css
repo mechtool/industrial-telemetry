@@ -1,0 +1,91 @@
+/* ── Users: ng-zorro layout ── */
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+:host > nz-layout {
+  height: 100%;
+}
+
+/* ── Header ── */
+nz-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 24px;
+}
+
+.header-avatar {
+  margin-left: auto;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Content ── */
+nz-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 16px;
+}
+
+nz-breadcrumb {
+  margin: 12px 0;
+  flex-shrink: 0;
+}
+
+.inner-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 20px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* ── Footer ── */
+nz-footer {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Cards ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.role-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.role-description {
+  color: #4b5563;
+}
+
+.role-select {
+  min-width: 160px;
+}

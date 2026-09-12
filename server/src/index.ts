@@ -10,6 +10,9 @@ import { errorHandler, notFoundHandler } from './middleware/error.middleware.js'
 import { kratosAuth } from './middleware/kratos.middleware.js';
 import kratosRouter from './routes/kratos.routes.js';
 import mqttRouter from './routes/mqtt.routes.js';
+import projectsRouter from './routes/projects.routes.js';
+import usersRouter from './routes/users.routes.js';
+import settingsRouter from './routes/settings.routes.js';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
@@ -66,6 +69,9 @@ app.use('/api/kratos', kratosRouter);
 
 // --------------- Routes ---------------
 app.use('/api/mqtt', kratosAuth, mqttRouter);
+app.use('/api/projects', kratosAuth, projectsRouter);
+app.use('/api/users', kratosAuth, usersRouter);
+app.use('/api/settings', kratosAuth, settingsRouter);
 
 // --------------- Kratos public proxy (/.ory → Kratos) ---------------
 app.use('/.ory', createProxyMiddleware({

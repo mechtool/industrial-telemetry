@@ -1,0 +1,68 @@
+<nz-layout>
+    <nz-header class="create-header">
+        <a routerLink="/projects" class="back-link">
+            <nz-icon nzType="arrow-left" />
+            <span>Проекты</span>
+        </a>
+        <span class="header-title">Новый проект</span>
+    </nz-header>
+
+    <nz-content>
+        <nz-breadcrumb>
+            <nz-breadcrumb-item>
+                <a routerLink="/projects">Проекты</a>
+            </nz-breadcrumb-item>
+            <nz-breadcrumb-item>Новый проект</nz-breadcrumb-item>
+        </nz-breadcrumb>
+
+        <div class="inner-content">
+            <nz-card class="create-card">
+                <form #createForm="ngForm" (ngSubmit)="submit()" class="create-form">
+                    <div class="field">
+                        <label class="field-label" for="project-name">Название</label>
+                        <input
+                            nz-input
+                            type="text"
+                            id="project-name"
+                            [(ngModel)]="name"
+                            name="name"
+                            #nameField="ngModel"
+                            required
+                            placeholder="Например: Цех №2 — Упаковка"
+                        />
+                        @if (nameField.touched && nameField.invalid) {
+                            <div class="field-error">Введите название проекта</div>
+                        }
+                    </div>
+
+                    <div class="field">
+                        <label class="field-label" for="project-description">Описание</label>
+                        <textarea
+                            nz-input
+                            id="project-description"
+                            [(ngModel)]="description"
+                            name="description"
+                            rows="4"
+                            placeholder="Краткое описание проекта"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button nz-button type="button" (click)="cancel()">Отмена</button>
+                        <button
+                            nz-button
+                            nzType="primary"
+                            type="submit"
+                            [nzLoading]="submitting"
+                            [disabled]="submitting || createForm.invalid"
+                        >
+                            <nz-icon nzType="plus" /> Создать
+                        </button>
+                    </div>
+                </form>
+            </nz-card>
+        </div>
+    </nz-content>
+
+    <nz-footer>Industrial Telemetry &copy;{{ currentYear }}</nz-footer>
+</nz-layout>

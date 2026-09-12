@@ -1,0 +1,79 @@
+<nz-layout>
+    <nz-header class="app-header">
+        <div class="logo"></div>
+        <ul nz-menu nzTheme="dark" nzMode="horizontal">
+            <li nz-menu-item nzMatchRouter routerLink="/settings">Настройки</li>
+            <li nz-menu-item nzMatchRouter routerLink="/users">Пользователи</li>
+            <li nz-menu-item nzMatchRouter routerLink="/dashboard">Панель управления</li>
+        </ul>
+        <a class="header-avatar" routerLink="/profile" title="Профиль">
+            <nz-avatar [nzText]="avatarInitial" [nzSize]="40" />
+        </a>
+    </nz-header>
+
+    <nz-layout>
+        <nz-content>
+            <nz-breadcrumb>
+                <nz-breadcrumb-item>Главная</nz-breadcrumb-item>
+                <nz-breadcrumb-item>Пользователи</nz-breadcrumb-item>
+            </nz-breadcrumb>
+
+            <div class="inner-content">
+                <h2 class="page-title">Пользователи и роли</h2>
+
+                <div class="cards">
+                    <nz-card nzTitle="Пользователи">
+                        @if (error()) {
+                            <nz-empty [nzNotFoundContent]="error()!" />
+                        } @else {
+                            <nz-table
+                                [nzData]="users()"
+                                [nzLoading]="loading()"
+                                [nzShowPagination]="false"
+                                [nzBordered]="true"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th>Имя пользователя</th>
+                                        <th>Email</th>
+                                        <th>Роль</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (u of users(); track u.id) {
+                                        <tr>
+                                            <td>{{ u.username }}</td>
+                                            <td>{{ u.email }}</td>
+                                            <td>
+                                                <nz-select
+                                                    class="role-select"
+                                                    [ngModel]="u.role"
+                                                    (ngModelChange)="changeRole(u, $event)"
+                                                    [nzOptions]="roleOptions"
+                                                    nzSize="small"
+                                                ></nz-select>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </nz-table>
+                        }
+                    </nz-card>
+
+                    <nz-card nzTitle="Роли">
+                        <div class="roles-list">
+                            @for (role of roles; track role.name) {
+                                <div class="role-row">
+                                    <nz-tag nzColor="blue">{{ role.label }}</nz-tag>
+                                    <span class="role-description">{{ role.description }}</span>
+                                </div>
+                            }
+                        </div>
+                    </nz-card>
+                </div>
+            </div>
+        </nz-content>
+
+        <nz-footer>Industrial Telemetry &copy;{{ currentYear }}</nz-footer>
+    </nz-layout>
+</nz-layout>
