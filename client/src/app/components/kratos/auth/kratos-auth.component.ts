@@ -7,6 +7,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { KratosService } from '../../../services/kratos.service';
 
 type AuthMode = 'login' | 'registration';
 
@@ -34,6 +35,7 @@ interface KratosProxyResponse {
 })
 export class KratosAuthComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly kratosService = inject(KratosService);
 
   mode = signal<AuthMode>('login');
   error = signal<string | null>(null);
@@ -75,6 +77,7 @@ export class KratosAuthComponent implements OnInit {
         throw new Error(data.error?.message || 'Неверный email или пароль');
       }
 
+      this.kratosService.checkSession().subscribe();
       this.router.navigate(['/projects']);
     } catch (err: any) {
       this.error.set(err?.message || 'Ошибка входа');
@@ -110,6 +113,7 @@ export class KratosAuthComponent implements OnInit {
         throw new Error(data.error?.message || 'Ошибка регистрации');
       }
 
+      this.kratosService.checkSession().subscribe();
       this.router.navigate(['/projects']);
     } catch (err: any) {
       this.error.set(err?.message || 'Ошибка регистрации');

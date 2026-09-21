@@ -113,6 +113,7 @@ services:
       - MQTT_PASSWORD=${MQTT_PASSWORD:-}
       - MQTT_TOPIC_PREFIX=industrial/
       - CORS_ORIGIN=https://${DOMAIN:-industrial-telemetry.ru}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-}
     depends_on:
       kratos:
         condition: service_started

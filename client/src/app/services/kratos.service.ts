@@ -6,8 +6,17 @@ export interface KratosUser {
   id: string;
   email: string;
   username: string;
-  role: string;
+  roles: string[];
   department?: string;
+}
+
+/** Наивысшая роль пользователя из списка. */
+export function primaryRole(roles: string[]): string {
+  const order = ['admin', 'engineer', 'operator', 'viewer'];
+  for (const r of order) {
+    if (roles.includes(r)) return r;
+  }
+  return roles[0] ?? 'viewer';
 }
 
 interface SessionResponse {
@@ -21,7 +30,10 @@ export class KratosService {
 
   readonly currentUser = signal<KratosUser | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
-  readonly currentRole = computed(() => this.currentUser()?.role ?? null);
+  readonly currentRole = computed(() => {
+    const user = this.currentUser();
+    return user ? primaryRole(user.roles) : null;
+  });
 
   /** Проверить сессию через API сервера (прокси к Kratos /sessions/whoami) */
   checkSession(): Observable<KratosUser | null> {

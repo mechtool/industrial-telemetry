@@ -63,6 +63,19 @@ selfservice:
         password:
           hooks:
             - hook: session
+            - hook: web_hook
+              config:
+                url: http://localhost:3000/api/webhooks/registration
+                method: POST
+                body: file:///etc/config/kratos/webhook-registration.jsonnet
+                auth:
+                  type: api_key
+                  config:
+                    name: Authorization
+                    value: change-me-webhook-secret
+                    in: header
+                response:
+                  ignore: true
 
     settings:
       ui_url: http://localhost:4000/settings

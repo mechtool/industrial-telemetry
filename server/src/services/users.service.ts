@@ -1,13 +1,14 @@
 import { config } from '../config/index.js';
+import { ketoService, Roles } from './keto.service.js';
 
 export interface AdminUser {
   id: string;
   username: string;
   email: string;
-  role: string;
+  roles: string[];
 }
 
-const ALLOWED_ROLES = ['admin', 'engineer', 'operator'];
+const ALLOWED_ROLES: string[] = [Roles.ADMIN, Roles.ENGINEER, Roles.OPERATOR, Roles.VIEWER];
 
 interface KratosIdentity {
   id: string;
@@ -16,22 +17,12 @@ interface KratosIdentity {
   traits: {
     username?: string;
     email?: string;
-    role?: string;
     [key: string]: unknown;
   };
 }
 
-function toAdminUser(identity: KratosIdentity): AdminUser {
-  return {
-    id: identity.id,
-    username: identity.traits?.username ?? '',
-    email: identity.traits?.email ?? '',
-    role: identity.traits?.role ?? 'operator',
-  };
-}
-
 class UsersService {
-  /** Список активных пользователей из Kratos. */
+  /** Список активных пользователей из Kratos + их роли из Keto. */
   async list(): Promise<AdminUser[]> {
     const r = await fetch(`${config.kratos.adminUrl}/admin/identities?per_page=200`);
     if (!r.ok) {
@@ -39,16 +30,32 @@ class UsersService {
     }
 
     const identities = (await r.json()) as KratosIdentity[];
-    return identities
-      .filter((i) => i.state === 'active')
-      .map(toAdminUser)
-      .sort((a, b) => a.username.localeCompare(b.username));
+    const active = identities.filter((i) => i.state === 'active');
+
+    const users = await Promise.all(
+      active.map(async (i) => ({
+        id: i.id,
+        username: i.traits?.username ?? '',
+        email: i.traits?.email ?? '',
+        roles: await ketoService.listRoles(i.id),
+      })),
+    );
+
+    return users.sort((a, b) => a.username.localeCompare(b.username));
   }
 
-  /** Обновить роль пользователя (traits.role). */
-  async updateRole(userId: string, role: string): Promise<AdminUser> {
-    if (!ALLOWED_ROLES.includes(role)) {
-      throw new Error(`Недопустимая роль: ${role}`);
+  /** Привести набор ролей пользователя к заданному (хранится в Keto). */
+  async setRoles(userId: string, roles: string[]): Promise<AdminUser> {
+    const normalized = [...new Set(roles)];
+    for (const role of normalized) {
+      if (!ALLOWED_ROLES.includes(role)) {
+        throw new Error(`Недопустимая роль: ${role}`);
+      }
+    }
+
+    const ok = await ketoService.setRoles(userId, normalized);
+    if (!ok) {
+      throw new Error('Не удалось обновить роли в Keto');
     }
 
     const getRes = await fetch(`${config.kratos.adminUrl}/admin/identities/${userId}`);
@@ -57,22 +64,12 @@ class UsersService {
     }
 
     const identity = (await getRes.json()) as KratosIdentity;
-    const body = {
-      schema_id: identity.schema_id,
-      state: identity.state,
-      traits: { ...identity.traits, role },
+    return {
+      id: identity.id,
+      username: identity.traits?.username ?? '',
+      email: identity.traits?.email ?? '',
+      roles: normalized,
     };
-
-    const putRes = await fetch(`${config.kratos.adminUrl}/admin/identities/${userId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!putRes.ok) {
-      throw new Error(`Не удалось обновить роль (${putRes.status})`);
-    }
-
-    return toAdminUser((await putRes.json()) as KratosIdentity);
   }
 }
 

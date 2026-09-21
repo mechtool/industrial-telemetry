@@ -9,6 +9,7 @@ import { mqttService } from './services/mqtt.service.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { kratosAuth } from './middleware/kratos.middleware.js';
 import kratosRouter from './routes/kratos.routes.js';
+import webhooksRouter from './routes/webhooks.routes.js';
 import mqttRouter from './routes/mqtt.routes.js';
 import projectsRouter from './routes/projects.routes.js';
 import usersRouter from './routes/users.routes.js';
@@ -58,7 +59,7 @@ app.get('/api/session', kratosAuth, (req, res) => {
       id: req.user!.id,
       email: req.user!.email,
       username: req.user!.username,
-      role: req.user!.role,
+      roles: req.user!.roles,
       department: req.user!.department,
     },
   });
@@ -66,6 +67,9 @@ app.get('/api/session', kratosAuth, (req, res) => {
 
 // --------------- Kratos proxy routes (login/registration API) ---------------
 app.use('/api/kratos', kratosRouter);
+
+// --------------- Kratos webhooks (server-to-server, без сессии) ---------------
+app.use('/api/webhooks', webhooksRouter);
 
 // --------------- Routes ---------------
 app.use('/api/mqtt', kratosAuth, mqttRouter);

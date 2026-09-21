@@ -40,4 +40,14 @@ export class UserProfileComponent {
     const u = this.user;
     return u ? u.username.charAt(0).toUpperCase() : '?';
   }
+
+  roleLabel(role: string): string {
+    const labels: Record<string, string> = {
+      admin: 'Администратор',
+      engineer: 'Инженер',
+      operator: 'Оператор',
+      viewer: 'Просмотр',
+    };
+    return labels[role] ?? role;
+  }
 }

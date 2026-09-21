@@ -15,21 +15,27 @@ router.get(
   }),
 );
 
-// PUT /api/users/:id/role — изменить роль пользователя (только admin)
+// PUT /api/users/:id/roles — изменить роли пользователя (только admin)
 router.put(
-  '/:id/role',
+  '/:id/roles',
   requireAdmin,
   asyncHandler(async (req: Request, res: Response) => {
     const rawId = req.params.id;
     const userId = Array.isArray(rawId) ? rawId[0] : rawId;
-    const role = typeof req.body?.role === 'string' ? req.body.role.trim() : '';
+    const roles = Array.isArray(req.body?.roles)
+      ? req.body.roles.map((r: unknown) => (typeof r === 'string' ? r.trim() : '')).filter(Boolean)
+      : [];
 
-    if (!userId || !role) {
-      res.status(400).json({ success: false, error: { message: 'id и role обязательны' } });
+    if (!userId) {
+      res.status(400).json({ success: false, error: { message: 'id обязателен' } });
+      return;
+    }
+    if (roles.length === 0) {
+      res.status(400).json({ success: false, error: { message: 'roles должен быть непустым массивом' } });
       return;
     }
 
-    const user = await usersService.updateRole(userId, role);
+    const user = await usersService.setRoles(userId, roles);
     res.json({ success: true, data: user });
   }),
 );

@@ -22,6 +22,11 @@ export const config = {
     writeUrl: process.env.KETO_WRITE_URL || 'http://localhost:4467',
   },
 
+  // ---- Webhooks (Ory Kratos → server) ----
+  webhook: {
+    secret: process.env.WEBHOOK_SECRET || '',
+  },
+
   // ---- MQTT ----
   mqtt: {
     brokerUrl: process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883',

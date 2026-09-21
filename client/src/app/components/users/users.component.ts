@@ -64,12 +64,14 @@ export class UsersComponent implements OnInit {
     { label: 'Администратор', value: 'admin' },
     { label: 'Инженер', value: 'engineer' },
     { label: 'Оператор', value: 'operator' },
+    { label: 'Просмотр', value: 'viewer' },
   ];
 
   readonly roles: RoleRow[] = [
     { name: 'admin', label: 'Администратор', description: 'Полный доступ ко всем разделам' },
     { name: 'engineer', label: 'Инженер', description: 'Просмотр и настройка телеметрии' },
     { name: 'operator', label: 'Оператор', description: 'Только просмотр данных' },
+    { name: 'viewer', label: 'Просмотр', description: 'Самый низкий уровень доступа — только просмотр' },
   ];
 
   get avatarInitial(): string {
@@ -97,16 +99,17 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  changeRole(user: AdminUser, role: string): void {
-    if (!role || role === user.role) return;
+  changeRoles(user: AdminUser, roles: string[]): void {
+    const same = roles.length === user.roles.length && roles.every((r) => user.roles.includes(r));
+    if (same || roles.length === 0) return;
 
-    this.usersService.updateRole(user.id, role).subscribe({
+    this.usersService.updateRoles(user.id, roles).subscribe({
       next: (updated) => {
         this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
-        this.message.success(`Роль пользователя «${updated.username}» изменена`);
+        this.message.success(`Роли пользователя «${updated.username}» изменены`);
       },
       error: (err) => {
-        this.message.error(err?.error?.error?.message ?? 'Не удалось изменить роль');
+        this.message.error(err?.error?.error?.message ?? 'Не удалось изменить роли');
         this.load();
       },
     });

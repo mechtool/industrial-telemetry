@@ -5,6 +5,31 @@
 
 ---
 
+## 🔄 Изменения 2026-09-21 — роли переведены в Keto
+
+**Что сделано (эта сессия):**
+- Роли теперь живут в **Keto** (relation tuples), а не в `traits.role` Kratos; из `identity.schema.json` поле `role` удалено.
+- Добавлена новая низшая роль **`viewer` (просмотр)** — назначается автоматически при регистрации.
+- Поддержка **нескольких ролей** на пользователя (`roles: string[]`): `/api/session`, список/редактирование пользователей, профиль.
+- Назначение при создании — через **Kratos webhook** (`after.registration.password.hooks` → `POST /api/webhooks/registration`), плюс синхронный fallback в прокси `/api/kratos/registration`.
+- Webhook защищён общим секретом (`WEBHOOK_SECRET`).
+- Миграция `server/src/scripts/migrate-roles.ts` (`npm run migrate:roles`) — перенос старых `traits.role` → Keto и очистка `traits.role` (идемпотентна).
+- Устойчивость: `assignRole` идемпотентен + сериализация мутаций ролей на пользователя + дедупликация на чтении (Keto `PUT` не идемпотентен).
+
+**Что осталось сделать при деплое на прод (по порядку):**
+1. На ВМ пересоздать `kratos/kratos.yc.yml` из обновлённого `kratos/kratos.yc.example.yml` (там появился web_hook + auth).
+2. Задать **один и тот же** `WEBHOOK_SECRET` в двух местах: `kratos/kratos.yc.yml` → `selfservice.flows.registration.after.password.hooks[web_hook].config.auth.config.value` и `.env.yc` → `WEBHOOK_SECRET`.
+3. Перезапустить Kratos (`up -d kratos`) — **Kratos не перечитывает конфиг на лету**.
+4. Прогнать миграцию ролей **до/вместе** с выкатом нового сервера: `cd server && npm run migrate:roles` — иначе существующие админы потеряют доступ.
+5. Пересобрать `server` и `client`.
+
+**Советы / важные нюансы:**
+- Kratos **не подставляет `${VAR}`** в значении webhook-auth (шлёт литерал) — секрет пишется напрямую в `kratos.yc.yml`. То же уже зафиксировано для `secrets.cookie`/`cipher`.
+- `ketoService.seedDefaults()` **всё ещё не вызывается** — поресурсные права (`requirePermission`/`requireRole`) не задействованы; авторизация сейчас идёт по ролям через `requireAdmin` (`roles.includes('admin')`). Это остаётся задачей ближайшего спринта.
+- Webhook-эндпоинт `/api/webhooks/registration` теперь требует секрет (если задан); снаружи он уже ограничен nginx rate-limiting.
+
+---
+
 ## ✅ Реализовано
 
 ### Аутентификация и авторизация

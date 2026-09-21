@@ -12,7 +12,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { MqttClientService } from '../../services/mqtt.service';
-import { KratosService } from '../../services/kratos.service';
+import { KratosService, primaryRole } from '../../services/kratos.service';
 import { PermissionsService } from '../../services/permissions.service';
 
 interface StatCard {
@@ -85,6 +85,6 @@ export class DashboardComponent implements OnInit {
     });
 
     const user = this.kratosService.currentUser();
-    this.cards[1].value = user ? `${user.username} (${user.role})` : '—';
+    this.cards[1].value = user ? `${user.username} (${primaryRole(user.roles)})` : '—';
   }
 }

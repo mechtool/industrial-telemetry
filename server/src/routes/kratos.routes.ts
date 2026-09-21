@@ -1,5 +1,6 @@
 ﻿import { Router, Request, Response as ExpressResponse } from 'express';
 import { config } from '../config/index.js';
+import { ketoService, Roles } from '../services/keto.service.js';
 
 const router = Router();
 
@@ -158,7 +159,6 @@ router.post('/registration', async (req: Request, res: ExpressResponse) => {
     body.set('csrf_token', csrfToken);
     body.set('traits.email', email);
     body.set('traits.username', username);
-    body.set('traits.role', 'operator');
     body.set('password', password);
 
     const regRes = await fetch(`${config.kratos.publicUrl}/self-service/registration?flow=${flow.id}`, {
@@ -185,6 +185,13 @@ router.post('/registration', async (req: Request, res: ExpressResponse) => {
       return;
     }
     const result = await regRes.json();
+
+    // Надёжность: назначаем роль просмотра синхронно, даже если webhook не сработал.
+    const identityId = result?.identity?.id ?? result?.session?.identity?.id;
+    if (typeof identityId === 'string' && identityId) {
+      await ketoService.assignRole(identityId, Roles.VIEWER);
+    }
+
     res.json({ success: true, data: result });
   } catch (err: any) {
     console.error('[Kratos] Registration error:', err.message);

@@ -88,11 +88,16 @@ DOMAIN=industrial-telemetry.ru
 DB_PASSWORD=<пароль-БД>
 MQTT_USERNAME=
 MQTT_PASSWORD=
+WEBHOOK_SECRET=<секрет-webhook>
 ```
+
+> Секрет webhook (`WEBHOOK_SECRET`) должен **совпадать** с `web_hook.auth.config.value` в `kratos/kratos.yc.yml` (см. §2.3).
 
 ### 2.3 Пример `kratos/kratos.yc.yml` (на ВМ)
 
-Копируется из `kratos/kratos.yc.example.yml` и заполняется реальными `secrets.cookie`, `secrets.cipher` (32 hex) и `courier.smtp.connection_uri`.
+Копируется из `kratos/kratos.yc.example.yml` и заполняется реальными `secrets.cookie`, `secrets.cipher` (32 hex), `courier.smtp.connection_uri` и `web_hook.auth.config.value` (общий секрет webhook, тот же что `WEBHOOK_SECRET` в `.env.yc`).
+
+> ⚠️ Kratos **не поддерживает** `${VAR}` в конфиге — `web_hook.auth.config.value` пишется напрямую.
 
 ---
 
@@ -277,9 +282,11 @@ docker logs -f it-client
 - [ ] `/api/health` → `status: healthy`
 - [ ] `/.ory/health/alive` → `ok`
 - [ ] регистрация нового пользователя
+- [ ] у нового пользователя в Keto роль `viewer` (`GET /admin/relation-tuples?namespace=Role&subject_id=<id>` через `it-keto`, либо `/api/users` под админом)
 - [ ] логин созданным аккаунтом
 - [ ] дашборд показывает MQTT-статус
 - [ ] logout → редирект на логин
+- [ ] в логах `it-kratos` webhook `Dispatching webhook` без `webhook failed`
 
 ---
 
@@ -300,14 +307,18 @@ docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
 
 ## 10. Известные ограничения и план
 
-### 10.1 RBAC (Keto) пока не подключён
+### 10.1 RBAC (Keto): роли работают, поресурсные права — нет
 
-Код RBAC написан, но **не активирован**:
-- `ketoService.seedDefaults()` не вызывается при старте сервера → роли/права не сидятся;
+Роли уже переведены из Kratos `traits.role` в Keto (relation tuples) и **работают**: `kratosAuth` читает роли через `ketoService.listRoles()`, `/api/session` отдаёт `roles`, `requireAdmin` проверяет `roles.includes('admin')` (защита `/api/users` и `/api/settings` PUT). Новая роль `viewer` (просмотр) назначается автоматически при регистрации (webhook + fallback).
+
+Поресурсные права пока **не активированы**:
+- `ketoService.seedDefaults()` не вызывается при старте сервера → права на ресурсы не сидятся;
 - `requirePermission` / `requireRole` / `loadPermissions` не применены к маршрутам `/api/mqtt/*`;
 - маршрута `/api/permissions` на сервере нет, а клиентский `PermissionsService.load()` нигде не вызывается.
 
-Следствие: сейчас `/api/mqtt/*` защищён только аутентификацией (`kratosAuth`), а dashboard не скрывает/показывает кнопки по ролям. Это задача ближайшего спринта (см. `user-data/NEXT_STEPS.md`).
+Следствие: `/api/mqtt/*` защищён аутентификацией (`kratosAuth`), а не поресурсными правами. Это задача ближайшего спринта (см. `user-data/NEXT_STEPS.md`).
+
+> ⚠️ **Одноразовая миграция при выкате этой версии:** перед/вместе с перезапуском `it-server` выполнить `cd server && npm run migrate:roles` (переносит старые `traits.role` → Keto и чистит `traits.role`), иначе существующие админы потеряют доступ.
 
 ### 10.2 Секреты, требующие ротации
 

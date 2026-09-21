@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { config } from '../config/index.js';
+import { ketoService } from '../services/keto.service.js';
 
 export interface KratosIdentity {
   id: string;
   email: string;
   username: string;
-  role: string;
+  roles: string[];
   department?: string;
 }
 
@@ -52,17 +53,19 @@ export async function kratosAuth(req: Request, res: Response, next: NextFunction
         traits: {
           email: string;
           username: string;
-          role?: string;
           department?: string;
         };
       };
     };
 
+    const identityId = session.identity.id;
+    const roles = await ketoService.listRoles(identityId);
+
     req.user = {
-      id: session.identity.id,
+      id: identityId,
       email: session.identity.traits.email,
       username: session.identity.traits.username,
-      role: session.identity.traits.role || 'operator',
+      roles,
       department: session.identity.traits.department,
     };
 

@@ -31,18 +31,27 @@ ssh -i <ключ> mit-2@<IP_ВМ>
 # 2. Обновить репозиторий
 cd ~/industrial-telemetry && git pull
 
-# 3. Собрать
+# 3. Задать общий секрет webhook (один раз, при первом выкате этой версии)
+#    .env.yc: WEBHOOK_SECRET=<секрет>
+#    kratos/kratos.yc.yml: web_hook.auth.config.value = <тот же секрет>
+
+# 4. Собрать
 cd client && npm ci --legacy-peer-deps && npm run build && cd ..
 cd server && npm ci && npm run build && cd ..
 
-# 4. Перезапустить
+# 5. Миграция ролей (traits.role -> Keto) — ДО перезапуска сервера
+cd server && npm run migrate:roles && cd ..
+
+# 6. Перезапустить (kratos подхватит новый конфиг с webhook)
 docker compose -f docker-compose.yc.yml --env-file .env.yc build --no-cache
 docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
 
-# 5. Проверить
+# 7. Проверить
 docker compose -f docker-compose.yc.yml ps
 curl -s https://industrial-telemetry.ru/api/health
 ```
+
+> ⚠️ Порядок важен: миграцию (`migrate:roles`) выполнять **до** перезапуска `it-server`, а `it-kratos` перезапустить с новым конфигом (`up -d`), так как Kratos не перечитывает конфиг на лету.
 
 ---
 
@@ -51,7 +60,7 @@ curl -s https://industrial-telemetry.ru/api/health
 - [ ] `https://industrial-telemetry.ru/` — загружается Angular PWA
 - [ ] `https://industrial-telemetry.ru/api/health` — `{"status":"healthy"}`
 - [ ] `/.ory/health/alive` — Kratos отвечает
-- [ ] Регистрация нового пользователя
+- [ ] Регистрация нового пользователя → в Keto у него роль `viewer`
 - [ ] Логин с созданным аккаунтом
 - [ ] Дашборд показывает MQTT-статус
 - [ ] В консоли: `GET /api/permissions` возвращает права
@@ -62,11 +71,16 @@ curl -s https://industrial-telemetry.ru/api/health
 
 ## Роли и права (что проверять)
 
+Роли хранятся в Keto (не в `traits.role`), у пользователя может быть несколько ролей.
+
 | Роль | Видит Dashboard | Видит MQTT | Управляет пользователями |
 |---|---|---|---|
+| viewer (просмотр) | ✅ | ✅ | ❌ |
 | operator | ✅ | ✅ | ❌ |
 | engineer | ✅ (edit) | ✅ (edit) | ❌ |
 | admin | ✅ (полный) | ✅ (полный) | ✅ |
+
+> Роль `viewer` — самая низкая, назначается автоматически при регистрации.
 
 ---
 

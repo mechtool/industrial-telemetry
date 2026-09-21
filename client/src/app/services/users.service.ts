@@ -7,7 +7,7 @@ export interface AdminUser {
   id: string;
   username: string;
   email: string;
-  role: string;
+  roles: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -19,8 +19,8 @@ export class UsersService {
     return this.api.get<AdminUser[]>('/users').pipe(map((res) => res.data));
   }
 
-  /** Изменить роль пользователя. */
-  updateRole(id: string, role: string): Observable<AdminUser> {
-    return this.api.put<AdminUser>(`/users/${id}/role`, { role }).pipe(map((res) => res.data));
+  /** Изменить роли пользователя. */
+  updateRoles(id: string, roles: string[]): Observable<AdminUser> {
+    return this.api.put<AdminUser>(`/users/${id}/roles`, { roles }).pipe(map((res) => res.data));
   }
 }

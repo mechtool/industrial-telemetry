@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ketoService, Actions } from '../services/keto.service.js';
+import { ketoService, Actions, primaryRole } from '../services/keto.service.js';
 
 /**
  * Middleware: проверить разрешение пользователя на ресурс.
@@ -78,7 +78,7 @@ export async function loadPermissions(req: Request, _res: Response, next: NextFu
     canViewDashboard,
     canEditMqtt,
     canManageUsers,
-    role: req.user.role,
+    role: primaryRole(req.user.roles),
   };
 
   next();

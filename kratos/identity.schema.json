@@ -28,12 +28,6 @@
           "minLength": 3,
           "maxLength": 64
         },
-        "role": {
-          "type": "string",
-          "title": "Role",
-          "enum": ["operator", "engineer", "admin"],
-          "default": "operator"
-        },
         "department": {
           "type": "string",
           "title": "Department"

@@ -355,9 +355,11 @@ Dev-серверы (`npm run dev`, `npm run start`) останавливаютс
 
 | Шаблон (tracked) | Реальный файл (gitignored) | Содержимое |
 |---|---|---|
-| `.env.yc.example` | `.env.yc` | `DOMAIN`, `DB_PASSWORD`, `MQTT_USERNAME`, `MQTT_PASSWORD` |
-| `kratos/kratos.yc.example.yml` | `kratos/kratos.yc.yml` | `secrets.cookie`, `secrets.cipher`, `courier.smtp.connection_uri` |
+| `.env.yc.example` | `.env.yc` | `DOMAIN`, `DB_PASSWORD`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `WEBHOOK_SECRET` |
+| `kratos/kratos.yc.example.yml` | `kratos/kratos.yc.yml` | `secrets.cookie`, `secrets.cipher`, `courier.smtp.connection_uri`, `web_hook.auth.config.value` (общий секрет webhook) |
 | `kratos/kratos.docker.example.yml` | `kratos/kratos.docker.yml` | `courier.smtp.connection_uri` (пароль приложения Яндекса) |
+
+> ⚠️ Секрет webhook задаётся **в двух местах одним и тем же значением**: `WEBHOOK_SECRET` в `.env.yc` (для сервера) и `web_hook.auth.config.value` в `kratos/kratos.yc.yml` (для Kratos). Kratos **не подставляет `${VAR}`** — значение пишется напрямую.
 
 Оба файла лежат в **корне проекта** (`.env.yc`) и в **`kratos/`** (`kratos.yc.yml`) соответственно — это важно для запуска prod-команд из корня.
 
@@ -376,25 +378,40 @@ node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 
 ## 7. RBAC: роли и права
 
-Роли: `admin`, `engineer`, `operator`. Ресурсы: `dashboard`, `mqtt`, `mqtt-topics`, `users`, `settings`.
+Роли: `admin`, `engineer`, `operator`, `viewer` (просмотр — низшая). Роли хранятся в **Keto** (relation tuples namespace `Role`), а не в `traits.role` Kratos. Пользователь может иметь **несколько ролей** одновременно.
 
-| Ресурс | operator | engineer | admin |
-|---|---|---|---|
-| Dashboard | view | view + edit | полный |
-| MQTT | view | view + edit | полный |
-| MQTT Topics | view | view + edit | полный |
-| Users | — | view | полный |
-| Settings | — | view + edit | полный |
+| Ресурс | viewer | operator | engineer | admin |
+|---|---|---|---|---|
+| Dashboard | view | view | view + edit | полный |
+| MQTT | view | view | view + edit | полный |
+| MQTT Topics | view | view | view + edit | полный |
+| Users | — | — | view | полный |
+| Settings | — | — | view + edit | полный |
+
+### Назначение роли при регистрации
+
+Новому пользователю автоматически назначается **`viewer`** двумя механизмами:
+
+- **Kratos webhook** — `selfservice.flows.registration.after.password.hooks` → `POST /api/webhooks/registration` (защищён секретом `WEBHOOK_SECRET`);
+- **Синхронный fallback** — серверный прокси `/api/kratos/registration` назначает роль сразу после создания identity (страхует, если webhook не сработал).
+
+> Обе операции идемпотентны, дубликаты ролей исключены (проверка + сериализация на пользователя + дедупликация на чтении).
+
+### Миграция существующих пользователей
+
+Роли старых пользователей лежали в `traits.role`. Одноразовая миграция переносит их в Keto и чистит `traits.role`:
+
+```bash
+# Выполнять из: server/
+npm run migrate:roles
+```
+
+Идемпотентна: если у пользователя уже есть роли в Keto — назначение пропускается.
 
 ### Текущий статус (важно)
 
-Код RBAC написан, но **ещё не активирован**:
-
-- `ketoService.seedDefaults()` не вызывается при старте → роли/права не сидятся;
-- `requirePermission`/`requireRole`/`loadPermissions` не применены к маршрутам `/api/mqtt/*`;
-- маршрута `/api/permissions` нет, клиентский `PermissionsService.load()` не вызывается.
-
-Сейчас `/api/mqtt/*` защищён только аутентификацией, а dashboard не переключается по ролям. Подключение RBAC — задача ближайшего спринта (`user-data/NEXT_STEPS.md`).
+- ✅ Роли из Keto уже **работают**: `kratosAuth` читает их через `ketoService.listRoles()`, `/api/session` отдаёт `roles`, а `requireAdmin` проверяет `roles.includes('admin')` (защита `/api/users`, `/api/settings` PUT).
+- ⏳ Поресурсные права (`requirePermission`/`requireRole`/`loadPermissions`) **не задействованы**: `ketoService.seedDefaults()` не вызывается при старте, `requirePermission` не применён к `/api/mqtt/*`, маршрута `/api/permissions` нет. Таблица прав выше — целевая модель, но enforcement на уровне ресурсов пока не включён (только по ролям). Это остаётся задачей ближайшего спринта (`user-data/NEXT_STEPS.md`).
 
 ---
 

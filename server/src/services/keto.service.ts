@@ -46,7 +46,19 @@ export const Roles = {
   ADMIN: 'admin',
   ENGINEER: 'engineer',
   OPERATOR: 'operator',
+  VIEWER: 'viewer',
 } as const;
+
+/** Порядок ролей по старшинству (для определения «первичной» роли). */
+export const ROLE_ORDER = [Roles.ADMIN, Roles.ENGINEER, Roles.OPERATOR, Roles.VIEWER] as const;
+
+/** Наивысшая роль пользователя из списка. */
+export function primaryRole(roles: string[]): string {
+  for (const role of ROLE_ORDER) {
+    if (roles.includes(role)) return role;
+  }
+  return roles[0] ?? Roles.VIEWER;
+}
 
 class KetoService {
   private readonly readUrl = config.keto.readUrl;
@@ -108,9 +120,97 @@ class KetoService {
   }
 
   /**
-   * Назначить роль пользователю.
+   * Получить все роли пользователя из Keto.
+   */
+  async listRoles(userId: string): Promise<string[]> {
+    const params = new URLSearchParams({
+      namespace: 'Role',
+      subject_id: userId,
+    });
+
+    try {
+      const r = await fetch(`${this.readUrl}/relation-tuples?${params.toString()}`);
+      if (!r.ok) return [];
+      const data = await r.json() as {
+        relation_tuples?: Array<{ object?: string }>;
+      };
+      const roles = (data.relation_tuples ?? [])
+        .map((t) => t.object)
+        .filter((o): o is string => typeof o === 'string');
+      // Keto PUT не идемпотентен — защищаемся от дубликатов на чтении.
+      return [...new Set(roles)];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Назначить роль пользователю (идемпотентно).
    */
   async assignRole(userId: string, role: string): Promise<boolean> {
+    return this.withRoleLock(userId, () => this.assignRoleInternal(userId, role));
+  }
+
+  /**
+   * Снять роль у пользователя.
+   */
+  async revokeRole(userId: string, role: string): Promise<boolean> {
+    return this.withRoleLock(userId, () => this.revokeRoleInternal(userId, role));
+  }
+
+  /**
+   * Привести набор ролей пользователя к заданному (снять лишние, назначить новые).
+   */
+  async setRoles(userId: string, roles: string[]): Promise<boolean> {
+    return this.withRoleLock(userId, async () => {
+      const desired = [...new Set(roles)];
+      const current = await this.listRoles(userId);
+      const toRemove = current.filter((r) => !desired.includes(r));
+      const toAdd = desired.filter((r) => !current.includes(r));
+
+      let ok = true;
+      for (const role of toRemove) {
+        ok = (await this.revokeRoleInternal(userId, role)) && ok;
+      }
+      for (const role of toAdd) {
+        ok = (await this.assignRoleInternal(userId, role)) && ok;
+      }
+      return ok;
+    });
+  }
+
+  // ---- Внутренняя реализация (без блокировки) ----
+
+  /**
+   * Сериализация мутаций ролей на одного пользователя.
+   * Keto PUT не идемпотентен, а webhook и fallback могут работать конкурентно
+   * и создавать дубликаты — блокировка на userId это исключает.
+   */
+  private readonly roleQueues = new Map<string, Promise<void>>();
+
+  private async withRoleLock<T>(userId: string, fn: () => Promise<T>): Promise<T> {
+    const prev = this.roleQueues.get(userId) ?? Promise.resolve();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const tail = prev.then(() => gate);
+    this.roleQueues.set(userId, tail);
+
+    await prev;
+    try {
+      return await fn();
+    } finally {
+      release();
+      if (this.roleQueues.get(userId) === tail) {
+        this.roleQueues.delete(userId);
+      }
+    }
+  }
+
+  private async assignRoleInternal(userId: string, role: string): Promise<boolean> {
+    // Проверяем наличие заранее — Keto PUT не идемпотентен.
+    const existing = await this.listRoles(userId);
+    if (existing.includes(role)) return true;
+
     const tuple: RelationTuple = {
       namespace: 'Role',
       object: role,
@@ -123,6 +223,24 @@ class KetoService {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(tuple),
+      });
+      return r.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  private async revokeRoleInternal(userId: string, role: string): Promise<boolean> {
+    const params = new URLSearchParams({
+      namespace: 'Role',
+      object: role,
+      relation: 'member',
+      subject_id: userId,
+    });
+
+    try {
+      const r = await fetch(`${this.writeUrl}/admin/relation-tuples?${params.toString()}`, {
+        method: 'DELETE',
       });
       return r.ok;
     } catch {
@@ -188,6 +306,10 @@ class KetoService {
       [Roles.OPERATOR, Resources.DASHBOARD, Actions.VIEW],
       [Roles.OPERATOR, Resources.MQTT, Actions.VIEW],
       [Roles.OPERATOR, Resources.MQTT_TOPICS, Actions.VIEW],
+
+      [Roles.VIEWER, Resources.DASHBOARD, Actions.VIEW],
+      [Roles.VIEWER, Resources.MQTT, Actions.VIEW],
+      [Roles.VIEWER, Resources.MQTT_TOPICS, Actions.VIEW],
     ];
 
     for (const [role, resource, action] of perms) {

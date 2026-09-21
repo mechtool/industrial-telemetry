@@ -47,9 +47,10 @@
                                             <td>
                                                 <nz-select
                                                     class="role-select"
-                                                    [ngModel]="u.role"
-                                                    (ngModelChange)="changeRole(u, $event)"
+                                                    [ngModel]="u.roles"
+                                                    (ngModelChange)="changeRoles(u, $event)"
                                                     [nzOptions]="roleOptions"
+                                                    nzMode="multiple"
                                                     nzSize="small"
                                                 ></nz-select>
                                             </td>

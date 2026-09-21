@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/src/index.js",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "migrate:roles": "tsx src/scripts/migrate-roles.ts"
   },
   "dependencies": {
     "compression": "^1.8.1",
