@@ -56,7 +56,7 @@ services:
       - "4434:4434"
     environment:
       - DSN=postgres://kratos:${DB_PASSWORD:-kratos}@kratos-db:5432/kratos?sslmode=disable
-    command: serve -c /etc/config/kratos/kratos.yc.yml --dev --watch-courier
+    command: serve -c /etc/config/kratos/kratos.yc.yml --watch-courier
     volumes:
       - ./kratos:/etc/config/kratos:ro
     networks:
