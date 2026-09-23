@@ -101,9 +101,9 @@ session:
     same_site: Lax
 
 log:
-  level: debug
+  level: info
   format: text
-  leak_sensitive_values: true
+  leak_sensitive_values: false
 
 secrets:
   cookie:
