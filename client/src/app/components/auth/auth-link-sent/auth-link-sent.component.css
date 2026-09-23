@@ -1,0 +1,178 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px;
+  background: #f4f8fd;
+}
+
+.auth-card {
+  width: 460px;
+  padding: 48px 40px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow:
+    0 8px 32px rgba(16, 36, 57, 0.0588),
+    0 2px 8px rgba(16, 36, 58, 0.0314);
+}
+
+/* ---- Логотип ---- */
+.auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.auth-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: #1e88e5;
+  color: #ffffff;
+  font-size: 24px;
+}
+
+.auth-logo-name {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 22px;
+  color: #10243a;
+}
+
+/* ---- Заголовок / подзаголовок ---- */
+.auth-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 26px;
+  text-align: center;
+  color: #10243a;
+}
+
+.auth-subtitle {
+  margin: 12px 0 32px;
+  font-size: 14px;
+  line-height: 14px;
+  text-align: center;
+  color: #5b7590;
+}
+
+/* ---- Сообщение об успехе ---- */
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background: rgba(15, 169, 126, 0.1);
+  border-radius: 8px;
+}
+
+.success-banner-icon {
+  flex: none;
+  font-size: 18px;
+  color: #0fa97e;
+}
+
+.success-banner-text {
+  font-size: 14px;
+  line-height: 18px;
+  color: #10243a;
+}
+
+/* ---- Отправлено на адрес ---- */
+.sent-address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 28px;
+  font-size: 13px;
+  line-height: 17px;
+}
+
+.sent-address-icon {
+  flex: none;
+  font-size: 16px;
+  color: #8fa6bc;
+}
+
+.sent-address-email {
+  color: #5b7590;
+}
+
+/* ---- Кнопка ---- */
+.auth-submit {
+  height: 52px;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.auth-submit .anticon {
+  font-size: 18px;
+}
+
+/* ---- Подсказка повторной отправки ---- */
+.resend-hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 14px;
+  text-align: center;
+  color: #8fa6bc;
+}
+
+/* ---- Ссылки ---- */
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.auth-link-primary {
+  font-size: 13px;
+  color: #1e88e5;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.auth-link-primary:hover {
+  color: #1775c2;
+  text-decoration: underline;
+}
+
+/* ---- Кнопка (ng-zorro) ---- */
+:host ::ng-deep .auth-submit.ant-btn-primary {
+  background: #1e88e5;
+  border-color: #1e88e5;
+  box-shadow: none;
+}
+
+:host ::ng-deep .auth-submit.ant-btn-primary:hover,
+:host ::ng-deep .auth-submit.ant-btn-primary:focus {
+  background: #1775c2;
+  border-color: #1775c2;
+}
+
+:host ::ng-deep .auth-submit.ant-btn-primary[disabled] {
+  background: #a7cdf0;
+  border-color: #a7cdf0;
+  color: #ffffff;
+}
+
+/* Неактивная кнопка повторной отправки — светлая, с серым текстом */
+:host ::ng-deep .auth-submit.resend-btn--cooldown.ant-btn-primary,
+:host ::ng-deep .auth-submit.resend-btn--cooldown.ant-btn-primary[disabled],
+:host ::ng-deep .auth-submit.resend-btn--cooldown.ant-btn-primary:hover,
+:host ::ng-deep .auth-submit.resend-btn--cooldown.ant-btn-primary:focus {
+  background: #eff7fe;
+  border-color: #e3edf7;
+  color: #8fa6bc;
+}

@@ -13,7 +13,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { KratosService } from '../../services/kratos.service';
+import { AuthService, initialsOf } from '../../services/auth.service';
 import { SettingsService } from '../../services/settings.service';
 
 interface Option {
@@ -44,7 +44,7 @@ interface Option {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsComponent implements OnInit {
-  private readonly kratos = inject(KratosService);
+  private readonly auth = inject(AuthService);
   private readonly settingsService = inject(SettingsService);
   private readonly message = inject(NzMessageService);
 
@@ -69,8 +69,7 @@ export class SettingsComponent implements OnInit {
   ];
 
   get avatarInitial(): string {
-    const user = this.kratos.currentUser();
-    return user ? user.username.charAt(0).toUpperCase() : 'U';
+    return initialsOf(this.auth.currentUser());
   }
 
   ngOnInit(): void {

@@ -64,3 +64,23 @@ html, body {
   color: #6b7280 !important;
   opacity: 1;
 }
+
+// ---- Autofill (Chrome/Edge): убираем «прыжок» шрифта и цвета ----
+// Браузер вешает на поле внутренний псевдокласс :-internal-autofill-selected
+// и переопределяет фон/цвет/шрифт. Напрямую его выбрать нельзя,
+// поэтому используем публичный аналог :-webkit-autofill.
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  -webkit-text-fill-color: currentColor;
+  caret-color: currentColor;
+  background-color: #f7fafd !important;
+  background-image: none !important;
+  -webkit-box-shadow: 0 0 0 1000px #f7fafd inset !important;
+  box-shadow: 0 0 0 1000px #f7fafd inset !important;
+  transition: background-color 9999999s ease-in-out 0s;
+}

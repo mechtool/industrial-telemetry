@@ -1,0 +1,288 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px;
+  background: #f4f8fd;
+}
+
+.auth-card {
+  width: 460px;
+  padding: 48px 40px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow:
+    0 8px 32px rgba(16, 36, 57, 0.0588),
+    0 2px 8px rgba(16, 36, 58, 0.0314);
+}
+
+/* ---- Логотип ---- */
+.auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.auth-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: #1e88e5;
+  color: #ffffff;
+  font-size: 24px;
+}
+
+.auth-logo-name {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 22px;
+  color: #10243a;
+}
+
+/* ---- Заголовок / подзаголовок ---- */
+.auth-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 26px;
+  text-align: center;
+  color: #10243a;
+}
+
+.auth-subtitle {
+  margin: 12px 0 32px;
+  font-size: 14px;
+  line-height: 14px;
+  text-align: center;
+  color: #5b7590;
+}
+
+/* ---- Форма ---- */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field--last {
+  margin-bottom: 28px;
+}
+
+.field-label {
+  margin-bottom: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 14px;
+  color: #10243a;
+}
+
+.field-required {
+  color: #ff4d4f;
+}
+
+.field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 14px;
+  color: #ff4d4f;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 14px;
+  color: #8fa6bc;
+}
+
+/* ---- Общая ошибка ---- */
+.form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 10px 12px;
+  background: #fff1f0;
+  border: 1px solid #ffccc7;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #cf1322;
+}
+
+.form-error .anticon {
+  flex: none;
+  margin-top: 1px;
+  font-size: 14px;
+}
+
+/* ---- Примечание ---- */
+.recovery-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 10px 12px;
+  background: #eff7fe;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 17px;
+  color: #5b7590;
+}
+
+.recovery-note-icon {
+  flex: none;
+  font-size: 16px;
+  color: #5b7590;
+}
+
+/* ---- Готово ---- */
+.recovery-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.recovery-done-icon {
+  font-size: 40px;
+  color: #52c41a;
+}
+
+.recovery-done-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: #5b7590;
+}
+
+/* ---- Кнопка ---- */
+.auth-submit {
+  height: 52px;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.auth-submit .anticon {
+  font-size: 18px;
+}
+
+/* ---- Ссылки ---- */
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.auth-link-primary {
+  font-size: 13px;
+  color: #1e88e5;
+  cursor: pointer;
+}
+
+.auth-link-primary:hover {
+  color: #1775c2;
+  text-decoration: underline;
+}
+
+/* ---- Переопределение ng-zorro под макет ---- */
+:host ::ng-deep .auth-form .ant-input-affix-wrapper {
+  height: 48px;
+  padding: 0 16px;
+  background: #f7fafd;
+  border: 1.5px solid #e3edf7;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+:host ::ng-deep .auth-form .ant-input-affix-wrapper:hover,
+:host ::ng-deep .auth-form .ant-input-affix-wrapper-focused {
+  border-color: #e3edf7;
+}
+
+:host ::ng-deep .auth-form .ant-input {
+  /* Сброс user agent stylesheet */
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  font-family: inherit;
+  font-weight: 400;
+  line-height: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-size: 13px;
+  color: #10243a;
+  background: transparent;
+}
+
+:host ::ng-deep .auth-form .ant-input::placeholder {
+  color: #8fa6bc;
+}
+
+:host ::ng-deep .auth-form .ant-input-prefix {
+  margin-right: 10px;
+  color: #8fa6bc;
+  font-size: 16px;
+}
+
+:host ::ng-deep .auth-form .ant-input-suffix {
+  margin-left: 10px;
+}
+
+:host ::ng-deep .auth-form .ant-input-password-icon {
+  color: #8fa6bc;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+:host ::ng-deep .auth-form .ant-input-password-icon:hover {
+  color: #10243a;
+}
+
+/* Пустой обязательный реквизит — красная подсветка */
+:host ::ng-deep .field-input--invalid.ant-input-affix-wrapper,
+:host ::ng-deep .field-input--invalid.ant-input-affix-wrapper:hover,
+:host ::ng-deep .field-input--invalid.ant-input-affix-wrapper-focused {
+  border-color: #ff4d4f;
+}
+
+:host ::ng-deep .field-input--invalid .ant-input-prefix {
+  color: #ff4d4f;
+}
+
+/* ---- Кнопка ---- */
+:host ::ng-deep .auth-submit.ant-btn-primary {
+  background: #1e88e5;
+  border-color: #1e88e5;
+  box-shadow: none;
+}
+
+:host ::ng-deep .auth-submit.ant-btn-primary:hover,
+:host ::ng-deep .auth-submit.ant-btn-primary:focus {
+  background: #1775c2;
+  border-color: #1775c2;
+}
+
+:host ::ng-deep .auth-submit.ant-btn-primary[disabled] {
+  background: #a7cdf0;
+  border-color: #a7cdf0;
+  color: #ffffff;
+}

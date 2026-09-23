@@ -13,7 +13,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { KratosService } from '../../services/kratos.service';
+import { AuthService, initialsOf } from '../../services/auth.service';
 import { UsersService, AdminUser } from '../../services/users.service';
 
 interface RoleRow {
@@ -50,7 +50,7 @@ interface RoleOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent implements OnInit {
-  private readonly kratos = inject(KratosService);
+  private readonly auth = inject(AuthService);
   private readonly usersService = inject(UsersService);
   private readonly message = inject(NzMessageService);
 
@@ -75,8 +75,7 @@ export class UsersComponent implements OnInit {
   ];
 
   get avatarInitial(): string {
-    const user = this.kratos.currentUser();
-    return user ? user.username.charAt(0).toUpperCase() : 'U';
+    return initialsOf(this.auth.currentUser());
   }
 
   ngOnInit(): void {

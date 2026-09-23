@@ -8,7 +8,7 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { KratosService } from '../../services/kratos.service';
+import { AuthService, initialsOf } from '../../services/auth.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -29,16 +29,15 @@ import { KratosService } from '../../services/kratos.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserProfileComponent {
-  readonly kratos = inject(KratosService);
+  readonly auth = inject(AuthService);
   readonly currentYear = new Date().getFullYear();
 
   get user() {
-    return this.kratos.currentUser();
+    return this.auth.currentUser();
   }
 
   get initial(): string {
-    const u = this.user;
-    return u ? u.username.charAt(0).toUpperCase() : '?';
+    return initialsOf(this.user);
   }
 
   roleLabel(role: string): string {

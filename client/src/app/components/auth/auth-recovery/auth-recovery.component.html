@@ -1,0 +1,63 @@
+<div class="auth-card">
+  <div class="auth-logo">
+    <span nz-icon nzType="thunderbolt" class="auth-logo-icon"></span>
+    <span class="auth-logo-name">Industrial Telemetry</span>
+  </div>
+
+  <h1 class="auth-title">Восстановление пароля</h1>
+  <p class="auth-subtitle">Укажите email, и мы отправим ссылку для сброса пароля</p>
+
+  @if (error()) {
+    <div class="form-error">
+      <span nz-icon nzType="close-circle"></span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <form class="auth-form" #f1="ngForm" (ngSubmit)="submitEmail()">
+    <div class="field field--last">
+      <label class="field-label" for="recovery-email">Электронная почта <span class="field-required">*</span></label>
+      <nz-input-wrapper [class.field-input--invalid]="emailField.touched && emailField.invalid">
+        <span nz-icon nzType="mail" nzInputPrefix></span>
+        <input
+          nz-input
+          id="recovery-email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          #emailField="ngModel"
+          autocomplete="email"
+          required
+          placeholder="example@mail.ru"
+        />
+      </nz-input-wrapper>
+      @if (emailField.touched && emailField.invalid) {
+        <span class="field-error">Введите корректный email</span>
+      }
+      <span class="field-hint">На этот адрес придёт письмо со ссылкой для сброса</span>
+    </div>
+
+    <button
+      nz-button
+      nzType="primary"
+      nzBlock
+      class="auth-submit"
+      type="submit"
+      [nzLoading]="loading()"
+      [disabled]="loading() || f1.invalid"
+    >
+      Отправить ссылку
+      <span nz-icon nzType="send"></span>
+    </button>
+  </form>
+
+  <div class="recovery-note">
+    <span nz-icon nzType="clock-circle" class="recovery-note-icon"></span>
+    <span>Ссылка действительна 15 минут</span>
+  </div>
+
+  <div class="auth-links">
+    <a class="auth-link-primary" (click)="goToLogin()">Войти</a>
+    <a class="auth-link-primary" (click)="goToRegistration()">Создать аккаунт</a>
+  </div>
+</div>

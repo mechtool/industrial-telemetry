@@ -1,0 +1,138 @@
+<div class="auth-card">
+  <div class="auth-logo">
+    <span nz-icon nzType="thunderbolt" class="auth-logo-icon"></span>
+    <span class="auth-logo-name">Industrial Telemetry</span>
+  </div>
+
+  <h1 class="auth-title">Создание аккаунта</h1>
+  <p class="auth-subtitle">Заполните данные для регистрации</p>
+
+  <form class="auth-form" #regForm="ngForm" (ngSubmit)="submitRegistration()">
+    <div class="field">
+      <label class="field-label" for="auth-reg-email">Электронная почта <span class="field-required">*</span></label>
+      <nz-input-wrapper [class.field-input--invalid]="emailField.touched && emailField.invalid">
+        <span nz-icon nzType="mail" nzInputPrefix></span>
+        <input
+          nz-input
+          id="auth-reg-email"
+          type="email"
+          name="email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          #emailField="ngModel"
+          autocomplete="email"
+          required
+          placeholder="example@mail.ru"
+        />
+      </nz-input-wrapper>
+      @if (emailField.touched && emailField.invalid) {
+        <span class="field-error">Введите корректный email</span>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="auth-reg-username">Имя пользователя</label>
+      <nz-input-wrapper [class.field-input--invalid]="usernameField.touched && usernameField.invalid">
+        <span nz-icon nzType="user" nzInputPrefix></span>
+        <input
+          nz-input
+          id="auth-reg-username"
+          type="text"
+          name="username"
+          [ngModel]="username()"
+          (ngModelChange)="username.set($event)"
+          #usernameField="ngModel"
+          autocomplete="nickname"
+          minlength="3"
+          placeholder="Иван Петров"
+        />
+      </nz-input-wrapper>
+      @if (usernameField.touched && usernameField.invalid) {
+        <span class="field-error">Минимум 3 символа</span>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="auth-reg-password">Пароль <span class="field-required">*</span></label>
+      <nz-input-password [class.field-input--invalid]="passwordField.touched && !requirementsMet()">
+        <span nz-icon nzType="lock" nzInputPrefix></span>
+        <input
+          nz-input
+          id="auth-reg-password"
+          type="password"
+          name="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          #passwordField="ngModel"
+          autocomplete="new-password"
+          required
+          placeholder="Придумайте пароль"
+        />
+      </nz-input-password>
+    </div>
+
+    <div class="password-requirements">
+      <p class="requirements-title">Требования к паролю</p>
+      <ul class="requirements-list">
+        <li class="requirement" [class.requirement--met]="minLengthOk()">
+          <span class="requirement-dot"></span>
+          <span>Не менее 8 символов</span>
+        </li>
+        <li class="requirement" [class.requirement--met]="hasUppercase()">
+          <span class="requirement-dot"></span>
+          <span>Заглавная буква</span>
+        </li>
+        <li class="requirement" [class.requirement--met]="hasDigit()">
+          <span class="requirement-dot"></span>
+          <span>Хотя бы одна цифра</span>
+        </li>
+        <li class="requirement" [class.requirement--met]="hasSpecial()">
+          <span class="requirement-dot"></span>
+          <span>Специальный символ</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="field field--last">
+      <label class="field-label" for="auth-reg-confirm">Подтверждение пароля <span class="field-required">*</span></label>
+      <nz-input-password [class.field-input--invalid]="confirmField.touched && !passwordsMatch()">
+        <span nz-icon nzType="lock" nzInputPrefix></span>
+        <input
+          nz-input
+          id="auth-reg-confirm"
+          type="password"
+          name="confirm"
+          [ngModel]="passwordConfirm()"
+          (ngModelChange)="passwordConfirm.set($event)"
+          #confirmField="ngModel"
+          autocomplete="new-password"
+          required
+          placeholder="Повторите пароль"
+        />
+      </nz-input-password>
+      @if (confirmField.touched && !passwordsMatch()) {
+        <span class="field-error">Пароли не совпадают</span>
+      }
+    </div>
+
+    <button
+      nz-button
+      nzType="primary"
+      nzBlock
+      class="auth-submit"
+      type="submit"
+      [nzLoading]="loading()"
+      [disabled]="loading() || regForm.invalid || !requirementsMet() || !passwordsMatch()"
+    >
+      Зарегистрироваться
+      <span nz-icon nzType="arrow-right"></span>
+    </button>
+  </form>
+
+  <div class="auth-links">
+    <div class="auth-register">
+      <span>Уже есть аккаунт?</span>
+      <a class="auth-link-primary" (click)="goToLogin()">Войти</a>
+    </div>
+  </div>
+</div>

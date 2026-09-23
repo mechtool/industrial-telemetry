@@ -3,23 +3,33 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./components/kratos/auth/kratos-auth.component').then(m => m.KratosAuthComponent),
+    loadComponent: () => import('./components/auth/auth-login/auth-login.component').then(m => m.AuthLoginComponent),
     title: 'Вход — Industrial Telemetry',
   },
   {
     path: 'login',
-    loadComponent: () => import('./components/kratos/auth/kratos-auth.component').then(m => m.KratosAuthComponent),
+    loadComponent: () => import('./components/auth/auth-login/auth-login.component').then(m => m.AuthLoginComponent),
     title: 'Вход — Industrial Telemetry',
   },
   {
     path: 'registration',
-    loadComponent: () => import('./components/kratos/auth/kratos-auth.component').then(m => m.KratosAuthComponent),
+    loadComponent: () => import('./components/auth/auth-registration/auth-registration.component').then(m => m.AuthRegistrationComponent),
     title: 'Регистрация — Industrial Telemetry',
   },
   {
     path: 'recovery',
-    loadComponent: () => import('./components/kratos/recovery/kratos-recovery.component').then(m => m.KratosRecoveryComponent),
+    loadComponent: () => import('./components/auth/auth-recovery/auth-recovery.component').then(m => m.AuthRecoveryComponent),
     title: 'Восстановление пароля — Industrial Telemetry',
+  },
+  {
+    path: 'link-sent',
+    loadComponent: () => import('./components/auth/auth-link-sent/auth-link-sent.component').then(m => m.AuthLinkSentComponent),
+    title: 'Ссылка отправлена — Industrial Telemetry',
+  },
+  {
+    path: 'change-password',
+    loadComponent: () => import('./components/auth/auth-change-password/auth-change-password.component').then(m => m.AuthChangePasswordComponent),
+    title: 'Изменение пароля — Industrial Telemetry',
   },
   {
     path: 'dashboard',

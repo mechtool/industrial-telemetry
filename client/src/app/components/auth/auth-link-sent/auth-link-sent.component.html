@@ -1,0 +1,47 @@
+<div class="auth-card">
+  <div class="auth-logo">
+    <span nz-icon nzType="thunderbolt" class="auth-logo-icon"></span>
+    <span class="auth-logo-name">Industrial Telemetry</span>
+  </div>
+
+  <h1 class="auth-title">Восстановление пароля</h1>
+  <p class="auth-subtitle">Проверьте почту и перейдите по ссылке для смены пароля</p>
+
+  <div class="success-banner">
+    <span nz-icon nzType="check-circle" class="success-banner-icon"></span>
+    <span class="success-banner-text">Ссылка отправлена</span>
+  </div>
+
+  <div class="sent-address">
+    <span nz-icon nzType="mail" class="sent-address-icon"></span>
+    <span class="sent-address-email">{{ email() }}</span>
+  </div>
+
+  <button
+    nz-button
+    nzType="primary"
+    nzBlock
+    class="auth-submit resend-btn"
+    [class.resend-btn--cooldown]="cooldown() > 0"
+    type="button"
+    [disabled]="cooldown() > 0 || loading()"
+    [nzLoading]="loading()"
+    (click)="resend()"
+  >
+    @if (cooldown() > 0) {
+      <span nz-icon nzType="check"></span>
+    } @else {
+      <span nz-icon nzType="reload"></span>
+    }
+    <span>Отправить повторно</span>
+  </button>
+
+  @if (cooldown() > 0) {
+    <p class="resend-hint">Повторная отправка будет доступна через {{ cooldown() }} с</p>
+  }
+
+  <div class="auth-links">
+    <a class="auth-link-primary" (click)="goToLogin()">Войти</a>
+    <a class="auth-link-primary" href="mailto:support@industrial-telemetry.local">Поддержка</a>
+  </div>
+</div>

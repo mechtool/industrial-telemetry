@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { KratosService } from './services/kratos.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -11,9 +11,9 @@ import { KratosService } from './services/kratos.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  readonly kratosService = inject(KratosService);
+  readonly authService = inject(AuthService);
 
   ngOnInit(): void {
-    this.kratosService.checkSession().subscribe();
+    this.authService.checkSession().subscribe();
   }
 }

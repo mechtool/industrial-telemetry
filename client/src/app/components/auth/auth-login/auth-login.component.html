@@ -1,0 +1,71 @@
+<div class="auth-card">
+  <div class="auth-logo">
+    <span nz-icon nzType="thunderbolt" class="auth-logo-icon"></span>
+    <span class="auth-logo-name">Industrial Telemetry</span>
+  </div>
+
+  <h1 class="auth-title">Вход в приложение</h1>
+  <p class="auth-subtitle">Введите ваши данные для входа</p>
+
+  <form class="auth-form" #loginForm="ngForm" (ngSubmit)="submitLogin()">
+    <div class="field">
+      <label class="field-label" for="auth-login-email">Электронная почта</label>
+      <nz-input-wrapper [class.field-input--invalid]="emailField.touched && emailField.invalid">
+        <span nz-icon nzType="mail" nzInputPrefix></span>
+        <input
+          nz-input
+          id="auth-login-email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          #emailField="ngModel"
+          autocomplete="email"
+          required
+          placeholder="example@mail.ru"
+        />
+      </nz-input-wrapper>
+      @if (emailField.touched && emailField.invalid) {
+        <span class="field-error">Заполните поле</span>
+      }
+    </div>
+
+    <div class="field field--last">
+      <label class="field-label" for="auth-login-password">Пароль</label>
+      <nz-input-password [class.field-input--invalid]="passwordField.touched && passwordField.invalid">
+        <span nz-icon nzType="lock" nzInputPrefix></span>
+        <input
+          nz-input
+          id="auth-login-password"
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          #passwordField="ngModel"
+          autocomplete="current-password"
+          required
+          placeholder="Введите пароль"
+        />
+      </nz-input-password>
+      @if (passwordField.touched && passwordField.invalid) {
+        <span class="field-error">Заполните поле</span>
+      }
+    </div>
+
+    <button
+      nz-button
+      nzType="primary"
+      nzBlock
+      class="auth-submit"
+      type="submit"
+      [nzLoading]="loading()"
+      [disabled]="loading() || loginForm.invalid"
+    >
+      Войти в приложение
+      <span nz-icon nzType="arrow-right"></span>
+    </button>
+  </form>
+
+  <div class="auth-links">
+    <a class="auth-link-primary" (click)="startRecovery()">Забыли пароль?</a>
+    <a class="auth-link-primary" (click)="goToRegistration()">Зарегистрироваться</a>
+  </div>
+</div>

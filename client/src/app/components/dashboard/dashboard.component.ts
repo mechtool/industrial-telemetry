@@ -12,7 +12,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { MqttClientService } from '../../services/mqtt.service';
-import { KratosService, primaryRole } from '../../services/kratos.service';
+import { AuthService, primaryRole, initialsOf } from '../../services/auth.service';
 import { PermissionsService } from '../../services/permissions.service';
 
 interface StatCard {
@@ -46,7 +46,7 @@ interface StatCard {
 })
 export class DashboardComponent implements OnInit {
   private readonly mqttService = inject(MqttClientService);
-  readonly kratosService = inject(KratosService);
+  readonly authService = inject(AuthService);
   readonly perms = inject(PermissionsService);
 
   readonly currentYear = new Date().getFullYear();
@@ -61,8 +61,7 @@ export class DashboardComponent implements OnInit {
   ];
 
   get avatarInitial(): string {
-    const user = this.kratosService.currentUser();
-    return user ? user.username.charAt(0).toUpperCase() : 'U';
+    return initialsOf(this.authService.currentUser());
   }
 
   ngOnInit(): void {
@@ -84,7 +83,7 @@ export class DashboardComponent implements OnInit {
       },
     });
 
-    const user = this.kratosService.currentUser();
+    const user = this.authService.currentUser();
     this.cards[1].value = user ? `${user.username} (${primaryRole(user.roles)})` : '—';
   }
 }

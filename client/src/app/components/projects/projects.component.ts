@@ -11,7 +11,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { KratosService } from '../../services/kratos.service';
+import { AuthService, initialsOf } from '../../services/auth.service';
 import { ProjectsService, ProjectStatus } from '../../services/projects.service';
 
 const STATUS_META: Record<ProjectStatus, { label: string; color: string }> = {
@@ -42,18 +42,17 @@ const STATUS_META: Record<ProjectStatus, { label: string; color: string }> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectsComponent implements OnInit {
-  private readonly kratos = inject(KratosService);
+  private readonly auth = inject(AuthService);
   readonly projectsService = inject(ProjectsService);
 
   readonly currentYear = new Date().getFullYear();
 
   get avatarInitial(): string {
-    const user = this.kratos.currentUser();
-    return user ? user.username.charAt(0).toUpperCase() : 'U';
+    return initialsOf(this.auth.currentUser());
   }
 
   get username(): string {
-    return this.kratos.currentUser()?.username ?? '';
+    return this.auth.currentUser()?.username ?? '';
   }
 
   ngOnInit(): void {
