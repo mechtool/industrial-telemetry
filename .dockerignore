@@ -3,4 +3,7 @@ dist/
 .git/
 .idea/
 *.log
+.env
+.env.yc
+.env.yc.*
 .env.local

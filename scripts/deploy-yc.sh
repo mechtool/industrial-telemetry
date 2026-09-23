@@ -31,6 +31,9 @@ DOMAIN=industrial-telemetry.ru
 DB_PASSWORD=kratos-production-secret
 MQTT_USERNAME=server
 MQTT_PASSWORD=
+# WEBHOOK_SECRET — общий секрет для webhook Kratos -> server
+# (должен совпадать с web_hook.auth.config.value в kratos/kratos.yc.yml)
+WEBHOOK_SECRET=
 EOF
 echo ".env.yc создан. Отредактируйте пароли: nano .env.yc"
 read -p "Нажмите Enter после редактирования .env.yc..."

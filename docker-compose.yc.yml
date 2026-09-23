@@ -105,6 +105,7 @@ services:
       - PORT=3000
       - SERVE_CLIENT=false
       - KRATOS_PUBLIC_URL=http://kratos:4433
+      - KRATOS_ADMIN_URL=http://kratos:4434
       - KETO_READ_URL=http://keto:4466
       - KETO_WRITE_URL=http://keto:4467
       - MQTT_BROKER_URL=mqtt://mosquitto:1883
