@@ -1,0 +1,30 @@
+<!-- Empty state -->
+<div class="pe-empty">
+  <span class="pe-empty-icon"><nz-icon nzType="folder" /></span>
+  <h2 class="pe-empty-title">Проектов пока нет</h2>
+  <p class="pe-empty-desc">
+    По фильтру «{{ activeFilter() }} · {{ activeFilterCount() }}» ничего не найдено.
+    Создайте новый проект или сбросьте фильтры, чтобы увидеть весь портфель.
+  </p>
+  <div class="pe-empty-actions">
+    <button nz-button nzType="primary" class="pe-action-primary" (click)="openNewProject()">
+      <nz-icon nzType="plus" />
+      Создать проект
+    </button>
+    <button nz-button class="pe-action-secondary">Сбросить фильтры</button>
+  </div>
+  <p class="pe-tip">СОВЕТ · НАЖМИТЕ «СОЗДАТЬ ПРОЕКТ», ЧТОБЫ ДОБАВИТЬ ПРОЕКТ В ПОРТФЕЛЬ</p>
+    <!-- Quick start -->
+    <div class="pe-quickstart">
+        <h3 class="pe-qs-title">БЫСТРЫЙ СТАРТ · ВЫБЕРИТЕ ШАБЛОН</h3>
+        <div class="pe-templates">
+            @for (t of templates; track t.title) {
+                <div class="pe-template">
+                    <span class="pe-template-icon"><nz-icon [nzType]="t.icon" /></span>
+                    <div class="pe-template-title">{{ t.title }}</div>
+                    <div class="pe-template-desc">{{ t.desc }}</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

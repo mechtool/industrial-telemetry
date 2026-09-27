@@ -57,7 +57,7 @@ export class AuthLoginComponent {
 
       this.authService.checkSession().subscribe();
       this.notification.info('Вход выполнен', 'Вы успешно вошли в систему');
-      this.router.navigate(['/projects']);
+      this.router.navigate(['/main-entrance']);
     } catch (err: any) {
       this.notification.error('Ошибка входа', err?.message || 'Не удалось выполнить вход');
     } finally {

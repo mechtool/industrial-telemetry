@@ -1,0 +1,114 @@
+<nz-layout class="ps-root">
+  <!-- ======================= Header ======================= -->
+  <nz-header class="ps-header">
+    <div class="ps-logo">
+      <svg class="ps-logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <g stroke="#1e88e5" stroke-width="2" stroke-linecap="round">
+          <path d="M12 2v20" />
+          <path d="M3.3 7l17.4 10" />
+          <path d="M20.7 7L3.3 17" />
+          <path d="M12 2l-2.6 1.5M12 2l2.6 1.5" />
+          <path d="M12 22l-2.6-1.5M12 22l2.6-1.5" />
+          <path d="M3.3 7L5 6.1M3.3 7l.6 2.2" />
+          <path d="M20.7 7L19 6.1M20.7 7l-.6 2.2" />
+          <path d="M3.3 17l1.7-.9M3.3 17l.6-2.2" />
+          <path d="M20.7 17L19 17.9M20.7 17l-.6 2.2" />
+        </g>
+      </svg>
+      <div class="ps-logo-text">
+        <span class="ps-logo-name">CRYOMON</span>
+        <span class="ps-logo-sub">МОНИТОРИНГ ХОЛОДИЛЬНОГО ОБОРУДОВАНИЯ</span>
+      </div>
+    </div>
+
+    <div class="ps-header-right">
+      <div class="ps-search">
+        <nz-icon nzType="search" class="ps-search-icon" />
+        <input class="ps-search-input" placeholder="Поиск проектов" />
+      </div>
+
+      <button nz-button nzType="text" class="ps-icon-btn" title="Уведомления">
+        <nz-icon nzType="bell" />
+      </button>
+
+      <span class="ps-header-divider"></span>
+
+      <div class="ps-user" routerLink="/profile" title="Профиль">
+        <nz-avatar [nzText]="avatarInitial()" [nzSize]="32" />
+        <div class="ps-user-text">
+          <span class="ps-user-name">{{ userName() }}</span>
+          <span class="ps-user-caption">{{ userCaption() }}</span>
+        </div>
+      </div>
+    </div>
+  </nz-header>
+
+  <!-- ======================= Content ======================= -->
+  <nz-layout class="ps-body">
+    <nz-content class="ps-content">
+      <div class="ps-container">
+        <!-- Toolbar -->
+        <div class="ps-toolbar">
+          <nz-breadcrumb>
+            <nz-breadcrumb-item>ОБЗОР</nz-breadcrumb-item>
+            <nz-breadcrumb-item>ПРОЕКТЫ</nz-breadcrumb-item>
+            <nz-breadcrumb-item>ВСЕ ПРОЕКТЫ</nz-breadcrumb-item>
+          </nz-breadcrumb>
+          <span class="ps-sort">
+            <nz-icon nzType="swap" />
+            Сортировка: по сроку
+          </span>
+        </div>
+
+        <!-- Title -->
+        <div class="ps-title-row">
+          <h1 class="ps-title">Проекты</h1>
+          <div class="ps-title-actions">
+            <div class="ps-view-toggle">
+              <button
+                class="ps-view-btn"
+                routerLink="/projects/list"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                title="Список"
+              >
+                <nz-icon nzType="unordered-list" />
+              </button>
+              <button
+                class="ps-view-btn"
+                routerLink="/projects/tiles"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                title="Плитки"
+              >
+                <nz-icon nzType="appstore" />
+              </button>
+            </div>
+            <button nz-button nzType="primary" class="ps-new-btn" (click)="openNewProject()">
+              <nz-icon nzType="plus" />
+              Новый проект
+            </button>
+          </div>
+        </div>
+        <p class="ps-subtitle">{{ ui.subtitle() }}</p>
+
+        <!-- Filters -->
+        <div class="ps-filters">
+          @for (f of ui.filters; track f.label) {
+            <button class="ps-filter" [class.active]="f.label === ui.activeFilter()">
+              {{ f.label }} <span class="ps-filter-count">· {{ f.count }}</span>
+            </button>
+          }
+          <span class="ps-shown">ПОКАЗАНО {{ ui.shownCount() }} ИЗ {{ ui.totalCount }}</span>
+        </div>
+
+        <!-- View content -->
+        <div class="ps-outlet">
+          <router-outlet />
+        </div>
+
+        <nz-footer class="ps-footer">CRYOMON &copy;{{ currentYear }}</nz-footer>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

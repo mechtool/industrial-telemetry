@@ -84,7 +84,7 @@ export class AuthRegistrationComponent {
 
       this.authService.checkSession().subscribe();
       this.notification.success('Регистрация выполнена', 'Вы успешно зарегистрировались');
-      this.router.navigate(['/projects']);
+      this.router.navigate(['/main-entrance']);
     } catch (err: any) {
       this.notification.error('Ошибка регистрации', err?.message || 'Не удалось завершить регистрацию');
     } finally {

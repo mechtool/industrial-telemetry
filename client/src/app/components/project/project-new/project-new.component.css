@@ -1,0 +1,116 @@
+/* ========================================================
+   Project — New (модальное окно создания проекта)
+   ======================================================== */
+
+.pn-root {
+  padding: 4px 2px 0;
+}
+
+.pn-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pn-subtitle {
+  margin: 6px 0 20px;
+  font-size: 13px;
+  color: #5b7590;
+}
+
+.pn-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.pn-section-head--sub {
+  margin-top: 20px;
+}
+
+.pn-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pn-section-note {
+  font-size: 12px;
+  color: #8fa6bc;
+}
+
+.pn-fields {
+  display: grid;
+  gap: 14px 20px;
+}
+
+.pn-fields--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.pn-fields--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.pn-field {
+  min-width: 0;
+}
+
+.pn-field nz-select {
+  width: 100%;
+}
+
+.pn-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #5b7590;
+}
+
+.pn-req {
+  color: #d9574e;
+}
+
+.pn-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f4f8;
+}
+
+.pn-hint {
+  font-size: 12px;
+  color: #8fa6bc;
+}
+
+.pn-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pn-actions .ant-btn {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .pn-fields--3,
+  .pn-fields--2 {
+    grid-template-columns: 1fr;
+  }
+  .pn-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

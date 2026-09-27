@@ -1,0 +1,92 @@
+<div class="ul-root">
+  <div class="ul-title-row">
+    <div>
+      <h1 class="ul-title">ПОЛЬЗОВАТЕЛИ</h1>
+      <p class="ul-subtitle">Управление учётными записями · 10 пользователей</p>
+    </div>
+    <div class="ul-actions">
+      <button nz-button nzType="primary" (click)="openNewUser()">
+        <nz-icon nzType="plus" />
+        Создать пользователя
+      </button>
+      <button nz-button>
+        <nz-icon nzType="user-add" />
+        Пригласить пользователя
+      </button>
+    </div>
+  </div>
+
+  <div class="ul-filters">
+    <div class="ul-search">
+      <nz-icon nzType="search" class="ul-search-icon" />
+      <input class="ul-search-input" placeholder="Иван" />
+    </div>
+    <nz-select class="ul-select" nzValue="Все роли">
+      @for (o of roleOptions; track o) {
+        <nz-option [nzValue]="o" [nzLabel]="o" />
+      }
+    </nz-select>
+    <nz-select class="ul-select" nzValue="Все статусы">
+      @for (o of statusOptions; track o) {
+        <nz-option [nzValue]="o" [nzLabel]="o" />
+      }
+    </nz-select>
+    <button nz-button class="ul-reset">Сбросить фильтры</button>
+  </div>
+
+  <div class="ul-table-wrap">
+    <table class="ul-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Имя</th>
+          <th>Email</th>
+          <th>Роль</th>
+          <th>Статус</th>
+          <th>Дата создания</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of users; track u.id) {
+          <tr>
+            <td class="ul-id">{{ u.id }}</td>
+            <td>
+              <div class="ul-user">
+                <nz-avatar [nzText]="u.initials" [nzSize]="32" class="ul-avatar"></nz-avatar>
+                <span class="ul-name">{{ u.name }}</span>
+              </div>
+            </td>
+            <td class="ul-email">{{ u.email }}</td>
+            <td>
+              <span class="ul-role">{{ u.role }}</span>
+            </td>
+            <td>
+              <span class="ul-status" [class.ul-status--blocked]="u.status === 'Заблокирован'">
+                <span class="ul-status-dot"></span>
+                {{ u.status }}
+              </span>
+            </td>
+            <td class="ul-date">{{ u.date }}</td>
+            <td>
+              <div class="ul-row-actions">
+                <button class="ul-icon-btn" title="Редактировать"><nz-icon nzType="edit" /></button>
+                <button class="ul-icon-btn ul-icon-btn--danger" title="Удалить"><nz-icon nzType="delete" /></button>
+                <button class="ul-icon-btn" title="Ещё"><nz-icon nzType="ellipsis" /></button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ul-footer">
+    <span>Всего: 10 записей</span>
+    <div class="ul-pages">
+      <span class="ul-page active">1</span>
+      <span class="ul-page">2</span>
+      <span class="ul-page-size">10 / стр.</span>
+    </div>
+  </div>
+</div>

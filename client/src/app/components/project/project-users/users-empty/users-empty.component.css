@@ -1,0 +1,62 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ue-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  min-height: 0;
+  padding: 56px 24px;
+  background: #fff;
+  border: 1px dashed #d7e2ee;
+  border-radius: 10px;
+}
+
+.ue-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: #f0f6fc;
+  color: #8fa6bc;
+  font-size: 30px;
+}
+
+.ue-title {
+  margin: 18px 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.ue-desc {
+  margin: 0 auto;
+  max-width: 460px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #5b7590;
+}
+
+.ue-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.ue-actions .ant-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 6px;
+  font-weight: 600;
+}

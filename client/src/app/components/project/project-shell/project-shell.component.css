@@ -1,0 +1,338 @@
+/* ========================================================
+   Project — Shell (оболочка проекта: сайдбар + контент)
+   ======================================================== */
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+  background: #f4f8fd;
+}
+
+.psh-root {
+  height: 100%;
+}
+
+/* ── Header ── */
+.psh-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 64px;
+  line-height: normal;
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.psh-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.psh-logo-mark {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.psh-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.psh-logo-name {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #10243a;
+}
+
+.psh-logo-sub {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #8fa6bc;
+  white-space: nowrap;
+}
+
+.psh-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.psh-search {
+  position: relative;
+  width: 300px;
+}
+
+.psh-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8fa6bc;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.psh-search-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 12px 0 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #f7fafd;
+  font-size: 14px;
+  color: #10243a;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.psh-search-input:focus {
+  border-color: #1e88e5;
+  background: #fff;
+}
+
+.psh-search-input::placeholder {
+  color: #8fa6bc;
+}
+
+.psh-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  color: #5b7590;
+  font-size: 17px;
+  border: 0px;
+}
+
+.psh-icon-btn:hover {
+  background: #f7fafd;
+  color: #1e88e5;
+}
+
+.psh-header-divider {
+  width: 1px;
+  height: 24px;
+  background: #e6edf4;
+}
+
+.psh-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.psh-user:hover {
+  background: #f7fafd;
+}
+
+.psh-user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.psh-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #10243a;
+}
+
+.psh-user-caption {
+  font-size: 12px;
+  color: #8fa6bc;
+}
+
+/* ── Main ── */
+.psh-main {
+  height: calc(100% - 64px);
+}
+
+/* ── Sidebar ── */
+.psh-sider {
+  background: #fff;
+  border-right: 1px solid #eef2f7;
+  overflow: hidden;
+}
+
+.psh-sider ::ng-deep .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.psh-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  background: #f7fafd;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.psh-brand-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #8fa6bc;
+}
+
+.psh-brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.psh-brand-meta {
+  font-size: 12px;
+  color: #5b7590;
+}
+
+.psh-nav {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.psh-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 12px;
+  margin-bottom: 4px;
+  color: #10243a;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.psh-nav-item:hover {
+  background: #f7fafd;
+}
+
+.psh-nav-item.active {
+  background: #eaf4fe;
+  color: #1470c8;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 0 #1470c8;
+}
+
+.psh-nav-item--placeholder {
+  color: #b6c4d3;
+  cursor: default;
+}
+
+.psh-nav-icon {
+  flex-shrink: 0;
+}
+
+.psh-nav-label {
+  flex: 1;
+}
+
+.psh-nav-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8fa6bc;
+}
+
+.psh-sync {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 16px 20px;
+  background: #f7fafd;
+  border-top: 1px solid #eef2f7;
+}
+
+.psh-sync-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #8fa6bc;
+}
+
+.psh-sync-date {
+  font-size: 13px;
+  color: #5b7590;
+}
+
+.psh-sync-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0fa97e;
+}
+
+.psh-sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0fa97e;
+  box-shadow: 0 0 0 3px rgba(15, 169, 126, 0.15);
+}
+
+/* ── Content ── */
+.psh-body {
+  background: #f4f8fd;
+}
+
+.psh-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px 32px 0;
+}
+
+.psh-breadcrumb {
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.psh-breadcrumb ::ng-deep .ant-breadcrumb {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.psh-outlet {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: 24px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .psh-logo-sub,
+  .psh-user-text {
+    display: none;
+  }
+  .psh-search {
+    width: 160px;
+  }
+}

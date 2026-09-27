@@ -1,0 +1,63 @@
+<div class="pt-grid">
+  @for (p of projects; track p.code) {
+    <div class="pt-card">
+      <div class="pt-card-top">
+        <span class="pt-status" [style.color]="statusMeta(p.status).color" [style.background]="statusMeta(p.status).bg">
+          <span class="pt-status-dot" [style.background]="statusMeta(p.status).color"></span>
+          {{ p.status }}
+        </span>
+        <span class="pt-industry">{{ p.industry }}</span>
+      </div>
+
+      <div class="pt-code">{{ p.code }}</div>
+      <div class="pt-title">{{ p.title }}</div>
+
+      <div class="pt-meta-grid">
+        <div class="pt-meta">
+          <span class="pt-meta-label">ВЛАДЕЛЕЦ</span>
+          <span class="pt-owner">
+            <nz-avatar [nzText]="p.ownerInitials" [nzSize]="24" class="pt-owner-avatar"></nz-avatar>
+            {{ p.ownerName }}
+          </span>
+        </div>
+        <div class="pt-meta">
+          <span class="pt-meta-label">ЗАКАЗЧИК</span>
+          <span class="pt-meta-value">{{ p.customer }}</span>
+        </div>
+      </div>
+
+      <div class="pt-stats">
+        <div class="pt-stat">
+          <span class="pt-stat-label">СРОК</span>
+          <span class="pt-stat-value">{{ p.deadline }}</span>
+        </div>
+        <div class="pt-stat">
+          <span class="pt-stat-label">ЗАДАЧИ</span>
+          <span class="pt-stat-value">{{ p.tasksDone }} из {{ p.tasksTotal }}</span>
+        </div>
+        <div class="pt-stat">
+          <span class="pt-stat-label">КОМАНДА</span>
+          <span class="pt-stat-value">{{ p.teamCount }} участников</span>
+        </div>
+      </div>
+
+      <div class="pt-progress">
+        <div class="pt-progress-track">
+          <div class="pt-progress-fill" [style.width.%]="p.progress"></div>
+        </div>
+        <span class="pt-progress-val">{{ p.progress }}%</span>
+      </div>
+
+      <div class="pt-tags">
+        @for (tag of p.tags.split(' · '); track tag) {
+          <span class="pt-tag">{{ tag }}</span>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<div class="pt-footer">
+  <span class="pt-footer-note">СТРАНИЦА 1 ИЗ 3 · ПРОЕКТЫ ОТСОРТИРОВАНЫ ПО СРОКУ</span>
+  <button nz-button class="pt-more-btn">Показать ещё 12 проектов</button>
+</div>

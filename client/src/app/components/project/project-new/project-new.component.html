@@ -1,0 +1,91 @@
+<div class="pn-root">
+  <h2 class="pn-title">Новый проект</h2>
+  <p class="pn-subtitle">Заполните реквизиты для создания нового проекта мониторинга</p>
+
+  <!-- Реквизиты проекта -->
+  <div class="pn-section-head">
+    <span class="pn-section-title">Реквизиты проекта</span>
+    <span class="pn-section-note">Основные сведения о новом проекте</span>
+  </div>
+  <div class="pn-fields pn-fields--3">
+    <div class="pn-field">
+      <label class="pn-label">Код проекта <span class="pn-req">*</span></label>
+      <input nz-input [(ngModel)]="code" name="code" placeholder="Например, МН-2024-001" />
+    </div>
+    <div class="pn-field">
+      <label class="pn-label">Статус <span class="pn-req">*</span></label>
+      <nz-select [(ngModel)]="status" name="status">
+        @for (o of statusOptions; track o) {
+          <nz-option [nzValue]="o" [nzLabel]="o" />
+        }
+      </nz-select>
+    </div>
+    <div class="pn-field">
+      <label class="pn-label">Наименование проекта <span class="pn-req">*</span></label>
+      <input nz-input [(ngModel)]="name" name="name" placeholder="Введите наименование объекта мониторинга" />
+    </div>
+    <div class="pn-field">
+      <label class="pn-label">Город</label>
+      <nz-select [(ngModel)]="city" name="city" nzPlaceHolder="Выберите город" nzAllowClear>
+        <nz-option nzValue="Санкт-Петербург" nzLabel="Санкт-Петербург" />
+        <nz-option nzValue="Москва" nzLabel="Москва" />
+      </nz-select>
+    </div>
+  </div>
+
+  <!-- Адрес, телефон -->
+  <div class="pn-section-head pn-section-head--sub">
+    <span class="pn-section-title">Адрес, телефон и карта проезда</span>
+  </div>
+  <div class="pn-fields pn-fields--2">
+    <div class="pn-field">
+      <label class="pn-label">Адрес объекта</label>
+      <input nz-input [(ngModel)]="address" name="address" placeholder="КЛАДР. Введите улицу, дом, корпус" />
+    </div>
+    <div class="pn-field">
+      <label class="pn-label">Телефон объекта</label>
+      <input nz-input [(ngModel)]="phone" name="phone" placeholder="+7 (___) ___-__-__" />
+    </div>
+  </div>
+
+  <!-- Режим работы -->
+  <div class="pn-section-head pn-section-head--sub">
+    <span class="pn-section-title">Режим работы</span>
+  </div>
+  <div class="pn-fields pn-fields--3">
+    <div class="pn-field">
+      <label class="pn-label">Режим работы</label>
+      <nz-select [(ngModel)]="workMode" name="workMode" nzPlaceHolder="Выберите режим" nzAllowClear>
+        @for (o of workModeOptions; track o) {
+          <nz-option [nzValue]="o" [nzLabel]="o" />
+        }
+      </nz-select>
+    </div>
+  </div>
+
+  <!-- Руководитель -->
+  <div class="pn-section-head pn-section-head--sub">
+    <span class="pn-section-title">Руководитель проекта</span>
+    <span class="pn-section-note">Руководитель, ответственный за проект</span>
+  </div>
+  <div class="pn-fields pn-fields--2">
+    <div class="pn-field">
+      <label class="pn-label">Руководитель <span class="pn-req">*</span></label>
+      <input nz-input [(ngModel)]="manager" name="manager" placeholder="ФИО руководителя" />
+    </div>
+    <div class="pn-field">
+      <label class="pn-label">Должность / Роль</label>
+      <input nz-input [(ngModel)]="role" name="role" placeholder="Должность или роль" />
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="pn-footer">
+    <span class="pn-hint">Поля отмеченные * обязательны для заполнения</span>
+    <div class="pn-actions">
+      <button nz-button (click)="cancel()">Отмена</button>
+      <button nz-button (click)="saveDraft()">Сохранить черновик</button>
+      <button nz-button nzType="primary" (click)="submit()">Создать проект</button>
+    </div>
+  </div>
+</div>

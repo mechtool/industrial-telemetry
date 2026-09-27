@@ -1,0 +1,55 @@
+<!-- Реквизиты проекта -->
+<div class="pv-card">
+  <div class="pv-card-head">
+    <h2 class="pv-card-title">Реквизиты проекта</h2>
+    <span class="pv-card-sync">{{ syncedAt }}</span>
+  </div>
+  <div class="pv-req-grid">
+    @for (r of requisites; track r.label) {
+      <div class="pv-req">
+        <div class="pv-req-label">{{ r.label }}</div>
+        <div class="pv-req-value" [class.pv-req-value--hl]="r.highlight">{{ r.value }}</div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Адрес + Ответственный -->
+<div class="pv-cols">
+  <div class="pv-card">
+    <h2 class="pv-card-title">Адрес, телефон и карта проезда</h2>
+    <div class="pv-field">
+      <div class="pv-field-label">АДРЕС ОБЪЕКТА</div>
+      <div class="pv-field-value">{{ address }}</div>
+    </div>
+    <div class="pv-field">
+      <div class="pv-field-label">ТЕЛЕФОН ОБЪЕКТА</div>
+      <div class="pv-field-value">{{ phoneObject }}</div>
+    </div>
+    <button nz-button class="pv-route-btn">
+      <nz-icon nzType="environment" />
+      Построить маршрут в Яндекс Картах
+    </button>
+  </div>
+
+  <div class="pv-card">
+    <h2 class="pv-card-title">Ответственный по проекту</h2>
+    <div class="pv-manager">
+      <nz-avatar [nzText]="managerInitials" [nzSize]="48" class="pv-manager-avatar"></nz-avatar>
+      <div class="pv-manager-info">
+        <div class="pv-manager-name">{{ managerName }}</div>
+        <div class="pv-manager-role">{{ managerRole }}</div>
+      </div>
+    </div>
+    <div class="pv-manager-contacts">
+      <div class="pv-contact">
+        <nz-icon nzType="phone" />
+        <span>{{ managerPhone }}</span>
+      </div>
+      <div class="pv-contact">
+        <nz-icon nzType="mail" />
+        <span>{{ managerEmail }}</span>
+      </div>
+    </div>
+  </div>
+</div>

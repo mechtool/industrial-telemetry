@@ -1,0 +1,219 @@
+<nz-layout class="me-root">
+  <!-- ======================= Header ======================= -->
+  <nz-header class="me-header">
+    <div class="me-logo">
+      <svg class="me-logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <g stroke="#1e88e5" stroke-width="2" stroke-linecap="round">
+          <path d="M12 2v20" />
+          <path d="M3.3 7l17.4 10" />
+          <path d="M20.7 7L3.3 17" />
+          <path d="M12 2l-2.6 1.5M12 2l2.6 1.5" />
+          <path d="M12 22l-2.6-1.5M12 22l2.6-1.5" />
+          <path d="M3.3 7L5 6.1M3.3 7l.6 2.2" />
+          <path d="M20.7 7L19 6.1M20.7 7l-.6 2.2" />
+          <path d="M3.3 17l1.7-.9M3.3 17l.6-2.2" />
+          <path d="M20.7 17L19 17.9M20.7 17l-.6 2.2" />
+        </g>
+      </svg>
+      <div class="me-logo-text">
+        <span class="me-logo-name">CRYOMON</span>
+        <span class="me-logo-sub">МОНИТОРИНГ ХОЛОДИЛЬНОГО ОБОРУДОВАНИЯ</span>
+      </div>
+    </div>
+
+    <div class="me-header-right">
+      <div class="me-search">
+        <nz-icon nzType="search" class="me-search-icon" />
+        <input class="me-search-input" placeholder="Поиск по системе..." />
+      </div>
+
+      <button nz-button nzType="text" class="me-icon-btn" title="Уведомления">
+        <nz-icon nzType="bell" />
+      </button>
+
+      <span class="me-header-divider"></span>
+
+      <div class="me-user" routerLink="/profile" title="Профиль">
+        <nz-avatar [nzText]="avatarInitial()" [nzSize]="32" />
+        <div class="me-user-text">
+          <span class="me-user-name">{{ userName() }}</span>
+          <span class="me-user-caption">{{ userCaption() }}</span>
+        </div>
+      </div>
+    </div>
+  </nz-header>
+
+  <nz-layout class="me-main">
+    <!-- ======================= Sidebar ======================= -->
+    <nz-sider class="me-sider" nzWidth="280px" nzTheme="light">
+      <div class="me-sider-brand">
+        <span class="me-brand-label">ПРОДУКТОВЫЙ РИТЕЙЛ</span>
+        <div class="me-brand-name-row">
+          <svg class="me-brand-globe" viewBox="0 0 32 32" width="32" height="32" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="meGlobeGrad" x1="27.31" x2="4.69" y1="4.69" y2="27.31" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#2563eb" offset="0" />
+                <stop stop-color="#0ea5e9" offset="1" />
+              </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="8" fill="url(#meGlobeGrad)" />
+            <g fill="none" stroke="#ffffff" stroke-width="1.5">
+              <circle cx="16" cy="16" r="8.5" />
+              <ellipse cx="16" cy="16" rx="4" ry="8.5" />
+              <line x1="7.5" x2="24.5" y1="13" y2="13" />
+              <line x1="7.5" x2="24.5" y1="19" y2="19" />
+            </g>
+          </svg>
+          <span class="me-brand-name">Глобус Гипермаркет</span>
+        </div>
+        <span class="me-brand-sub">Система мониторинга · CRYOMON</span>
+      </div>
+
+      <ul nz-menu nzMode="inline" nzTheme="light" class="me-nav">
+        @for (item of navItems; track item.id) {
+          @if (item.route) {
+            <li nz-menu-item nzMatchRouter [routerLink]="item.route">
+              <nz-icon [nzType]="item.icon" />
+              <span>{{ item.label }}</span>
+            </li>
+          } @else {
+            <li nz-menu-item class="me-nav-placeholder">
+              <nz-icon [nzType]="item.icon" />
+              <span>{{ item.label }}</span>
+            </li>
+          }
+        }
+      </ul>
+
+      <div class="me-sider-foot">
+        <span class="me-foot-label">СТАТУС СИСТЕМЫ</span>
+        <div class="me-foot-status">
+          <span class="me-foot-dot"></span>
+          <span class="me-foot-status-text">Система активна</span>
+        </div>
+        <span class="me-foot-date">12.05.2024, 08:42</span>
+      </div>
+    </nz-sider>
+
+    <!-- ======================= Content ======================= -->
+    <nz-layout class="me-body">
+      <nz-content class="me-content">
+        <!-- Hero -->
+        <section class="me-hero">
+          <div class="me-hero-left">
+            <span class="me-badge">
+              <nz-icon nzType="thunderbolt" />
+              СИСТЕМА МОНИТОРИНГА
+            </span>
+
+            <h1 class="me-hero-title">
+              Держите бизнес под контролем
+              <span class="me-hero-title-accent">— в режиме реального времени</span>
+            </h1>
+
+            <p class="me-hero-sub">
+              CRYOMON — интеллектуальная платформа мониторинга холодильного оборудования.
+              Предотвращайте сбои, сокращайте потери и принимайте решения на основе данных.
+            </p>
+
+            <div class="me-hero-cta">
+              <button nz-button nzType="primary" nzSize="large" routerLink="/projects">
+                <nz-icon nzType="play-circle" />
+                Выбрать проект
+              </button>
+              <button nz-button nzSize="large" class="me-btn-secondary">
+                <nz-icon nzType="book" />
+                Документация
+              </button>
+            </div>
+          </div>
+
+          <div class="me-hero-right">
+            <h2 class="me-benefits-title">ПРЕИМУЩЕСТВА СИСТЕМЫ</h2>
+            <div class="me-benefits">
+              @for (b of benefits; track b.title) {
+                <div class="me-benefit">
+                  <span class="me-benefit-icon">
+                    <nz-icon [nzType]="b.icon" />
+                  </span>
+                  <div class="me-benefit-text">
+                    <div class="me-benefit-title">{{ b.title }}</div>
+                    <div class="me-benefit-desc">{{ b.desc }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Section label -->
+        <div class="me-section-row">
+          <h2 class="me-section-title">КЛЮЧЕВЫЕ ПОКАЗАТЕЛИ СИСТЕМЫ</h2>
+          <span class="me-section-note">Выберите раздел в меню для детального просмотра</span>
+        </div>
+
+        <!-- Metrics -->
+        <div class="me-metrics">
+          @for (m of metrics; track m.label) {
+            <div class="me-metric">
+              <div class="me-metric-head">
+                <span class="me-metric-icon" [style.color]="m.color" [style.background]="m.bg">
+                  <nz-icon [nzType]="m.icon" />
+                </span>
+                <span class="me-metric-label">{{ m.label }}</span>
+              </div>
+              <div class="me-metric-value">{{ m.value }}</div>
+              <div class="me-metric-note">{{ m.note }}</div>
+            </div>
+          }
+        </div>
+
+        <!-- Info row -->
+        <div class="me-info">
+          <div class="me-card me-efficiency">
+            <div class="me-card-head">
+              <span class="me-card-head-icon me-card-head-icon--green">
+                <nz-icon nzType="rise" />
+              </span>
+              <span class="me-card-head-title">Эффективность мониторинга</span>
+            </div>
+
+            <div class="me-eff-stats">
+              @for (s of efficiencyStats; track s.label) {
+                <div class="me-eff-stat">
+                  <div class="me-eff-stat-value">{{ s.value }}</div>
+                  <div class="me-eff-stat-label">{{ s.label }}</div>
+                </div>
+              }
+            </div>
+
+            <p class="me-eff-desc">{{ efficiencyDesc }}</p>
+          </div>
+
+          <div class="me-card me-events">
+            <div class="me-card-head">
+              <span class="me-card-head-icon me-card-head-icon--blue">
+                <nz-icon nzType="notification" />
+              </span>
+              <span class="me-card-head-title">Последние события</span>
+            </div>
+
+            <div class="me-events-list">
+              @for (e of events; track e.text) {
+                <div class="me-event">
+                  <span class="me-event-dot" [style.background]="e.color"></span>
+                  <div class="me-event-body">
+                    <div class="me-event-text">{{ e.text }}</div>
+                    <div class="me-event-time">{{ e.time }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <nz-footer class="me-footer">CRYOMON &copy;{{ currentYear }}</nz-footer>
+      </nz-content>
+    </nz-layout>
+  </nz-layout>
+</nz-layout>
