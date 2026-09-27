@@ -69,7 +69,7 @@ export class MainEntranceComponent {
 
   readonly navItems: NavItem[] = [
     { id: '01', label: 'Проекты', icon: 'folder', route: '/projects' },
-    { id: '02', label: 'Пользователи', icon: 'team', route: '/users' },
+    { id: '02', label: 'Пользователи', icon: 'team' },
     { id: '03', label: 'Журналы', icon: 'file-text' },
     { id: '04', label: 'Настройки', icon: 'setting', route: '/settings' },
     { id: '05', label: 'Протоколы', icon: 'profile' },

@@ -3,12 +3,10 @@
         <div class="logo"></div>
         <ul nz-menu nzTheme="dark" nzMode="horizontal">
             <li nz-menu-item nzMatchRouter routerLink="/settings">Настройки</li>
-            <li nz-menu-item nzMatchRouter routerLink="/users">Пользователи</li>
-            <li nz-menu-item nzMatchRouter routerLink="/dashboard">Панель управления</li>
         </ul>
-        <a class="header-avatar" routerLink="/profile" title="Профиль">
+        <span class="header-avatar">
             <nz-avatar [nzText]="avatarInitial" [nzSize]="40" />
-        </a>
+        </span>
     </nz-header>
 
     <nz-layout>

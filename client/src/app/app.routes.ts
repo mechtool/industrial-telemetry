@@ -37,11 +37,6 @@ export const routes: Routes = [
     title: 'Главная — CRYOMON',
   },
   {
-    path: 'dashboard',
-    loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
-    title: 'Панель управления — Industrial Telemetry',
-  },
-  {
     path: 'projects',
     loadComponent: () => import('./components/projects/projects-shell/projects-shell.component').then(m => m.ProjectsShellComponent),
     title: 'Проекты — CRYOMON',
@@ -86,24 +81,9 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'users',
-    loadComponent: () => import('./components/users/users.component').then(m => m.UsersComponent),
-    title: 'Пользователи и роли — Industrial Telemetry',
-  },
-  {
     path: 'settings',
     loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent),
     title: 'Настройки — Industrial Telemetry',
-  },
-  {
-    path: 'profile',
-    loadComponent: () => import('./components/user-profile/user-profile.component').then(m => m.UserProfileComponent),
-    title: 'Профиль — Industrial Telemetry',
-  },
-  {
-    path: 'mqtt',
-    loadComponent: () => import('./components/mqtt-telemetry/mqtt-telemetry.component').then(m => m.MqttTelemetryComponent),
-    title: 'MQTT Телеметрия — Industrial Telemetry',
   },
   {
     path: '**',
