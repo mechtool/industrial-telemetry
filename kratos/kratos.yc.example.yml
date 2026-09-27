@@ -5,7 +5,12 @@
 # Затем заменить плейсхолдеры на реальные значения:
 #   - secrets.cookie / secrets.cipher — ровно 32 hex-символа
 #     (node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")
-#   - courier.smtp.connection_uri — пароль приложения Яндекса
+#   - courier.smtp.connection_uri — SMTP-доступ приложения (отдельный
+#     почтовый ящик noreply@<домен> либо транзакционный SMTP-сервис).
+#
+# ВАЖНО: recovery-ссылка из письма после клика редиректится Kratos на
+# selfservice.flows.settings.ui_url. Он обязан указывать на страницу
+# смены пароля (/change-password), иначе пользователь попадёт не туда.
 # ========================================================
 
 version: v1.3.1
@@ -44,6 +49,7 @@ selfservice:
     - https://industrial-telemetry.ru/dashboard
     - https://industrial-telemetry.ru/login
     - https://industrial-telemetry.ru/recovery
+    - https://industrial-telemetry.ru/change-password
 
   methods:
     password:
@@ -83,7 +89,7 @@ selfservice:
                   ignore: true
 
     settings:
-      ui_url: https://industrial-telemetry.ru/recovery
+      ui_url: https://industrial-telemetry.ru/change-password
       privileged_session_max_age: 15m
 
     recovery:
@@ -127,8 +133,12 @@ identity:
 
 courier:
   smtp:
-    connection_uri: smtps://user%40example.com:app-password@smtp.example.com:465/?skip_ssl_verify=false
-    from_address: mit-2@yandex.ru
+    # Отдельный почтовый ящик приложения (не личный). Примеры:
+    #   - Яндекс 360 для домена industrial-telemetry.ru: smtps://noreply%40industrial-telemetry.ru:<пароль-приложения>@smtp.yandex.ru:465/?skip_ssl_verify=false
+    #   - Транзакционный сервис (Mailgun/SMTP2GO/SendGrid/Resend): smtps://<user>:<key>@<smtp-хост>:465/?skip_ssl_verify=false
+    connection_uri: smtps://noreply%40industrial-telemetry.ru:YOUR_APP_PASSWORD@smtp.yandex.ru:465/?skip_ssl_verify=false
+    from_address: noreply@industrial-telemetry.ru
+    from_name: Industrial Telemetry
 
 feature_flags:
   use_continue_with_transitions: false

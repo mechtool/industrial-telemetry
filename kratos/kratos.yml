@@ -38,7 +38,8 @@ selfservice:
     - http://localhost:4000/projects
     - http://localhost:4000/dashboard
     - http://localhost:4000/login
-    - http://localhost:4000/settings
+    - http://localhost:4000/recovery
+    - http://localhost:4000/change-password
 
   methods:
     password:
@@ -78,7 +79,7 @@ selfservice:
                   ignore: true
 
     settings:
-      ui_url: http://localhost:4000/settings
+      ui_url: http://localhost:4000/change-password
       privileged_session_max_age: 15m
 
     recovery:
@@ -116,7 +117,9 @@ identity:
 
 courier:
   smtp:
-    connection_uri: smtps://user%40example.com:app-password@smtp.example.com:465/?skip_ssl_verify=false
+    connection_uri: smtps://noreply%40industrial-telemetry.ru:YOUR_APP_PASSWORD@smtp.yandex.ru:465/?skip_ssl_verify=false
+    from_address: noreply@industrial-telemetry.ru
+    from_name: Industrial Telemetry
 
 feature_flags:
   use_continue_with_transitions: false

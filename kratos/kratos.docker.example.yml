@@ -3,9 +3,14 @@
 # Industrial Telemetry
 #
 # Скопировать:   cp kratos/kratos.docker.example.yml kratos/kratos.docker.yml
-# Затем в kratos/kratos.docker.yml подставить реальный пароль приложения
-# Яндекса в courier.smtp.connection_uri (место YOUR_YANDEX_APP_PASSWORD).
+# Затем в kratos/kratos.docker.yml подставить реальный SMTP-доступ
+# приложения в courier.smtp.connection_uri (место YOUR_APP_PASSWORD).
+# Для локальной отладки можно указать smtp://mailslurper:1025 (письма
+# попадут в веб-интерфейс http://localhost:4436).
 # Реальный файл kratos/kratos.docker.yml — gitignored.
+#
+# ВАЖНО: recovery-ссылка из письма после клика редиректится Kratos на
+# selfservice.flows.settings.ui_url — он должен указывать на /change-password.
 # ========================================================
 
 version: v1.3.1
@@ -45,6 +50,7 @@ selfservice:
     - http://localhost:4200/login
     - http://localhost:4200/registration
     - http://localhost:4200/recovery
+    - http://localhost:4200/change-password
 
   methods:
     password:
@@ -84,7 +90,7 @@ selfservice:
                   ignore: true
 
     settings:
-      ui_url: http://localhost:4200/recovery
+      ui_url: http://localhost:4200/change-password
       privileged_session_max_age: 15m
 
     recovery:
@@ -122,8 +128,9 @@ identity:
 
 courier:
   smtp:
-    connection_uri: smtps://mit-2%40yandex.ru:YOUR_YANDEX_APP_PASSWORD@smtp.yandex.ru:465/?skip_ssl_verify=false
-    from_address: mit-2@yandex.ru
+    connection_uri: smtps://noreply%40industrial-telemetry.ru:YOUR_APP_PASSWORD@smtp.yandex.ru:465/?skip_ssl_verify=false
+    from_address: noreply@industrial-telemetry.ru
+    from_name: Industrial Telemetry
 
 feature_flags:
   use_continue_with_transitions: false
