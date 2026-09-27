@@ -1,148 +1,149 @@
 # Industrial Telemetry — Дальнейшие шаги
 
-**Дата:** 2026-08-02
-**Текущая версия:** cf5674f (Keto RBAC интегрирован)
+**Дата:** 2026-09-27
+**Текущая версия:** `29820e8` (master)
+
+> Актуальный список того, что уже работает, и что осталось сделать. Фактическое состояние сверено с кодом (`server/src`, `client/src`, `docker-compose*.yml`, `kratos/`, `keto/`, `nginx/`).
 
 ---
 
-## 🔄 Изменения 2026-09-21 — роли переведены в Keto
-
-**Что сделано (эта сессия):**
-- Роли теперь живут в **Keto** (relation tuples), а не в `traits.role` Kratos; из `identity.schema.json` поле `role` удалено.
-- Добавлена новая низшая роль **`viewer` (просмотр)** — назначается автоматически при регистрации.
-- Поддержка **нескольких ролей** на пользователя (`roles: string[]`): `/api/session`, список/редактирование пользователей, профиль.
-- Назначение при создании — через **Kratos webhook** (`after.registration.password.hooks` → `POST /api/webhooks/registration`), плюс синхронный fallback в прокси `/api/kratos/registration`.
-- Webhook защищён общим секретом (`WEBHOOK_SECRET`).
-- Миграция `server/src/scripts/migrate-roles.ts` (`npm run migrate:roles`) — перенос старых `traits.role` → Keto и очистка `traits.role` (идемпотентна).
-- Устойчивость: `assignRole` идемпотентен + сериализация мутаций ролей на пользователя + дедупликация на чтении (Keto `PUT` не идемпотентен).
-
-**Что осталось сделать при деплое на прод (по порядку):**
-1. На ВМ пересоздать `kratos/kratos.yc.yml` из обновлённого `kratos/kratos.yc.example.yml` (там появился web_hook + auth).
-2. Задать **один и тот же** `WEBHOOK_SECRET` в двух местах: `kratos/kratos.yc.yml` → `selfservice.flows.registration.after.password.hooks[web_hook].config.auth.config.value` и `.env.yc` → `WEBHOOK_SECRET`.
-3. Перезапустить Kratos (`up -d kratos`) — **Kratos не перечитывает конфиг на лету**.
-4. Прогнать миграцию ролей **до/вместе** с выкатом нового сервера: `cd server && npm run migrate:roles` — иначе существующие админы потеряют доступ.
-5. Пересобрать `server` и `client`.
-
-**Советы / важные нюансы:**
-- Kratos **не подставляет `${VAR}`** в значении webhook-auth (шлёт литерал) — секрет пишется напрямую в `kratos.yc.yml`. То же уже зафиксировано для `secrets.cookie`/`cipher`.
-- `ketoService.seedDefaults()` **всё ещё не вызывается** — поресурсные права (`requirePermission`/`requireRole`) не задействованы; авторизация сейчас идёт по ролям через `requireAdmin` (`roles.includes('admin')`). Это остаётся задачей ближайшего спринта.
-- Webhook-эндпоинт `/api/webhooks/registration` теперь требует секрет (если задан); снаружи он уже ограничен nginx rate-limiting.
-
----
-
-## ✅ Реализовано
+## ✅ Текущее состояние (реализовано и работает)
 
 ### Аутентификация и авторизация
-- [x] Ory Kratos — регистрация, логин, восстановление пароля (link-based)
-- [x] Ory Keto — ролевая модель (admin/engineer/operator), middleware `requirePermission`, `requireRole`
-- [x] Keto seed при старте сервера (26 разрешений для 3 ролей на 5 ресурсов)
-- [x] Angular `PermissionsService` — `canView`, `canEdit`, `canManageUsers`
-- [x] Dashboard скрывает/показывает кнопки по правам
+- [x] Ory Kratos v1.3.1 — регистрация, логин, восстановление пароля (link-based), смена пароля (settings-флоу), logout.
+- [x] Роли в **Ory Keto** (relation tuples, namespace `Role`): `admin`, `engineer`, `operator`, `viewer`.
+- [x] Несколько ролей на пользователя (`roles: string[]`); `/api/session` отдаёт `roles`.
+- [x] Автоназначение `viewer` при регистрации — Kratos webhook (`POST /api/webhooks/registration`) + синхронный fallback в `/api/kratos/registration`.
+- [x] Webhook защищён общим секретом `WEBHOOK_SECRET` (заголовок `Authorization`).
+- [x] Проверка по ролям: middleware `requireAdmin` (защита `/api/users` и `PUT /api/settings`).
+- [x] Миграция `npm run migrate:roles` (idempotent) — перенос старых `traits.role` → Keto.
 
 ### Инфраструктура
-- [x] Docker Compose (dev + YC production) — 8 контейнеров
-- [x] Nginx reverse proxy с security headers (HSTS, X-Frame-Options, CSP, CORS)
-- [x] Rate limiting (Kratos: 10 r/m, API: 30 r/m)
-- [x] Let's Encrypt HTTPS (certbot автообновление каждые 12ч)
-- [x] Health checks для всех контейнеров
-- [x] Бэкап PostgreSQL (pg_dump Kratos + Keto)
+- [x] Docker Compose: dev (`docker-compose.yml`) и prod Yandex Cloud (`docker-compose.yc.yml`).
+- [x] Dev-инфраструктура: PostgreSQL + Kratos + Keto + MailSlurper.
+- [x] Prod-стек: PostgreSQL + Kratos + Keto + Express + Mosquitto + Nginx/Angular + certbot (profile `ssl`).
+- [x] Nginx reverse proxy с security-заголовками (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP) и rate limiting (Kratos 10 r/m, API 30 r/m).
+- [x] Let's Encrypt HTTPS (certbot, автообновление каждые 12 ч).
+- [x] Health check БД и клиента; graceful shutdown сервера; таймауты fetch.
 
-### Клиент
-- [x] Angular 22 PWA (service worker, manifest, иконки)
-- [x] PrimeNG UI + PrimeFlex утилиты
-- [x] Dashboard: MQTT-статус, пользователь, топики
-- [x] MQTT Telemetry: подписка/отписка/публикация
-- [x] Responsive дизайн (card-grid)
-- [x] WCAG AA контраст (primary #047857, text #4b5563)
-- [x] CSP `connect-src 'self' http://localhost:* https: wss:`
+### Клиент (Angular 22, PWA)
+- [x] Angular 22 + **NG-ZORRO** (не PrimeNG) + `@ant-design/icons-angular`; zoneless change detection.
+- [x] PWA: service worker, manifest, иконки.
+- [x] Разделы: вход/регистрация/recovery, dashboard (MQTT-статус), MQTT-телеметрия (подписка/отписка/публикация), проекты (список/создание), пользователи и роли (admin), настройки, профиль.
+- [x] CSP через `<meta http-equiv="Content-Security-Policy">` в `client/src/index.html`.
 
-### Сервер
-- [x] Express + TypeScript (ESM)
-- [x] Kratos-прокси (login, registration, recovery)
-- [x] Keto-клиент (`check`, `hasRole`, `assignRole`, `grantPermission`)
-- [x] RBAC middleware (`requirePermission`, `requireRole`, `loadPermissions`)
-- [x] MQTT-мост (подписка, публикация, статус)
-- [x] Таймауты fetch (клиент 15с, сервер 10с)
-- [x] Graceful shutdown (SIGINT/SIGTERM)
+### Сервер (Express 4, TypeScript ESM)
+- [x] Kratos-прокси (login/registration/recovery) + публичный прокси `/.ory`.
+- [x] Keto-клиент на REST (`check`, `hasRole`, `listRoles`, `assignRole`, `revokeRole`, `setRoles`, `grantPermission`, `seedDefaults`).
+- [x] MQTT-мост (подписка, публикация, статус, wildcard-топики `+`/`#`, реконнект), префикс `industrial/`, подписка `sensors/#`.
+- [x] Маршруты: `/api/health`, `/api/session`, `/api/mqtt/*`, `/api/projects`, `/api/users`, `/api/settings`, `/api/webhooks/*`, `/.ory/*`.
 
-### Качество кода
-- [x] Удалён мёртвый CSS (.status-indicator, mqtt-telemetry классы)
-- [x] Удалён dead code (navItems, неиспользуемые методы KratosService, kratosOptional, adminUrl)
-- [x] Удалены debug-логи из recovery handler
-- [x] Пустая директория `server/src/models/` удалена
-- [x] Лишняя зависимость `http-proxy-middleware` из корневого package.json удалена
+---
+
+## ⚠️ Известные ограничения (технический долг)
+
+### 1. Поресурсные права Keto не включены
+- `ketoService.seedDefaults()` **не вызывается** при старте сервера — разрешения на ресурсы (`dashboard`, `mqtt`, `mqtt-topics`, `users`, `settings`) не сидятся.
+- Middleware `requirePermission` / `requireRole` / `loadPermissions` существуют, но **не применены** к маршрутам; `/api/mqtt/*` защищён только `kratosAuth`.
+- Маршрута `/api/permissions` на сервере **нет**; клиентский `PermissionsService.load()` ходит на несуществующий `/api/permissions`.
+- `PermissionsService` внедрён в `dashboard.component.ts`, но **не используется** (фактически мёртвый код).
+
+**Итог:** авторизация сейчас по ролям (`requireAdmin`), а не по разрешениям на ресурсы. Целевая модель описана в `MANUAL_RUN_GUIDE.md` §7.
+
+**Что сделать:** вызвать `seedDefaults()` при старте, применить `requirePermission` к `/api/mqtt/*` (и, при необходимости, к `/api/projects`), добавить маршрут `/api/permissions` (или отдавать права в `/api/session`) и задействовать `PermissionsService` на клиенте — либо удалить его, если поресурсная модель не нужна.
+
+### 2. Данные в памяти (без персистентности)
+- `/api/projects` (`server/src/services/projects.service.ts`) — in-memory `Map`, 4 стартовых проекта на пользователя; теряются при перезапуске.
+- `/api/settings` (`server/src/services/settings.service.ts`) — in-memory объект настроек.
+
+**Что сделать:** таблицы `projects` (с `owner_id`) и `settings` в PostgreSQL + CRUD.
+
+### 3. Нет клиентских route-guard'ов
+- `client/src/app/app.routes.ts` не содержит guard'ов — навигация свободная, защита только на сервере (401 при отсутствии сессии).
+
+**Что сделать:** `authGuard` (редирект на `/login`) и `adminGuard` для `/users`/`/settings`.
+
+### 4. Несогласованность версии Keto
+- `keto/keto.yml` объявляет `version: v0.14.0-alpha.0`, а compose использует образ `oryd/keto:v0.14.0`; заголовок файла говорит «v0.13».
+
+**Что сделать:** привести `version` (и комментарии) в `keto/keto.yml` к `v0.14.0`.
 
 ---
 
 ## 🔒 Безопасность — рекомендуется
 
 ### Высокий приоритет
-- [ ] **MQTT-аутентификация** — `mosquitto.conf`: `allow_anonymous false` + `password_file`
-- [ ] **Kratos secrets в .env** — вынести cookie/cipher секреты из `kratos.yc.yml` в переменные окружения
-- [ ] **SMTP-пароль в .env** — пароль приложения Яндекса не должен быть в Git
-- [ ] **CSRF-защита Express** — middleware `csurf` или `lusca` для state-changing запросов
-- [ ] **Helmet middleware** — HTTP-заголовки безопасности на уровне Express (дублирует Nginx)
+- [ ] **MQTT-аутентификация** — `mosquitto.conf`: `allow_anonymous false` + `password_file`.
+- [ ] **Закрыть порты наружу** — в prod публикуются `it-kratos` (4433/4434) и `it-mosquitto` (1883); оставить только 80/443 (nginx), остальное — в security group ВМ.
+- [ ] **Kratos secrets в переменные окружения** — вынести cookie/cipher из `kratos.yc.yml` (Kratos не подставляет `${VAR}` напрямую — потребуется генерация конфига из шаблона при деплое).
+- [ ] **SMTP-пароль вне git** — пароль приложения Яндекса сейчас в `courier.smtp.connection_uri`.
+- [ ] **CSRF-защита Express** — `csurf`/`lusca` для state-changing запросов (сейчас защита только через cookie + CORS).
+- [ ] **Helmet** — HTTP-заголовки безопасности на уровне Express (дублирует Nginx).
 
 ### Средний приоритет
-- [ ] **Логирование запросов** — `morgan` или `pino` для аудита API-вызовов
-- [ ] **Ротация логов** — Docker `logging driver: json-file` с `max-size` и `max-file`
-- [ ] **Secrets manager** — Yandex Lockbox для хранения секретов вне кодовой базы
-- [ ] **Бэкап по расписанию** — cron-задача `pg_dump` ежедневно + копирование в Object Storage
-- [ ] **Fail2Ban** — защита от брутфорса на уровне Nginx (логин Kratos)
+- [ ] **Логирование запросов** — `morgan`/`pino` для аудита API-вызовов.
+- [ ] **Ротация логов** — `logging driver: json-file` с `max-size`/`max-file`.
+- [ ] **Secrets manager** — Yandex Lockbox для хранения секретов вне кодовой базы.
+- [ ] **Бэкап по расписанию** — ежедневный `pg_dump` Kratos + Keto + копирование в Object Storage.
+- [ ] **Fail2Ban** — защита от брутфорса на уровне Nginx (логин Kratos).
 
 ### Низкий приоритет
-- [ ] **Docker-образы без root** — `USER node` уже есть в `Dockerfile.server`, добавить в `Dockerfile.client`
-- [ ] **Read-only файловая система** — `docker-compose: read_only: true` для stateless-контейнеров
-- [ ] **Security scanning** — Trivy или Docker Scout для сканирования уязвимостей образов
-- [ ] **Content Security Policy audit** — регулярная проверка CSP на соответствие актуальным угрозам
+- [ ] **Docker-образы без root** — `USER node` уже есть в `Dockerfile.server`; добавить в `Dockerfile.client` (nginx).
+- [ ] **Read-only файловая система** — `read_only: true` для stateless-контейнеров.
+- [ ] **Security scanning** — Trivy / Docker Scout для образов.
+- [ ] **CSP-аудит** — регулярная проверка CSP (сейчас задан `<meta>` в `index.html`, а не заголовком Nginx).
 
 ---
 
 ## 🚀 Модернизация — рекомендуется
 
 ### Мониторинг и наблюдаемость
-- [ ] **Health dashboard** — Prometheus + Grafana для метрик контейнеров и приложения
-- [ ] **Uptime monitoring** — Yandex Monitoring или внешний (UptimeRobot, BetterStack)
-- [ ] **Error tracking** — Sentry для клиентских и серверных ошибок
-- [ ] **MQTT-метрики** — Prometheus exporter для Mosquitto (кол-во сообщений, подписчиков)
+- [ ] **Health dashboard** — Prometheus + Grafana (метрики контейнеров и приложения).
+- [ ] **Uptime monitoring** — Yandex Monitoring или внешний (UptimeRobot, BetterStack).
+- [ ] **Error tracking** — Sentry (клиент + сервер).
+- [ ] **MQTT-метрики** — Prometheus exporter для Mosquitto (сообщения, подписчики).
 
 ### CI/CD
-- [ ] **GitHub Actions** — автосборка и тесты при push в master
-- [ ] **Автодеплой** — деплой на ВМ при успешном прохождении CI
-- [ ] **Тесты** — unit (Jest), e2e (Playwright/Cypress)
+- [ ] **GitHub Actions** — сборка и тесты при push в master.
+- [ ] **Автодеплой** — деплой на ВМ при успешном CI.
+- [ ] **Тесты** — unit (Jest), e2e (Playwright/Cypress).
 
 ### База данных
-- [ ] **PostgreSQL-бэкап в Yandex Object Storage** — автоматическое копирование дампов
-- [ ] **Миграции с версионированием** — Keto/Kratos миграции уже есть, добавить свои SQL-миграции
+- [ ] **Персистентность проектов/настроек** — PostgreSQL вместо in-memory (см. «Известные ограничения»).
+- [ ] **Миграции с версионированием** — собственные SQL-миграции (Keto/Kratos миграции уже есть).
 
 ### Функциональность
-- [ ] **Админ-панель управления пользователями** — CRUD пользователей, назначение ролей через UI
-- [ ] **Аудит действий** — логирование кто/когда/что сделал (изменение ролей, доступ к MQTT)
-- [ ] **Визуализация телеметрии** — графики (Chart.js/ECharts) для MQTT-данных на дашборде
-- [ ] **Алерты** — уведомления при выходе датчиков за пределы (email/Telegram)
-- [ ] **Мобильное PWA** — офлайн-режим через Service Worker (уже есть база, доделать)
+- [ ] **Админ-панель управления пользователями** — частично есть (`/users` со сменой ролей); добавить CRUD (создание/удаление/блокировка).
+- [ ] **Аудит действий** — лог «кто/когда/что» (смена ролей, доступ к MQTT).
+- [ ] **Визуализация телеметрии** — графики (Chart.js/ECharts) для MQTT-данных на дашборде.
+- [ ] **Алерты** — уведомления при выходе датчиков за пределы (email/Telegram).
+- [ ] **Мобильное PWA** — офлайн-режим через Service Worker (база есть, доделать).
 
 ---
 
 ## 📋 План ближайших спринтов
 
-### Спринт 1 — Безопасность (2-3 дня)
-1. MQTT-аутентификация
-2. Kratos secrets в .env
-3. Helmet + CSRF
-4. Логирование запросов
+### Спринт 1 — Закрыть технический долг (2–3 дня)
+1. Включить поресурсные права Keto: `seedDefaults()` при старте, `requirePermission` на `/api/mqtt/*`, маршрут `/api/permissions`, задействовать или удалить `PermissionsService`.
+2. Привести `keto/keto.yml` `version` к `v0.14.0`.
+3. Добавить `authGuard`/`adminGuard` в Angular.
 
-### Спринт 2 — Мониторинг и CI/CD (3-4 дня)
-1. GitHub Actions (сборка + тесты)
-2. Sentry (ошибки)
-3. Uptime-мониторинг
-4. Docker-логи с ротацией
+### Спринт 2 — Безопасность (2–3 дня)
+1. MQTT-аутентификация.
+2. Закрыть лишние порты в prod.
+3. Helmet + CSRF.
+4. Логирование запросов + ротация логов.
 
-### Спринт 3 — Функциональность (4-5 дней)
-1. Админ-панель (управление пользователями и ролями)
-2. Визуализация телеметрии (графики)
-3. Алерты по датчикам
-4. Аудит действий
+### Спринт 3 — Персистентность и CI/CD (3–4 дня)
+1. PostgreSQL-таблицы `projects` и `settings` вместо in-memory.
+2. GitHub Actions (сборка + тесты).
+3. Sentry и uptime-мониторинг.
+
+### Спринт 4 — Функциональность (4–5 дней)
+1. Расширить админ-панель (CRUD пользователей).
+2. Визуализация телеметрии (графики).
+3. Алерты по датчикам.
+4. Аудит действий.
 
 ---
 
