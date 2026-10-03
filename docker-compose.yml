@@ -100,6 +100,28 @@ services:
       - "4436:4436"   # Web UI (HTTP)
       - "4437:4437"   # Web UI (HTTPS)
 
+  # ---- Mosquitto MQTT (dev) ----
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: telemetry-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"   # MQTT
+      - "9001:9001"   # MQTT over WebSocket
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h localhost -p 1883 -t it/healthcheck -m ok -q 1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   kratos-db-data:
+    driver: local
+  mosquitto-data:
+    driver: local
+  mosquitto-log:
     driver: local

@@ -54,6 +54,12 @@ services:
     ports:
       - "4433:4433"
       - "4434:4434"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4433/health/alive"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     environment:
       - DSN=postgres://kratos:${DB_PASSWORD:-kratos}@kratos-db:5432/kratos?sslmode=disable
     command: serve -c /etc/config/kratos/kratos.yc.yml --watch-courier
@@ -85,6 +91,12 @@ services:
     depends_on:
       keto-migrate:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4466/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     environment:
       - DSN=postgres://kratos:${DB_PASSWORD:-kratos}@kratos-db:5432/keto?sslmode=disable
     command: serve -c /etc/config/keto/keto.yml
@@ -117,7 +129,7 @@ services:
       - WEBHOOK_SECRET=${WEBHOOK_SECRET:-}
     depends_on:
       kratos:
-        condition: service_started
+        condition: service_healthy
     networks:
       - it-network
 
@@ -150,8 +162,10 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - certbot-webroot:/var/www/certbot
     depends_on:
-      - server
-      - kratos
+      server:
+        condition: service_started
+      kratos:
+        condition: service_healthy
     networks:
       - it-network
 

@@ -1,4 +1,5 @@
 import { config } from '../config/index.js';
+import { fetchWithTimeout } from '../lib/fetch.js';
 
 /**
  * Keto permission check request.
@@ -80,7 +81,7 @@ class KetoService {
     };
 
     try {
-      const r = await fetch(`${this.readUrl}/relation-tuples/check`, {
+      const r = await fetchWithTimeout(`${this.readUrl}/relation-tuples/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -106,7 +107,7 @@ class KetoService {
     };
 
     try {
-      const r = await fetch(`${this.readUrl}/relation-tuples/check`, {
+      const r = await fetchWithTimeout(`${this.readUrl}/relation-tuples/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -129,7 +130,7 @@ class KetoService {
     });
 
     try {
-      const r = await fetch(`${this.readUrl}/relation-tuples?${params.toString()}`);
+      const r = await fetchWithTimeout(`${this.readUrl}/relation-tuples?${params.toString()}`);
       if (!r.ok) return [];
       const data = await r.json() as {
         relation_tuples?: Array<{ object?: string }>;
@@ -219,7 +220,7 @@ class KetoService {
     };
 
     try {
-      const r = await fetch(`${this.writeUrl}/admin/relation-tuples`, {
+      const r = await fetchWithTimeout(`${this.writeUrl}/admin/relation-tuples`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(tuple),
@@ -239,7 +240,7 @@ class KetoService {
     });
 
     try {
-      const r = await fetch(`${this.writeUrl}/admin/relation-tuples?${params.toString()}`, {
+      const r = await fetchWithTimeout(`${this.writeUrl}/admin/relation-tuples?${params.toString()}`, {
         method: 'DELETE',
       });
       return r.ok;
@@ -260,7 +261,7 @@ class KetoService {
     };
 
     try {
-      const r = await fetch(`${this.writeUrl}/admin/relation-tuples`, {
+      const r = await fetchWithTimeout(`${this.writeUrl}/admin/relation-tuples`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(tuple),

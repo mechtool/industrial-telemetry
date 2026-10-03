@@ -1,4 +1,5 @@
 import { config } from '../config/index.js';
+import { fetchWithTimeout } from '../lib/fetch.js';
 import { ketoService, Roles } from './keto.service.js';
 
 export interface AdminUser {
@@ -24,7 +25,7 @@ interface KratosIdentity {
 class UsersService {
   /** Список активных пользователей из Kratos + их роли из Keto. */
   async list(): Promise<AdminUser[]> {
-    const r = await fetch(`${config.kratos.adminUrl}/admin/identities?per_page=200`);
+    const r = await fetchWithTimeout(`${config.kratos.adminUrl}/admin/identities?per_page=200`);
     if (!r.ok) {
       throw new Error(`Kratos admin responded ${r.status}`);
     }
@@ -58,7 +59,7 @@ class UsersService {
       throw new Error('Не удалось обновить роли в Keto');
     }
 
-    const getRes = await fetch(`${config.kratos.adminUrl}/admin/identities/${userId}`);
+    const getRes = await fetchWithTimeout(`${config.kratos.adminUrl}/admin/identities/${userId}`);
     if (!getRes.ok) {
       throw new Error('Пользователь не найден');
     }

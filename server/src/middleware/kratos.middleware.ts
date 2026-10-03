@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { config } from '../config/index.js';
+import { fetchWithTimeout } from '../lib/fetch.js';
 import { ketoService } from '../services/keto.service.js';
 
 export interface KratosIdentity {
@@ -34,7 +35,7 @@ export async function kratosAuth(req: Request, res: Response, next: NextFunction
   }
 
   try {
-    const response = await fetch(`${config.kratos.publicUrl}/sessions/whoami`, {
+    const response = await fetchWithTimeout(`${config.kratos.publicUrl}/sessions/whoami`, {
       headers: { Cookie: cookie },
     });
 

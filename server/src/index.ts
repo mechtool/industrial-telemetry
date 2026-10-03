@@ -99,19 +99,31 @@ app.use(errorHandler);
 
 // --------------- Startup (non-blocking) ---------------
 async function bootstrap(): Promise<void> {
-  app.listen(config.port, () => {
+  const server = app.listen(config.port, () => {
     console.log(`[Server] Industrial Telemetry API запущен на http://localhost:${config.port}`);
     console.log(`[Server] Kratos public: ${config.kratos.publicUrl}`);
+  });
+
+  // Явная обработка ошибок слушателя (напр. EADDRINUSE) вместо необработанного `error`
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`[Server] Порт ${config.port} уже занят. Освободите порт или задайте PORT.`);
+    } else {
+      console.error('[Server] Ошибка запуска HTTP-сервера:', err.message);
+    }
+    process.exit(1);
+  });
+
+  // Регистрируем подписку ДО подключения: subscribe() безопасно вызывать в отключённом
+  // состоянии — топик попадёт в this.subscribed и будет переподписан в resubscribeAll()
+  // после (пере)подключения. Иначе при недоступном брокере на старте подписка терялась навсегда.
+  mqttService.subscribe('sensors/#', (topic, payload) => {
+    console.log(`[Telemetry] ${topic} → ${payload.toString()}`);
   });
 
   // MQTT — non-blocking
   mqttService
     .connect()
-    .then(() => {
-      mqttService.subscribe('sensors/#', (topic, payload) => {
-        console.log(`[Telemetry] ${topic} → ${payload.toString()}`);
-      });
-    })
     .catch((err) => console.warn(`[MQTT] Недоступен (${err.message}) — сервер работает без MQTT`));
 }
 
