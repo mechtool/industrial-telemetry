@@ -1,55 +1,85 @@
-<!-- Реквизиты проекта -->
-<div class="pv-card">
-  <div class="pv-card-head">
-    <h2 class="pv-card-title">Реквизиты проекта</h2>
-    <span class="pv-card-sync">{{ syncedAt }}</span>
-  </div>
-  <div class="pv-req-grid">
-    @for (r of requisites; track r.label) {
-      <div class="pv-req">
-        <div class="pv-req-label">{{ r.label }}</div>
-        <div class="pv-req-value" [class.pv-req-value--hl]="r.highlight">{{ r.value }}</div>
-      </div>
-    }
-  </div>
-</div>
+<!-- Хлебные крошки -->
+<nav class="pv-breadcrumb">
+  <a class="pv-crumb-link" routerLink="/projects">Проекты</a>
+  <span class="pv-crumb-sep">/</span>
+  <span class="pv-crumb-current">{{ projectName }}</span>
+</nav>
 
-<!-- Адрес + Ответственный -->
-<div class="pv-cols">
-  <div class="pv-card">
-    <h2 class="pv-card-title">Адрес, телефон и карта проезда</h2>
-    <div class="pv-field">
-      <div class="pv-field-label">АДРЕС ОБЪЕКТА</div>
-      <div class="pv-field-value">{{ address }}</div>
+<!-- Шапка проекта -->
+<div class="pv-header">
+  <div class="pv-heading">
+    <h1 class="pv-title">{{ projectName }}</h1>
+    <div class="pv-meta">
+      <span class="pv-status">
+        <span class="pv-status-dot"></span>
+        В РАБОТЕ
+      </span>
+      <span class="pv-meta-text">{{ projectCode }} · запущен 12.03.2021 · объектов 24 · онлайн 96%</span>
     </div>
-    <div class="pv-field">
-      <div class="pv-field-label">ТЕЛЕФОН ОБЪЕКТА</div>
-      <div class="pv-field-value">{{ phoneObject }}</div>
-    </div>
-    <button nz-button class="pv-route-btn">
-      <nz-icon nzType="environment" />
-      Построить маршрут в Яндекс Картах
+  </div>
+  <div class="pv-head-actions">
+    <button nz-button class="pv-settings-btn">
+      <nz-icon nzType="setting" />
+      Настройки проекта
     </button>
   </div>
-
-  <div class="pv-card">
-    <h2 class="pv-card-title">Ответственный по проекту</h2>
-    <div class="pv-manager">
-      <nz-avatar [nzText]="managerInitials" [nzSize]="48" class="pv-manager-avatar"></nz-avatar>
-      <div class="pv-manager-info">
-        <div class="pv-manager-name">{{ managerName }}</div>
-        <div class="pv-manager-role">{{ managerRole }}</div>
-      </div>
-    </div>
-    <div class="pv-manager-contacts">
-      <div class="pv-contact">
-        <nz-icon nzType="phone" />
-        <span>{{ managerPhone }}</span>
-      </div>
-      <div class="pv-contact">
-        <nz-icon nzType="mail" />
-        <span>{{ managerEmail }}</span>
-      </div>
-    </div>
-  </div>
 </div>
+
+<!-- Табы -->
+<div class="pv-tabs">
+  @for (t of tabs; track t) {
+    <button
+      class="pv-tab"
+      [class.pv-tab--active]="selectedTab() === t"
+      (click)="selectedTab.set(t)"
+    >{{ t }}</button>
+  }
+</div>
+
+@if (isUsersTab()) {
+  <!-- Пользователи проекта -->
+  <div class="pv-content">
+    @if (usersUi.hasUsers()) {
+      <app-users-list />
+    } @else {
+      <app-users-empty />
+    }
+  </div>
+} @else if (isDashboardTab()) {
+  <!-- Панель управления -->
+  <div class="pv-content">
+    <app-project-dashboard />
+  </div>
+} @else if (isObjectsTab()) {
+  <!-- Объекты -->
+  <div class="pv-content">
+    @if (objectsUi.hasObjects()) {
+      <app-objects-list />
+    } @else {
+      <app-object-empty />
+    }
+  </div>
+} @else if (isOrganizationsTab()) {
+  <!-- Организации -->
+  <div class="pv-content">
+    @if (organizationsUi.hasOrganizations()) {
+      <app-organizations-list />
+    } @else {
+      <app-organizations-empty />
+    }
+  </div>
+} @else if (isGatewaysTab()) {
+  <!-- Шлюзы -->
+  <div class="pv-content">
+    @if (gatewaysUi.hasGateways()) {
+      <app-gateways-list />
+    } @else {
+      <app-gateways-empty />
+    }
+  </div>
+} @else {
+  <!-- Общие -->
+  <div class="pv-content">
+    <app-project-general />
+  </div>
+}

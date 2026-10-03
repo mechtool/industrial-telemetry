@@ -1,0 +1,66 @@
+<div class="gwl-filters">
+  <div class="gwl-search">
+    <nz-icon nzType="search" class="gwl-search-icon" />
+    <input class="gwl-search-input" placeholder="Поиск по шлюзам..." />
+  </div>
+  <nz-select class="gwl-select" nzValue="Все типы">
+    @for (o of typeOptions; track o) {
+      <nz-option [nzValue]="o" [nzLabel]="o" />
+    }
+  </nz-select>
+  <nz-select class="gwl-select" nzValue="Все статусы">
+    @for (o of statusOptions; track o) {
+      <nz-option [nzValue]="o" [nzLabel]="o" />
+    }
+  </nz-select>
+  <button nz-button class="gwl-reset">Сбросить фильтры</button>
+  <button nz-button nzType="primary" class="gwl-add-btn" (click)="openNewGateway()">
+    <nz-icon nzType="plus" />
+    Добавить шлюз
+  </button>
+</div>
+
+<div class="gwl-table-wrap">
+  <table class="gwl-table">
+    <thead>
+      <tr>
+        <th>Шлюз</th>
+        <th>IP-адрес</th>
+        <th>MAC-адрес</th>
+        <th>Тип подключения</th>
+        <th>Статус</th>
+        <th class="gwl-actions-col">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (g of gateways; track g.mac) {
+        <tr>
+          <td class="gwl-name">{{ g.name }}</td>
+          <td class="gwl-ip">{{ g.ip }}</td>
+          <td class="gwl-mac">{{ g.mac }}</td>
+          <td>{{ g.connectionType }}</td>
+          <td>
+            <span class="gwl-status" [style.color]="statusColor(g.status)">
+              <span class="gwl-status-dot" [style.background]="statusColor(g.status)"></span>
+              {{ g.status }}
+            </span>
+          </td>
+          <td class="gwl-actions-col">
+            <div class="gwl-row-actions">
+              <button class="gwl-icon-btn" title="Редактировать"><nz-icon nzType="edit" /></button>
+              <button class="gwl-icon-btn gwl-icon-btn--danger" title="Удалить"><nz-icon nzType="delete" /></button>
+              <button class="gwl-icon-btn" title="Ещё"><nz-icon nzType="ellipsis" /></button>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="gwl-footer">
+  <span>Всего: {{ gateways.length }} шлюзов</span>
+  <div class="gwl-pages">
+    <span class="gwl-page active">1</span>
+  </div>
+</div>

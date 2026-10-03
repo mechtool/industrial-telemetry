@@ -1,0 +1,207 @@
+/* ========================================================
+   Project — General (содержимое вкладки «Общие»)
+   ======================================================== */
+
+:host {
+  display: block;
+}
+
+.pg-card {
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.pg-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.pg-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pg-card-sync {
+  font-size: 12px;
+  color: #8fa6bc;
+}
+
+/* ── Реквизиты ── */
+.pg-req-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px 16px;
+}
+
+.pg-req-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #8fa6bc;
+}
+
+.pg-req-value {
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #10243a;
+  line-height: 1.4;
+}
+
+.pg-req-value--hl {
+  color: #0fa97e;
+}
+
+/* ── Две колонки ── */
+.pg-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pg-field {
+  margin-bottom: 16px;
+}
+
+.pg-field-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #8fa6bc;
+}
+
+.pg-field-value {
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #10243a;
+}
+
+.pg-route-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  border-radius: 6px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ── Ответственный ── */
+.pg-manager {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pg-manager-avatar {
+  background: #eaf4fe;
+  color: #1470c8;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pg-manager-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pg-manager-role {
+  margin-top: 3px;
+  font-size: 13px;
+  color: #5b7590;
+}
+
+.pg-manager-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f4f8;
+}
+
+.pg-contact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #10243a;
+}
+
+.pg-contact nz-icon {
+  color: #8fa6bc;
+}
+
+/* ── Сервисные организации ── */
+.pg-orgs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pg-org {
+  padding: 16px;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  background: #fafcfe;
+}
+
+.pg-org-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pg-org-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pg-org-role {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #eaf4fe;
+  color: #1470c8;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.pg-org-desc {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #5b7590;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1000px) {
+  .pg-req-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .pg-orgs {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .pg-cols {
+    grid-template-columns: 1fr;
+  }
+  .pg-req-grid {
+    grid-template-columns: 1fr;
+  }
+}

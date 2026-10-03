@@ -26,4 +26,5 @@ export class ProjectsUiService {
   readonly subtitle = signal('');
   readonly activeFilter = signal('Все');
   readonly shownCount = signal(0);
+  readonly isProjectView = signal(false);
 }

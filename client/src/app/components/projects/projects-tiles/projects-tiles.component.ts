@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
@@ -32,7 +33,7 @@ const STATUS_META: Record<string, { color: string; bg: string }> = {
 @Component({
   selector: 'app-projects-tiles',
   standalone: true,
-  imports: [CommonModule, NzButtonModule, NzIconModule, NzAvatarModule],
+  imports: [CommonModule, RouterLink, NzButtonModule, NzIconModule, NzAvatarModule],
   templateUrl: './projects-tiles.component.html',
   styleUrl: './projects-tiles.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,6 +51,7 @@ export class ProjectsTilesComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.ui.isProjectView.set(false);
     this.ui.subtitle.set('18 проектов · 7 в работе · обновлено 5 минут назад');
     this.ui.activeFilter.set('Все');
     this.ui.shownCount.set(6);

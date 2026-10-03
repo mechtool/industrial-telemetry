@@ -1,6 +1,6 @@
 <div class="pt-grid">
   @for (p of projects; track p.code) {
-    <div class="pt-card">
+    <div class="pt-card" [routerLink]="['/projects', p.code]">
       <div class="pt-card-top">
         <span class="pt-status" [style.color]="statusMeta(p.status).color" [style.background]="statusMeta(p.status).bg">
           <span class="pt-status-dot" [style.background]="statusMeta(p.status).color"></span>

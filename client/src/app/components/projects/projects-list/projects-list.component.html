@@ -12,7 +12,7 @@
     </thead>
     <tbody>
       @for (p of projects; track p.code) {
-        <tr class="pl-row">
+        <tr class="pl-row" [routerLink]="['/projects', p.code]">
           <td>
             <div class="pl-name">{{ p.name }}</div>
             <div class="pl-code">{{ p.code }}</div>
@@ -43,7 +43,7 @@
           </td>
           <td class="pl-deadline">{{ p.deadline }}</td>
           <td class="pl-actions-col">
-            <div class="pl-actions">
+            <div class="pl-actions" (click)="$event.stopPropagation()">
               <button class="pl-act-btn pl-act-edit" title="Редактировать">
                 <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
                   <path fill-rule="nonzero" d="M14.6433 3.50653C14.7054 3.1146 14.6418 2.71308 14.4617 2.3595C14.2816 2.00592 13.9942 1.71842 13.6407 1.53822C13.2871 1.35801 12.8856 1.29434 12.4937 1.35632C12.1017 1.41831 11.7395 1.60277 11.4588 1.88328L2.56145 10.7826C2.40667 10.9369 2.2922 11.127 2.22812 11.3359L1.34745 14.2373C1.33022 14.2949 1.32892 14.3562 1.34369 14.4145C1.35845 14.4728 1.38873 14.5261 1.43132 14.5686C1.4739 14.6111 1.5272 14.6413 1.58556 14.656C1.64392 14.6707 1.70516 14.6693 1.76279 14.6519L4.66479 13.7719C4.87357 13.7084 5.06357 13.5947 5.21812 13.4406L14.1161 4.54128C14.3967 4.26067 14.5812 3.89846 14.6433 3.50653Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.333333" />

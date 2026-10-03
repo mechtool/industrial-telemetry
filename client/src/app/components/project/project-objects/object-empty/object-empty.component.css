@@ -1,0 +1,77 @@
+/* ========================================================
+   Objects — Empty (пустое состояние раздела «Объекты»)
+   ======================================================== */
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.oe-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  min-height: 0;
+  padding: 56px 24px;
+}
+
+.oe-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: #f0f6fc;
+  color: #8fa6bc;
+  font-size: 30px;
+}
+
+.oe-title {
+  margin: 18px 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.oe-desc {
+  margin: 0 auto;
+  max-width: 460px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #5b7590;
+}
+
+.oe-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.oe-actions .ant-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.oe-action-secondary {
+  background: #f7fafd;
+  border: 1px solid #e6edf4;
+  color: #10243a;
+}
+
+.oe-tip {
+  margin: 22px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: #8fa6bc;
+}

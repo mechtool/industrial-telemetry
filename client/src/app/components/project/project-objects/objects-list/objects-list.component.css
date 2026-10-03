@@ -1,38 +1,96 @@
 /* ========================================================
-   Projects — List (вертикальный список, таблица)
+   Objects — List (список объектов телеметрии)
    ======================================================== */
 
 :host {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  height: 100%;
   min-height: 0;
   overflow: hidden;
 }
 
-.pl-table-wrap {
+.ol-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ol-search {
+  position: relative;
+  width: 240px;
+}
+
+.ol-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8fa6bc;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.ol-search-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 12px 0 34px;
+  border: 1px solid #e6edf4;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+  color: #10243a;
+  outline: none;
+}
+
+.ol-search-input:focus {
+  border-color: #1e88e5;
+}
+
+.ol-select {
+  width: 160px;
+}
+
+.ol-reset {
+  height: 34px;
+  border-radius: 6px;
+}
+
+.ol-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 16px;
+  margin-left: auto;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.ol-table-wrap {
   flex: 1;
   min-height: 0;
-  margin-top: 20px;
+  margin-top: 16px;
   background: #fff;
   border: 1px solid #eef2f7;
   border-radius: 10px;
   overflow: auto;
 }
 
-.pl-table {
+.ol-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.pl-table th {
-  padding: 24px 18px;
+.ol-table th {
+  padding: 14px 16px;
   text-align: left;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   color: #8fa6bc;
   border-bottom: 1px solid #eef2f7;
   white-space: nowrap;
@@ -42,116 +100,57 @@
   z-index: 1;
 }
 
-.pl-table td {
-  padding: 14px 18px;
+.ol-table td {
+  padding: 13px 16px;
   border-bottom: 1px solid #f0f4f8;
   vertical-align: middle;
 }
 
-.pl-row {
-  cursor: pointer;
-}
-
-.pl-row:last-child td {
+.ol-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.pl-row:hover td {
+.ol-table tbody tr:hover td {
   background: #fafcfe;
 }
 
-.pl-name {
-  font-weight: 600;
-  color: #10243a;
-}
-
-.pl-code {
-  margin-top: 2px;
-  font-size: 12px;
-  color: #8fa6bc;
-}
-
-.pl-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+.ol-name {
   font-weight: 600;
   color: #10243a;
   white-space: nowrap;
 }
 
-.pl-status-dot {
-  width: 8px;
-  height: 8px;
+.ol-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ol-status-dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
 }
 
-.pl-progress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 120px;
-}
-
-.pl-progress-track {
-  flex: 1;
-  height: 6px;
-  border-radius: 999px;
-  background: #eef2f7;
-  overflow: hidden;
-}
-
-.pl-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: #1e88e5;
-}
-
-.pl-progress-val {
-  font-size: 12px;
-  font-weight: 600;
-  color: #5b7590;
-  min-width: 34px;
-  text-align: right;
-}
-
-.pl-team {
-  display: flex;
-  align-items: center;
-}
-
-.pl-avatar {
-  background: #eaf4fe;
-  color: #1470c8;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.pl-team-extra {
-  margin-left: 6px;
-  font-size: 12px;
-  font-weight: 600;
+.ol-updated {
   color: #8fa6bc;
-}
-
-.pl-deadline {
-  font-size: 13px;
-  color: #5b7590;
   white-space: nowrap;
 }
 
-.pl-actions-col {
+.ol-actions-col {
   width: 120px;
   text-align: right;
 }
 
-.pl-actions {
+.ol-row-actions {
   display: inline-flex;
   align-items: center;
   gap: 2px;
 }
 
-.pl-act-btn {
+.ol-icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -160,56 +159,39 @@
   border: none;
   border-radius: 6px;
   background: transparent;
+  color: #8fa6bc;
+  font-size: 14px;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.pl-act-edit {
-  color: #5b7590;
-}
-
-.pl-act-edit:hover {
+.ol-icon-btn:hover {
   color: #1470c8;
   background: #eaf4fe;
 }
 
-.pl-act-del {
-  color: #d9574e;
-}
-
-.pl-act-del:hover {
+.ol-icon-btn--danger:hover {
   color: #b5453d;
   background: #fbeceb;
 }
 
-.pl-more-btn {
-  color: #8fa6bc;
-}
-
-.pl-more-btn:hover {
-  color: #1e88e5;
-}
-
-/* ── Pagination ── */
-.pl-pagination {
+.ol-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 16px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: #5b7590;
   flex-shrink: 0;
 }
 
-.pl-total {
-  font-size: 13px;
-  color: #5b7590;
-}
-
-.pl-pages {
+.ol-pages {
   display: flex;
+  align-items: center;
   gap: 6px;
 }
 
-.pl-page {
+.ol-page {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -223,12 +205,7 @@
   cursor: pointer;
 }
 
-.pl-page:hover {
-  border-color: #1e88e5;
-  color: #1470c8;
-}
-
-.pl-page.active {
+.ol-page.active {
   background: #1e88e5;
   border-color: #1e88e5;
   color: #fff;

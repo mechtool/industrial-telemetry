@@ -12,6 +12,7 @@
 .pt-card {
   display: flex;
   flex-direction: column;
+  cursor: pointer;
   background: #fff;
   border: 1px solid #eef2f7;
   border-radius: 10px;

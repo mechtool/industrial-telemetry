@@ -1,0 +1,55 @@
+<!-- Реквизиты проекта -->
+<div class="pg-card">
+  <div class="pg-card-head">
+    <h2 class="pg-card-title">Реквизиты проекта</h2>
+    <span class="pg-card-sync">{{ syncedAt }}</span>
+  </div>
+  <div class="pg-req-grid">
+    @for (r of requisites; track r.label) {
+      <div class="pg-req">
+        <div class="pg-req-label">{{ r.label }}</div>
+        <div class="pg-req-value" [class.pg-req-value--hl]="r.highlight">{{ r.value }}</div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Адрес + Ответственный -->
+<div class="pg-cols">
+  <div class="pg-card">
+    <h2 class="pg-card-title">Адрес, телефон и карта проезда</h2>
+    <div class="pg-field">
+      <div class="pg-field-label">АДРЕС ОБЪЕКТА</div>
+      <div class="pg-field-value">{{ address }}</div>
+    </div>
+    <div class="pg-field">
+      <div class="pg-field-label">ТЕЛЕФОН ОБЪЕКТА</div>
+      <div class="pg-field-value">{{ phoneObject }}</div>
+    </div>
+    <button nz-button class="pg-route-btn">
+      <nz-icon nzType="environment" />
+      Построить маршрут в Яндекс Картах
+    </button>
+  </div>
+
+  <div class="pg-card">
+    <h2 class="pg-card-title">Ответственный по проекту</h2>
+    <div class="pg-manager">
+      <nz-avatar [nzText]="managerInitials" [nzSize]="48" class="pg-manager-avatar"></nz-avatar>
+      <div class="pg-manager-info">
+        <div class="pg-manager-name">{{ managerName }}</div>
+        <div class="pg-manager-role">{{ managerRole }}</div>
+      </div>
+    </div>
+    <div class="pg-manager-contacts">
+      <div class="pg-contact">
+        <nz-icon nzType="phone" />
+        <span>{{ managerPhone }}</span>
+      </div>
+      <div class="pg-contact">
+        <nz-icon nzType="mail" />
+        <span>{{ managerEmail }}</span>
+      </div>
+    </div>
+  </div>
+</div>

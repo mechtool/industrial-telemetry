@@ -1,0 +1,106 @@
+<div class="gwn-root">
+  <h2 class="gwn-title">Добавление шлюза</h2>
+  <p class="gwn-subtitle">Настройте параметры шлюза RS485 и токены доступа MQTT</p>
+
+  <!-- Сетевые параметры -->
+  <div class="gwn-section-head">
+    <span class="gwn-section-title">Сетевые параметры</span>
+    <span class="gwn-section-note">Адреса шлюза, тип подключения и проброс порта</span>
+  </div>
+
+  <div class="gwn-nat-row">
+    <nz-switch [(ngModel)]="nat" name="nat"></nz-switch>
+    <span class="gwn-nat-label">За роутером (NAT)</span>
+  </div>
+
+  <div class="gwn-fields">
+    <div class="gwn-field">
+      <label class="gwn-label">IP-адрес шлюза <span class="gwn-req">*</span></label>
+      <input nz-input [(ngModel)]="ipAddress" name="ipAddress" placeholder="192.168.10.24" />
+    </div>
+    <div class="gwn-field">
+      <label class="gwn-label">IP назначения (MQTT / TCP-IP)</label>
+      <input nz-input [(ngModel)]="destinationIp" name="destinationIp" placeholder="mqtt://broker.zg-cloud.ru:1883" />
+    </div>
+    <div class="gwn-field">
+      <label class="gwn-label">MAC-адрес <span class="gwn-req">*</span></label>
+      <input nz-input [(ngModel)]="macAddress" name="macAddress" placeholder="A4:CF:12:8B:3E:07" />
+      <div class="gwn-field-error">Неверный формат, нужно 6 пар: A4:CF:12:8B:3E:07</div>
+    </div>
+    <div class="gwn-field">
+      <label class="gwn-label">Идентификатор шлюза</label>
+      <input nz-input [(ngModel)]="gatewayId" name="gatewayId" placeholder="GW-RS485-0001" />
+    </div>
+    <div class="gwn-field">
+      <label class="gwn-label">Тип подключения</label>
+      <nz-select [(ngModel)]="connectionType" name="connectionType">
+        @for (o of connectionTypeOptions; track o) {
+          <nz-option [nzValue]="o" [nzLabel]="o" />
+        }
+      </nz-select>
+    </div>
+    <div class="gwn-field">
+      <label class="gwn-label">Протокол передачи</label>
+      <nz-select [(ngModel)]="protocol" name="protocol">
+        @for (o of protocolOptions; track o) {
+          <nz-option [nzValue]="o" [nzLabel]="o" />
+        }
+      </nz-select>
+    </div>
+    <div class="gwn-field">
+      <label class="gwn-label">Статус шлюза</label>
+      <nz-select [(ngModel)]="status" name="status">
+        @for (o of statusOptions; track o) {
+          <nz-option [nzValue]="o" [nzLabel]="o" />
+        }
+      </nz-select>
+    </div>
+    <div class="gwn-field">
+      <label class="gwn-label">Проброшенный порт</label>
+      <input nz-input [(ngModel)]="port" name="port" placeholder="1883" />
+      <div class="gwn-field-hint">Порт 1883 проброшен на роутере</div>
+    </div>
+  </div>
+
+  <!-- Токены -->
+  <div class="gwn-tokens-head">
+    <div class="gwn-tokens-tabs">
+      <span class="gwn-tokens-tab gwn-tokens-tab--active">Токены</span>
+      <span class="gwn-tokens-tab">Соединения</span>
+      <span class="gwn-tokens-tab">Контроллеры</span>
+    </div>
+    <button nz-button class="gwn-add-token-btn">
+      <nz-icon nzType="plus" />
+      Добавить токен
+    </button>
+  </div>
+
+  <div class="gwn-token-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Токен</th>
+          <th>Имя провайдера</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of tokens; track t.token) {
+          <tr>
+            <td class="gwn-token-val">{{ t.token }}</td>
+            <td>{{ t.provider }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="gwn-token-hint">Если токенов нет, таблица пуста: добавьте токен, чтобы шлюз публиковал данные</p>
+
+  <!-- Footer -->
+  <div class="gwn-footer">
+    <span class="gwn-hint">Поля со звёздочкой * обязательны для заполнения</span>
+    <div class="gwn-actions">
+      <button nz-button (click)="cancel()">Отмена</button>
+      <button nz-button nzType="primary" (click)="submit()">Добавить шлюз</button>
+    </div>
+  </div>
+</div>

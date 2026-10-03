@@ -1,156 +1,151 @@
 /* ========================================================
-   Project — View (содержимое вкладки «Общие»)
+   Project — View (содержимое projects-shell, макет ProjectContent)
    ======================================================== */
 
-.pv-card {
-  background: #fff;
-  border: 1px solid #eef2f7;
-  border-radius: 10px;
-  padding: 20px 24px;
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.pv-card-head {
+/* ── Хлебные крошки ── */
+.pv-breadcrumb {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #f0f4f8;
+  gap: 8px;
+  flex-shrink: 0;
+  font-size: 12px;
+  letter-spacing: 0.5px;
 }
 
-.pv-card-title {
+.pv-crumb-link {
+  color: #8fa6bc;
+  text-decoration: none;
+}
+
+.pv-crumb-link:hover {
+  color: #1470c8;
+}
+
+.pv-crumb-sep {
+  color: #c4d2e0;
+}
+
+.pv-crumb-current {
+  color: #10243a;
+  font-weight: 600;
+}
+
+/* ── Шапка ── */
+.pv-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  margin-top: 14px;
+}
+
+.pv-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 24px;
   font-weight: 700;
   color: #10243a;
 }
 
-.pv-card-sync {
+.pv-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.pv-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #eaf4fe;
+  color: #1470c8;
   font-size: 12px;
-  color: #8fa6bc;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-/* ── Реквизиты: сетка ── */
-.pv-req-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 22px 16px;
+.pv-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1e88e5;
 }
 
-.pv-req-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: #8fa6bc;
+.pv-meta-text {
+  font-size: 13px;
+  color: #5b7590;
 }
 
-.pv-req-value {
-  margin-top: 5px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #10243a;
-  line-height: 1.4;
+.pv-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.pv-req-value--hl {
-  color: #0fa97e;
-}
-
-/* ── Две колонки ── */
-.pv-cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.pv-field {
-  margin-bottom: 16px;
-}
-
-.pv-field-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: #8fa6bc;
-}
-
-.pv-field-value {
-  margin-top: 5px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #10243a;
-}
-
-.pv-route-btn {
+.pv-head-actions .ant-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   height: 38px;
   border-radius: 6px;
   font-weight: 600;
-  margin-top: 4px;
 }
 
-/* ── Ответственный ── */
-.pv-manager {
+/* ── Табы ── */
+.pv-tabs {
   display: flex;
   align-items: center;
-  gap: 14px;
-}
-
-.pv-manager-avatar {
-  background: #eaf4fe;
-  color: #1470c8;
-  font-weight: 700;
+  gap: 4px;
   flex-shrink: 0;
+  margin-top: 16px;
+  border-bottom: 1px solid #eef2f7;
 }
 
-.pv-manager-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: #10243a;
-}
-
-.pv-manager-role {
-  margin-top: 3px;
-  font-size: 13px;
+.pv-tab {
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
   color: #5b7590;
-}
-
-.pv-manager-contacts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f4f8;
-}
-
-.pv-contact {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   font-size: 14px;
-  color: #10243a;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
 }
 
-.pv-contact nz-icon {
-  color: #8fa6bc;
+.pv-tab:hover {
+  color: #1470c8;
 }
 
-@media (max-width: 1000px) {
-  .pv-req-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.pv-tab--active {
+  color: #1470c8;
+  border-bottom-color: #1e88e5;
 }
 
+/* ── Контент ── */
+.pv-content {
+  flex: 1;
+  min-height: 0;
+  margin-top: 16px;
+  overflow: auto;
+}
+
+/* ── Responsive ── */
 @media (max-width: 720px) {
-  .pv-cols {
-    grid-template-columns: 1fr;
-  }
-  .pv-req-grid {
-    grid-template-columns: 1fr;
+  .pv-header {
+    flex-direction: column;
   }
 }

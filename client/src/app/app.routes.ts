@@ -54,29 +54,10 @@ export const routes: Routes = [
         path: 'tiles',
         loadComponent: () => import('./components/projects/projects-tiles/projects-tiles.component').then(m => m.ProjectsTilesComponent),
       },
-    ],
-  },
-  {
-    path: 'project/:id',
-    loadComponent: () => import('./components/project/project-shell/project-shell.component').then(m => m.ProjectShellComponent),
-    title: 'Проект — CRYOMON',
-    children: [
-      { path: '', redirectTo: 'general', pathMatch: 'full' },
       {
-        path: 'general',
+        path: ':id',
         loadComponent: () => import('./components/project/project-view/project-view.component').then(m => m.ProjectViewComponent),
-      },
-      {
-        path: 'dashboard',
-        loadComponent: () => import('./components/project/project-dashboard/project-dashboard.component').then(m => m.ProjectDashboardComponent),
-      },
-      {
-        path: 'users',
-        loadComponent: () => import('./components/project/project-users/users-list/users-list.component').then(m => m.UsersListComponent),
-      },
-      {
-        path: 'users-empty',
-        loadComponent: () => import('./components/project/project-users/users-empty/users-empty.component').then(m => m.UsersEmptyComponent),
+        title: 'Проект — CRYOMON',
       },
     ],
   },

@@ -36,6 +36,7 @@ export class ProjectsEmptyComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    this.ui.isProjectView.set(false);
     this.ui.subtitle.set('Выбранный фильтр не содержит проектов');
     this.ui.activeFilter.set('Архив');
     this.ui.shownCount.set(0);

@@ -1,0 +1,226 @@
+.ogn-root {
+  padding: 4px 2px 0;
+}
+
+.ogn-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.ogn-subtitle {
+  margin: 6px 0 18px;
+  font-size: 13px;
+  color: #5b7590;
+}
+
+.ogn-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f4f8;
+}
+
+.ogn-section-head--sub {
+  margin-top: 18px;
+}
+
+.ogn-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.ogn-section-note {
+  font-size: 12px;
+  color: #8fa6bc;
+}
+
+.ogn-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 18px;
+}
+
+.ogn-field {
+  min-width: 0;
+}
+
+.ogn-field nz-select {
+  width: 100%;
+}
+
+.ogn-field--wide {
+  grid-column: span 2;
+}
+
+.ogn-label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #5b7590;
+}
+
+.ogn-req {
+  color: #d9574e;
+}
+
+.ogn-map-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ogn-map-row input {
+  flex: 1;
+}
+
+.ogn-map-btn {
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+
+.ogn-contacts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.ogn-contacts-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.ogn-contacts-sub {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8fa6bc;
+}
+
+.ogn-add-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.ogn-contact-card {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid #e6edf4;
+  border-radius: 8px;
+  background: #fafcfe;
+}
+
+.ogn-contact-card-title {
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.ogn-contact-hint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #8fa6bc;
+}
+
+.ogn-contact-example {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.ogn-contact-example-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ogn-contact-example-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.ogn-contact-example-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #eaf4fe;
+  color: #1470c8;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ogn-contact-example-role {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #5b7590;
+}
+
+.ogn-contact-example-line {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #10243a;
+}
+
+.ogn-contact-tip {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #8fa6bc;
+}
+
+.ogn-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #f0f4f8;
+}
+
+.ogn-hint {
+  font-size: 12px;
+  color: #8fa6bc;
+}
+
+.ogn-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ogn-actions .ant-btn {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .ogn-fields {
+    grid-template-columns: 1fr;
+  }
+  .ogn-field--wide {
+    grid-column: span 1;
+  }
+  .ogn-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

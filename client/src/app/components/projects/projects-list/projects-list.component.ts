@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
@@ -26,7 +27,7 @@ const STATUS_COLORS: Record<string, string> = {
 @Component({
   selector: 'app-projects-list',
   standalone: true,
-  imports: [CommonModule, NzButtonModule, NzIconModule, NzAvatarModule],
+  imports: [CommonModule, RouterLink, NzButtonModule, NzIconModule, NzAvatarModule],
   templateUrl: './projects-list.component.html',
   styleUrl: './projects-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +48,7 @@ export class ProjectsListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.ui.isProjectView.set(false);
     this.ui.subtitle.set('6 активных проектов · сортировка по ближайшему сроку');
     this.ui.activeFilter.set('Все');
     this.ui.shownCount.set(6);

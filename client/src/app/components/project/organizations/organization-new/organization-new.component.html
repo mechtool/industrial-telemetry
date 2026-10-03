@@ -1,0 +1,126 @@
+<div class="ogn-root">
+  <h2 class="ogn-title">Новая организация</h2>
+  <p class="ogn-subtitle">Заполните реквизиты нового объекта организации</p>
+
+  <!-- Реквизиты организации -->
+  <div class="ogn-section-head">
+    <span class="ogn-section-title">Реквизиты организации</span>
+    <span class="ogn-section-note">Основные сведения об организации</span>
+  </div>
+  <div class="ogn-fields">
+    <div class="ogn-field">
+      <label class="ogn-label">Наименование <span class="ogn-req">*</span></label>
+      <input nz-input [(ngModel)]="name" name="name" placeholder="Введите наименование объекта" />
+    </div>
+    <div class="ogn-field">
+      <label class="ogn-label">ID объекта</label>
+      <input nz-input [(ngModel)]="objectId" name="objectId" placeholder="Уникальный идентификатор" />
+    </div>
+    <div class="ogn-field">
+      <label class="ogn-label">Тип организации</label>
+      <nz-select [(ngModel)]="type" name="type" nzPlaceHolder="Выберите тип организации">
+        @for (o of typeOptions; track o) {
+          <nz-option [nzValue]="o" [nzLabel]="o" />
+        }
+      </nz-select>
+    </div>
+    <div class="ogn-field">
+      <label class="ogn-label">Проект</label>
+      <nz-select [(ngModel)]="project" name="project" nzPlaceHolder="Выберите проект">
+        @for (o of projectOptions; track o) {
+          <nz-option [nzValue]="o" [nzLabel]="o" />
+        }
+      </nz-select>
+    </div>
+  </div>
+
+  <!-- Контакты организации -->
+  <div class="ogn-section-head ogn-section-head--sub">
+    <span class="ogn-section-title">Контакты организации</span>
+    <span class="ogn-section-note">Адрес, телефон и контактные лица</span>
+  </div>
+  <div class="ogn-fields">
+    <div class="ogn-field">
+      <label class="ogn-label">Адрес организации</label>
+      <input nz-input [(ngModel)]="address" name="address" placeholder="Введите адрес организации" />
+    </div>
+    <div class="ogn-field">
+      <label class="ogn-label">Телефон</label>
+      <input nz-input [(ngModel)]="phone" name="phone" placeholder="+7 (___) ___-__-__" />
+    </div>
+    <div class="ogn-field ogn-field--wide">
+      <label class="ogn-label">Ссылка на карту</label>
+      <div class="ogn-map-row">
+        <input nz-input [(ngModel)]="mapLink" name="mapLink" placeholder="https://maps.yandex.ru/..." />
+        <button nz-button class="ogn-map-btn">Открыть карту</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Контакты (должностные лица) -->
+  <div class="ogn-contacts-head">
+    <div class="ogn-contacts-title">
+      Контакты <span class="ogn-contacts-sub">должностные лица</span>
+    </div>
+    <button nz-button class="ogn-add-contact-btn">
+      <nz-icon nzType="plus" />
+      Добавить контакт
+    </button>
+  </div>
+
+  <!-- Создание нового контакта -->
+  <div class="ogn-contact-card">
+    <div class="ogn-contact-card-title">Создание нового контакта</div>
+    <div class="ogn-fields">
+      <div class="ogn-field">
+        <label class="ogn-label">Фамилия, инициалы <span class="ogn-req">*</span></label>
+        <input nz-input [(ngModel)]="contactName" name="contactName" placeholder="Введите фамилию и инициалы" />
+      </div>
+      <div class="ogn-field">
+        <label class="ogn-label">Должность</label>
+        <input nz-input [(ngModel)]="contactRole" name="contactRole" placeholder="Введите должность" />
+      </div>
+      <div class="ogn-field">
+        <label class="ogn-label">Телефон <span class="ogn-req">*</span></label>
+        <input nz-input [(ngModel)]="contactPhone" name="contactPhone" placeholder="+7 (___) ___-__-__" />
+      </div>
+      <div class="ogn-field">
+        <label class="ogn-label">Email</label>
+        <input nz-input [(ngModel)]="contactEmail" name="contactEmail" placeholder="example@mail.ru" />
+      </div>
+      <div class="ogn-field">
+        <label class="ogn-label">Статус</label>
+        <nz-select [(ngModel)]="contactStatus" name="contactStatus">
+          @for (o of contactStatusOptions; track o) {
+            <nz-option [nzValue]="o" [nzLabel]="o" />
+          }
+        </nz-select>
+      </div>
+    </div>
+    <div class="ogn-contact-hint">*— обязательное поле для заполнения</div>
+  </div>
+
+  <!-- Пример контакта -->
+  <div class="ogn-contact-example">
+    <div class="ogn-contact-example-top">
+      <span class="ogn-contact-example-name">Иванов Иван Иванович</span>
+      <span class="ogn-contact-example-badge">Основной</span>
+    </div>
+    <div class="ogn-contact-example-role">Генеральный директор</div>
+    <div class="ogn-contact-example-line">
+      <span>+7 (495) 123-45-67</span>
+      <span>ivanov@company.ru</span>
+    </div>
+  </div>
+  <p class="ogn-contact-tip">Нажмите «Добавить контакт», чтобы добавить контактное лицо</p>
+
+  <!-- Footer -->
+  <div class="ogn-footer">
+    <span class="ogn-hint">Поля отмеченные * обязательны для заполнения</span>
+    <div class="ogn-actions">
+      <button nz-button (click)="cancel()">Отмена</button>
+      <button nz-button (click)="saveDraft()">Сохранить черновик</button>
+      <button nz-button nzType="primary" (click)="submit()">Добавить организацию</button>
+    </div>
+  </div>
+</div>
