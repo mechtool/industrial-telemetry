@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -11,6 +11,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { AuthService, initialsOf, primaryRole } from '../../../services/auth.service';
 import { ProjectsUiService } from '../../../services/projects-ui.service';
 import { ProjectNewComponent } from '../../project/project-new/project-new.component';
+import { UserProfileComponent } from '../../user-profile/user-profile.component';
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Администратор',
@@ -51,6 +52,13 @@ export class ProjectsShellComponent {
   private readonly modalService = inject(NzModalService);
   readonly ui = inject(ProjectsUiService);
 
+  /** Свёрнут ли левый сайдбар. */
+  readonly collapsed = signal(false);
+
+  toggleSidebar(): void {
+    this.collapsed.update((value) => !value);
+  }
+
   readonly navItems: NavItem[] = [
     { id: '01', label: 'Проекты', icon: 'folder', route: '/projects' },
     { id: '02', label: 'Пользователи', icon: 'team' },
@@ -81,6 +89,17 @@ export class ProjectsShellComponent {
     this.modalService.create({
       nzTitle: '',
       nzContent: ProjectNewComponent,
+      nzFooter: null,
+      nzWidth: 840,
+      nzMaskClosable: false,
+      nzBodyStyle: { padding: '24px 28px' },
+    });
+  }
+
+  openProfile(): void {
+    this.modalService.create({
+      nzTitle: '',
+      nzContent: UserProfileComponent,
       nzFooter: null,
       nzWidth: 840,
       nzMaskClosable: false,

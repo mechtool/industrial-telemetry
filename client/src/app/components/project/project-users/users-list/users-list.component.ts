@@ -7,6 +7,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { UserNewComponent } from '../user-new/user-new.component';
+import { UserProfileComponent } from '../../../user-profile/user-profile.component';
 
 interface UserRow {
   id: string;
@@ -55,6 +56,17 @@ export class UsersListComponent {
     this.modalService.create({
       nzTitle: '',
       nzContent: UserNewComponent,
+      nzFooter: null,
+      nzWidth: 760,
+      nzMaskClosable: false,
+      nzBodyStyle: { padding: '24px 28px' },
+    });
+  }
+
+  openProfile(): void {
+    this.modalService.create({
+      nzTitle: '',
+      nzContent: UserProfileComponent,
       nzFooter: null,
       nzWidth: 760,
       nzMaskClosable: false,

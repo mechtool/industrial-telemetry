@@ -53,6 +53,8 @@ import {
   ClusterOutline,
   EditOutline,
   DeleteOutline,
+  MenuFoldOutline,
+  MenuUnfoldOutline,
 } from '@ant-design/icons-angular/icons';
 import { routes } from './app.routes';
 
@@ -105,6 +107,8 @@ const nzIcons = [
   ClusterOutline,
   EditOutline,
   DeleteOutline,
+  MenuFoldOutline,
+  MenuUnfoldOutline,
 ];
 
 export const appConfig: ApplicationConfig = {

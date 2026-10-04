@@ -1,0 +1,87 @@
+<div class="un-root">
+  <h2 class="un-title">Создание пользователя</h2>
+  <p class="un-subtitle">Заполните реквизиты для добавления нового пользователя в систему</p>
+
+  <div class="un-section-head">
+    <span class="un-section-title">Реквизиты пользователя</span>
+    <span class="un-section-note">Основные данные и параметры доступа</span>
+  </div>
+  <div class="un-fields">
+    <div class="un-field">
+      <label class="un-label">Имя <span class="un-req">*</span></label>
+      <input nz-input [(ngModel)]="name" name="name" placeholder="Введите имя пользователя" />
+    </div>
+    <div class="un-field">
+      <label class="un-label">Организация <span class="un-req">*</span></label>
+      <nz-select [(ngModel)]="organization" name="organization" nzPlaceHolder="Выберите организацию">
+        <nz-option nzValue="Глобус Гипермаркет" nzLabel="Глобус Гипермаркет" />
+      </nz-select>
+    </div>
+    <div class="un-field">
+      <label class="un-label">Должность</label>
+      <input nz-input [(ngModel)]="position" name="position" placeholder="Введите должность" />
+    </div>
+    <div class="un-field">
+      <label class="un-label">Проект <span class="un-req">*</span></label>
+      <nz-select [(ngModel)]="project" name="project" nzPlaceHolder="Выберите проект">
+        <nz-option nzValue="Холод-Логистик Север" nzLabel="Холод-Логистик Север" />
+      </nz-select>
+    </div>
+    <div class="un-field">
+      <label class="un-label">Телефон</label>
+      <input nz-input [(ngModel)]="phone" name="phone" placeholder="+7 (___) ___-__-__" />
+    </div>
+    <div class="un-field">
+      <label class="un-label">Email <span class="un-req">*</span></label>
+      <input nz-input [(ngModel)]="email" name="email" placeholder="example@domain.ru" />
+    </div>
+    <div class="un-field">
+      <label class="un-label">Статус <span class="un-req">*</span></label>
+      <nz-select [(ngModel)]="status" name="status">
+        @for (o of statusOptions; track o) {
+          <nz-option [nzValue]="o" [nzLabel]="o" />
+        }
+      </nz-select>
+    </div>
+    <div class="un-field">
+      <label class="un-label">Дата создания</label>
+      <input nz-input [(ngModel)]="createdDate" name="createdDate" placeholder="дд.мм.гггг" />
+    </div>
+  </div>
+
+  <div class="un-rights">
+    <span class="un-label">Права доступа <span class="un-req">*</span></span>
+    <div class="un-rights-options">
+      @for (r of roleOptions; track r) {
+        <label class="un-rights-item">
+          <input type="checkbox" [checked]="rights.includes(r)" (change)="toggleRight(r, $any($event.target).checked)" />
+          <span>{{ r }}</span>
+        </label>
+      }
+    </div>
+  </div>
+
+  <div class="un-section-head un-section-head--sub">
+    <span class="un-section-title">Учётные данные</span>
+    <span class="un-section-note">Логин и пароль для входа в систему</span>
+  </div>
+  <div class="un-fields">
+    <div class="un-field">
+      <label class="un-label">Логин <span class="un-req">*</span></label>
+      <input nz-input [(ngModel)]="login" name="login" placeholder="Введите логин" />
+    </div>
+    <div class="un-field">
+      <label class="un-label">Пароль <span class="un-req">*</span></label>
+      <input nz-input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" />
+    </div>
+  </div>
+
+  <div class="un-footer">
+    <span class="un-hint">Поля отмеченные * обязательны для заполнения</span>
+    <div class="un-actions">
+      <button nz-button (click)="cancel()">Отмена</button>
+      <button nz-button (click)="saveDraft()">Сохранить черновик</button>
+      <button nz-button nzType="primary" (click)="submit()">Добавить пользователя</button>
+    </div>
+  </div>
+</div>

@@ -49,7 +49,7 @@
       </thead>
       <tbody>
         @for (u of users; track u.id) {
-          <tr>
+          <tr (click)="openProfile()">
             <td class="ul-id">{{ u.id }}</td>
             <td>
               <div class="ul-user">
@@ -69,7 +69,7 @@
             </td>
             <td class="ul-date">{{ u.date }}</td>
             <td>
-              <div class="ul-row-actions">
+              <div class="ul-row-actions" (click)="$event.stopPropagation()">
                 <button class="ul-icon-btn" title="Редактировать"><nz-icon nzType="edit" /></button>
                 <button class="ul-icon-btn ul-icon-btn--danger" title="Удалить"><nz-icon nzType="delete" /></button>
                 <button class="ul-icon-btn" title="Ещё"><nz-icon nzType="ellipsis" /></button>

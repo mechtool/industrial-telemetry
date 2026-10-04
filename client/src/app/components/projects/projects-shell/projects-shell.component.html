@@ -1,6 +1,17 @@
 <nz-layout class="ps-root">
   <!-- ======================= Header ======================= -->
   <nz-header class="ps-header">
+    <button
+      nz-button
+      nzType="text"
+      class="ps-collapse-btn"
+      (click)="toggleSidebar()"
+      [title]="collapsed() ? 'Развернуть меню' : 'Свернуть меню'"
+      aria-label="Переключить боковое меню"
+    >
+      <nz-icon [nzType]="collapsed() ? 'menu-unfold' : 'menu-fold'" />
+    </button>
+
     <div class="ps-logo">
       <svg class="ps-logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <g stroke="#1e88e5" stroke-width="2" stroke-linecap="round">
@@ -33,7 +44,7 @@
 
       <span class="ps-header-divider"></span>
 
-      <div class="ps-user">
+      <div class="ps-user" (click)="openProfile()">
         <nz-avatar [nzText]="avatarInitial()" [nzSize]="32" />
         <div class="ps-user-text">
           <span class="ps-user-name">{{ userName() }}</span>
@@ -45,7 +56,15 @@
 
   <nz-layout class="ps-main">
     <!-- ======================= Sidebar ======================= -->
-    <nz-sider class="ps-sider" nzWidth="280px" nzTheme="light">
+    <nz-sider
+      class="ps-sider"
+      nzWidth="280px"
+      [nzCollapsedWidth]="0"
+      nzTheme="light"
+      [nzCollapsible]="true"
+      [nzCollapsed]="collapsed()"
+      [nzTrigger]="null"
+    >
       <div class="ps-sider-brand">
         <span class="ps-brand-label">ПРОДУКТОВЫЙ РИТЕЙЛ</span>
         <div class="ps-brand-name-row">

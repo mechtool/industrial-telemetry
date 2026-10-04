@@ -135,6 +135,14 @@
   border-bottom: none;
 }
 
+.ul-table tbody tr {
+  cursor: pointer;
+}
+
+.ul-table tbody tr:hover td {
+  background: #f7fafd;
+}
+
 .ul-id {
   color: #8fa6bc;
   font-weight: 600;

@@ -60,6 +60,23 @@
   white-space: nowrap;
 }
 
+.ps-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  color: #1e88e5;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.ps-collapse-btn:hover {
+  background: #f7fafd;
+  color: #1470c8;
+}
+
 .ps-header-right {
   display: flex;
   align-items: center;
