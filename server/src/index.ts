@@ -14,6 +14,7 @@ import mqttRouter from './routes/mqtt.routes.js';
 import projectsRouter from './routes/projects.routes.js';
 import usersRouter from './routes/users.routes.js';
 import settingsRouter from './routes/settings.routes.js';
+import addressRouter from './routes/address.routes.js';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
@@ -76,6 +77,7 @@ app.use('/api/mqtt', kratosAuth, mqttRouter);
 app.use('/api/projects', kratosAuth, projectsRouter);
 app.use('/api/users', kratosAuth, usersRouter);
 app.use('/api/settings', kratosAuth, settingsRouter);
+app.use('/api/address', kratosAuth, addressRouter);
 
 // --------------- Kratos public proxy (/.ory → Kratos) ---------------
 app.use('/.ory', createProxyMiddleware({

@@ -22,6 +22,12 @@ export const config = {
     writeUrl: process.env.KETO_WRITE_URL || 'http://localhost:4467',
   },
 
+  // ---- DaData (подсказки адресов РФ) ----
+  dadata: {
+    apiKey: process.env.DADATA_API_KEY || '',
+    apiUrl: process.env.DADATA_API_URL || 'https://suggestions.dadata.ru/suggestions/api/4_1/rs',
+  },
+
   // ---- Webhooks (Ory Kratos → server) ----
   webhook: {
     secret: process.env.WEBHOOK_SECRET || '',
