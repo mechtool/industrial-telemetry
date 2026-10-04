@@ -4,15 +4,14 @@
       <tr>
         <th>НАЗВАНИЕ ПРОЕКТА</th>
         <th>СТАТУС</th>
-        <th>ПРОГРЕСС</th>
-        <th>КОМАНДА</th>
-        <th>ДЕДЛАЙН</th>
-        <th class="pl-actions-col">ДЕЙСТВИЯ</th>
+        <th>ТИП МОНИТОРИНГА</th>
+        <th>ОТВЕТСТВЕННОЕ ЛИЦО</th>
+        <th>АДРЕС</th>
       </tr>
     </thead>
     <tbody>
-      @for (p of projects; track p.code) {
-        <tr class="pl-row" [routerLink]="['/projects', p.code]">
+      @for (p of projects$ | async; track p.id) {
+        <tr class="pl-row" [routerLink]="['/projects', p.id]">
           <td>
             <div class="pl-name">{{ p.name }}</div>
             <div class="pl-code">{{ p.code }}</div>
@@ -23,47 +22,16 @@
               {{ p.status }}
             </span>
           </td>
+          <td>{{ p.monitoringType || '—' }}</td>
           <td>
-            <div class="pl-progress">
-              <div class="pl-progress-track">
-                <div class="pl-progress-fill" [style.width.%]="p.progress"></div>
-              </div>
-              <span class="pl-progress-val">{{ p.progress }}%</span>
-            </div>
+            <div>{{ p.manager || '—' }}</div>
+            <div class="pl-code">{{ p.role }}</div>
           </td>
-          <td>
-            <div class="pl-team">
-              <nz-avatar-group>
-                @for (initials of p.team; track initials) {
-                  <nz-avatar [nzText]="initials" [nzSize]="28" class="pl-avatar"></nz-avatar>
-                }
-              </nz-avatar-group>
-              <span class="pl-team-extra">+{{ p.teamExtra }}</span>
-            </div>
-          </td>
-          <td class="pl-deadline">{{ p.deadline }}</td>
-          <td class="pl-actions-col">
-            <div class="pl-actions" (click)="$event.stopPropagation()">
-              <button class="pl-act-btn pl-act-edit" title="Редактировать">
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
-                  <path fill-rule="nonzero" d="M14.6433 3.50653C14.7054 3.1146 14.6418 2.71308 14.4617 2.3595C14.2816 2.00592 13.9942 1.71842 13.6407 1.53822C13.2871 1.35801 12.8856 1.29434 12.4937 1.35632C12.1017 1.41831 11.7395 1.60277 11.4588 1.88328L2.56145 10.7826C2.40667 10.9369 2.2922 11.127 2.22812 11.3359L1.34745 14.2373C1.33022 14.2949 1.32892 14.3562 1.34369 14.4145C1.35845 14.4728 1.38873 14.5261 1.43132 14.5686C1.4739 14.6111 1.5272 14.6413 1.58556 14.656C1.64392 14.6707 1.70516 14.6693 1.76279 14.6519L4.66479 13.7719C4.87357 13.7084 5.06357 13.5947 5.21812 13.4406L14.1161 4.54128C14.3967 4.26067 14.5812 3.89846 14.6433 3.50653Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.333333" />
-                  <path d="M10 3.33325L12.6667 5.99992" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.333333" />
-                </svg>
-              </button>
-              <button class="pl-act-btn pl-act-del" title="Удалить">
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
-                  <path d="M6.6665 7.33325L6.6665 11.3333" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.333333" />
-                  <path d="M9.3335 7.33325L9.3335 11.3333" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.333333" />
-                  <path fill-rule="nonzero" d="M12.6668 4L12.6668 13.3333C12.6668 13.5674 12.6052 13.7973 12.4882 14C12.3712 14.2027 12.2029 14.371 12.0002 14.488C11.7975 14.6051 11.5675 14.6667 11.3335 14.6667L4.66683 14.6667C4.43278 14.6667 4.20285 14.6051 4.00016 14.488C3.79747 14.371 3.62915 14.2027 3.51213 14C3.3951 13.7973 3.3335 13.5674 3.3335 13.3333L3.3335 4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.333333" />
-                  <path d="M2 4L14 4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.333333" />
-                  <path fill-rule="nonzero" d="M5.3335 3.99992L5.3335 2.66659C5.3335 2.43254 5.3951 2.20261 5.51213 1.99992C5.62915 1.79723 5.79747 1.62891 6.00016 1.51188C6.20286 1.39486 6.43278 1.33325 6.66683 1.33325L9.3335 1.33325C9.56754 1.33325 9.79747 1.39486 10.0002 1.51188C10.2029 1.62891 10.3712 1.79723 10.4882 1.99992C10.6052 2.20261 10.6668 2.43254 10.6668 2.66659L10.6668 3.99992" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.333333" />
-                </svg>
-              </button>
-              <button nz-button nzType="text" class="pl-more-btn">
-                <nz-icon nzType="ellipsis" />
-              </button>
-            </div>
-          </td>
+          <td>{{ p.address || '—' }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5">Проектов пока нет</td>
         </tr>
       }
     </tbody>
@@ -71,10 +39,5 @@
 </div>
 
 <div class="pl-pagination">
-  <span class="pl-total">Всего проектов: 18</span>
-  <div class="pl-pages">
-    <span class="pl-page active">1</span>
-    <span class="pl-page">2</span>
-    <span class="pl-page">3</span>
-  </div>
+  <span class="pl-total">Всего проектов: {{ ui.totalCount() }}</span>
 </div>

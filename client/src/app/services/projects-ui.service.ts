@@ -21,7 +21,7 @@ export class ProjectsUiService {
     { label: 'Архив', count: 0 },
   ];
 
-  readonly totalCount = 18;
+  readonly totalCount = signal(0);
 
   readonly subtitle = signal('');
   readonly activeFilter = signal('Все');

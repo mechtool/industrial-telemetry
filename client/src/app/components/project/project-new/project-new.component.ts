@@ -12,6 +12,7 @@ import type { NzAutocompleteOptionComponent } from 'ng-zorro-antd/auto-complete'
 import { Subject, Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, tap, catchError } from 'rxjs/operators';
 import { AddressService, AddressSuggestion } from '../../../services/address.service';
+import { ProjectsService, CreateProjectInput } from '../../../services/projects.service';
 
 @Component({
   selector: 'app-project-new',
@@ -33,14 +34,15 @@ export class ProjectNewComponent implements OnInit {
   private readonly modalRef = inject(NzModalRef);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly addressService = inject(AddressService);
+  private readonly projectsService = inject(ProjectsService);
   private readonly addressInput$ = new Subject<string>();
 
-  readonly statusOptions = ['Новый', 'В работе', 'Приостановлен', 'Архив'];
+  readonly statusOptions = ['Черновик', 'Новый', 'В работе', 'Приостановлен', 'Архив'];
   readonly workModeOptions = ['Круглосуточно', 'пн–пт', 'по расписанию'];
   readonly monitoringTypeOptions = ['Мобильный', 'Статический', 'Динамический'];
 
   code = '';
-  status = 'Новый';
+  status = '';
   name = '';
   monitoringType = '';
   address = '';
@@ -48,6 +50,9 @@ export class ProjectNewComponent implements OnInit {
   workMode = '';
   manager = '';
   role = '';
+
+  /** Идёт сохранение (блокирует кнопки во время запроса). */
+  saving = false;
 
   /** Последние полученные подсказки (для разбора выбранного пункта). */
   addressSuggestions: AddressSuggestion[] = [];
@@ -77,8 +82,7 @@ export class ProjectNewComponent implements OnInit {
   get isFormValid(): boolean {
     return this.name.trim() !== ''
       && this.code.trim() !== ''
-      && this.status.trim() !== ''
-      && this.manager.trim() !== '';
+      && this.monitoringType.trim() !== '';
   }
 
   /** URL карты проезда (пересчитывается только при изменении адреса). */
@@ -136,11 +140,35 @@ export class ProjectNewComponent implements OnInit {
   }
 
   saveDraft(): void {
-    this.modalRef.close();
+    this.status = 'Черновик';
+    this.save();
   }
 
   submit(): void {
-    this.modalRef.close();
+    this.status = 'Новый';
+    this.save();
+  }
+
+  private save(): void {
+    this.saving = true;
+    this.projectsService.create(this.buildInput()).subscribe({
+      next: () => this.modalRef.close(true),
+      error: () => { this.saving = false; },
+    });
+  }
+
+  private buildInput(): CreateProjectInput {
+    return {
+      code: this.code,
+      name: this.name,
+      status: this.status,
+      monitoringType: this.monitoringType,
+      address: this.address,
+      phone: this.phone,
+      workMode: this.workMode,
+      manager: this.manager,
+      role: this.role,
+    };
   }
 
   onAddressInput(event: Event): void {
