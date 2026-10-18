@@ -8,6 +8,8 @@
     "build": "tsc",
     "start": "node dist/src/index.js",
     "dev": "tsx watch src/index.ts",
+    "keeper:start": "node dist/src/keeper.js",
+    "keeper:dev": "tsx src/keeper.ts",
     "migrate:roles": "tsx src/scripts/migrate-roles.ts"
   },
   "dependencies": {
@@ -16,13 +18,15 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "http-proxy-middleware": "^3.0.5",
-    "mqtt": "^5.10.4"
+    "mqtt": "^5.10.4",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/node": "^22.13.14",
+    "@types/pg": "^8.23.1",
     "tsx": "^4.19.3",
     "typescript": "~5.7.0"
   }

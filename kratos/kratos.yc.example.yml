@@ -133,12 +133,15 @@ identity:
 
 courier:
   smtp:
-    # Отдельный почтовый ящик приложения (не личный). Примеры:
-    #   - Яндекс 360 для домена industrial-telemetry.ru: smtps://noreply%40industrial-telemetry.ru:<пароль-приложения>@smtp.yandex.ru:465/?skip_ssl_verify=false
-    #   - Транзакционный сервис (Mailgun/SMTP2GO/SendGrid/Resend): smtps://<user>:<key>@<smtp-хост>:465/?skip_ssl_verify=false
-    connection_uri: smtps://noreply%40industrial-telemetry.ru:YOUR_APP_PASSWORD@smtp.yandex.ru:465/?skip_ssl_verify=false
+    # SMTP-доступ подставляется из переменной окружения SMTP_URI (файл .env.yc)
+    # при старте контейнера. Примеры значений SMTP_URI:
+    #   - Яндекс 360 для домена industrial-telemetry.ru:
+    #     smtps://noreply%40industrial-telemetry.ru:<пароль-приложения>@smtp.yandex.ru:465/?skip_ssl_verify=false
+    #   - Транзакционный сервис (Mailgun/SMTP2GO/SendGrid/Resend):
+    #     smtps://<user>:<key>@<smtp-хост>:465/?skip_ssl_verify=false
+    connection_uri: __SMTP_URI__
     from_address: noreply@industrial-telemetry.ru
     from_name: Industrial Telemetry
 
 feature_flags:
-  use_continue_with_transitions: false
+  use_continue_with_transitions: true

@@ -1,0 +1,67 @@
+{
+  "gateway": {
+    "model": "RS485 TO POE ETH (B)",
+    "firmware": "MQTT And JSON",
+    "mode": "independent Modbus RTU master, periodic JSON upload",
+    "note": "Конфиг для Vircom: JSON Configuration + MQTT Configuration, затем Download (прошивка). Точная схема импорта проверяется в Vircom."
+  },
+  "serial": {
+    "baudRate": 9600,
+    "dataBits": 8,
+    "parity": "even",
+    "stopBits": 1
+  },
+  "modbus": {
+    "slaveAddress": 1,
+    "functionCode": 3,
+    "addressConvention": "zero-based (PNU minus 1)"
+  },
+  "uplink": {
+    "protocol": "MQTT",
+    "periodMs": 30000,
+    "mqtt": {
+      "server": "158.160.204.124",
+      "port": 1883,
+      "clientId": "akcc55-gateway",
+      "username": "",
+      "password": "",
+      "publishTopic": "industrial/sensors/akcc55",
+      "qos": 1,
+      "retain": false,
+      "cleanSession": true,
+      "keepAliveSec": 60
+    },
+    "ntp": {
+      "enabled": true,
+      "timezone": "UTC"
+    }
+  },
+  "device": {
+    "id": "akcc55-084B4081",
+    "name": "AK-CC55 Compact",
+    "orderCode": "084B4081"
+  },
+  "registers": [
+    { "keyword": "pe",               "name": "Флаг ошибки Pe (испаритель)", "pnu": 20002, "address": 20001, "bytes": 2, "signed": false, "decimals": 0, "unit": "", "kind": "flag",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "s2",               "name": "Флаг ошибки S2",              "pnu": 20003, "address": 20002, "bytes": 2, "signed": false, "decimals": 0, "unit": "", "kind": "flag",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "s3",               "name": "Флаг ошибки S3",              "pnu": 20004, "address": 20003, "bytes": 2, "signed": false, "decimals": 0, "unit": "", "kind": "flag",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "s4",               "name": "Флаг ошибки S4",              "pnu": 20005, "address": 20004, "bytes": 2, "signed": false, "decimals": 0, "unit": "", "kind": "flag",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "s5",               "name": "Флаг ошибки S5",              "pnu": 20006, "address": 20005, "bytes": 2, "signed": false, "decimals": 0, "unit": "", "kind": "flag",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "setpoint",         "name": "Уставка (Cutout)",            "pnu": 100,   "address": 99,    "bytes": 2, "signed": true,  "decimals": 1, "unit": "°C", "kind": "temperature", "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "diff",             "name": "Дифференциал",                "pnu": 101,   "address": 100,   "bytes": 2, "signed": false, "decimals": 1, "unit": "K",  "kind": "number",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "main_switch",      "name": "Главный выключатель",         "pnu": 117,   "address": 116,   "bytes": 2, "signed": false, "decimals": 0, "unit": "",   "kind": "boolean",     "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "air_temp",         "name": "Температура воздуха Ther.air","pnu": 2532,  "address": 2531,  "bytes": 2, "signed": true,  "decimals": 1, "unit": "°C", "kind": "temperature", "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "evap_temp",        "name": "Температура испарителя Te",   "pnu": 2544,  "address": 2543,  "bytes": 2, "signed": true,  "decimals": 1, "unit": "°C", "kind": "temperature", "sensor": "pe", "pollingIntervalMs": 30 },
+    { "keyword": "food_temp",        "name": "Температура продукта",        "pnu": 2702,  "address": 2701,  "bytes": 2, "signed": true,  "decimals": 1, "unit": "°C", "kind": "temperature", "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "s2_temp",          "name": "Датчик S2",                   "pnu": 2537,  "address": 2536,  "bytes": 2, "signed": true,  "decimals": 1, "unit": "°C", "kind": "temperature", "sensor": "s2", "pollingIntervalMs": 30 },
+    { "keyword": "s3_temp",          "name": "Датчик S3",                   "pnu": 2530,  "address": 2529,  "bytes": 2, "signed": true,  "decimals": 1, "unit": "°C", "kind": "temperature", "sensor": "s3", "pollingIntervalMs": 30 },
+    { "keyword": "s4_temp",          "name": "Датчик S4",                   "pnu": 2531,  "address": 2530,  "bytes": 2, "signed": true,  "decimals": 1, "unit": "°C", "kind": "temperature", "sensor": "s4", "pollingIntervalMs": 30 },
+    { "keyword": "s5_temp",          "name": "Датчик S5",                   "pnu": 1011,  "address": 1010,  "bytes": 2, "signed": true,  "decimals": 1, "unit": "°C", "kind": "temperature", "sensor": "s5", "pollingIntervalMs": 30 },
+    { "keyword": "reg_state",        "name": "Состояние регулирования",     "pnu": 2007,  "address": 2006,  "bytes": 2, "signed": false, "decimals": 0, "unit": "",   "kind": "number",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "eev_opening",      "name": "Открытие EEV, %",             "pnu": 2528,  "address": 2527,  "bytes": 2, "signed": false, "decimals": 0, "unit": "%",  "kind": "number",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "pwm_od",           "name": "PWM OD %",                    "pnu": 2633,  "address": 2632,  "bytes": 2, "signed": false, "decimals": 0, "unit": "%",  "kind": "number",      "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "alarm_sum",        "name": "Суммарная авария",            "pnu": 2541,  "address": 2540,  "bytes": 2, "signed": false, "decimals": 0, "unit": "",   "kind": "boolean",     "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "alarm_high_temp",  "name": "Авария High t.alarm",         "pnu": 20007, "address": 20006, "bytes": 2, "signed": false, "decimals": 0, "unit": "",   "kind": "boolean",     "sensor": null, "pollingIntervalMs": 30 },
+    { "keyword": "alarm_low_temp",   "name": "Авария Low t.alarm",          "pnu": 20008, "address": 20007, "bytes": 2, "signed": false, "decimals": 0, "unit": "",   "kind": "boolean",     "sensor": null, "pollingIntervalMs": 30 }
+  ]
+}

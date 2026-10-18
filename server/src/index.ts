@@ -31,7 +31,9 @@ if (config.serveClient) {
   app.use(express.static(clientDist, {
     maxAge: '1h',
     setHeaders(res, filePath) {
-      if (/\.(js|css|woff2?|png|jpg|jpeg|gif|ico|svg|webp|webmanifest)$/.test(filePath)) {
+      if (/(ngsw\.json|ngsw-worker\.js|safety-worker\.js)$/.test(filePath)) {
+        res.setHeader('Cache-Control', 'no-cache');
+      } else if (/\.(js|css|woff2?|png|jpg|jpeg|gif|ico|svg|webp|webmanifest)$/.test(filePath)) {
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       } else if (/\.html$/.test(filePath)) {
         res.setHeader('Cache-Control', 'no-cache');

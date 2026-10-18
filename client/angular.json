@@ -38,10 +38,10 @@
           },
             "configurations": {
             "production": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "outputHashing": "none",
+              "optimization": true,
+              "extractLicenses": true,
+              "sourceMap": false,
+              "outputHashing": "all",
               "serviceWorker": "ngsw-config.json"
             },
             "development": {

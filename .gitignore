@@ -3,6 +3,7 @@ dist/
 .angular/
 .idea/
 *.log
+.npm-cache/
 .env
 .env.local
 .env.yc
@@ -12,3 +13,5 @@ dist/
 certbot/
 kratos/kratos.yc.yml
 kratos/kratos.docker.yml
+.lh-profile/
+lighthouse/

@@ -42,6 +42,24 @@ export const config = {
     topicPrefix: process.env.MQTT_TOPIC_PREFIX || 'industrial/',
   },
 
+  // ---- Сервис-хранитель телеметрии (keeper, отдельный процесс) ----
+  keeper: {
+    brokerUrl: process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883',
+    clientId: process.env.MQTT_KEEPER_CLIENT_ID || 'industrial-telemetry-keeper',
+    username: process.env.MQTT_USERNAME || undefined,
+    password: process.env.MQTT_PASSWORD || undefined,
+    topicPrefix: process.env.MQTT_TOPIC_PREFIX || 'industrial/',
+    topics: (process.env.MQTT_SUBSCRIBE_TOPICS || 'sensors/#').split(',').map((s: string) => s.trim()),
+    qos: parseInt(process.env.MQTT_QOS || '1', 10) as 0 | 1 | 2,
+    deviceId: process.env.DEVICE_ID || 'akcc55-084B4081',
+    databaseUrl:
+      process.env.DATABASE_URL ||
+      'postgres://kratos:kratos@localhost:5432/telemetry?sslmode=disable',
+    maxConnections: parseInt(process.env.DB_MAX_CONNECTIONS || '5', 10),
+    maxQueue: parseInt(process.env.DB_MAX_QUEUE || '10000', 10),
+    healthPort: parseInt(process.env.HEALTH_PORT || '3100', 10),
+  },
+
   // ---- CORS ----
   cors: {
     origin: process.env.CORS_ORIGIN

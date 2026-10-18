@@ -16,7 +16,12 @@
     "docker:yc:up": "npm run build:client && docker compose -f docker-compose.yc.yml --env-file .env.yc up -d",
     "docker:yc:down": "docker compose -f docker-compose.yc.yml down",
     "docker:yc:build": "npm run build:client && docker compose -f docker-compose.yc.yml build --no-cache",
-    "docker:yc:logs": "docker compose -f docker-compose.yc.yml logs -f"
+    "docker:yc:logs": "docker compose -f docker-compose.yc.yml logs -f",
+    "keeper:start": "cd server && npm run keeper:start",
+    "keeper:dev": "cd server && npm run keeper:dev",
+    "telemetry:up": "docker compose --profile telemetry up -d telemetry-migrate keeper",
+    "telemetry:down": "docker compose --profile telemetry down",
+    "telemetry:logs": "docker compose --profile telemetry logs -f keeper"
   },
   "engines": {
     "node": ">=22"

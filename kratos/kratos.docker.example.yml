@@ -3,14 +3,21 @@
 # Industrial Telemetry
 #
 # Скопировать:   cp kratos/kratos.docker.example.yml kratos/kratos.docker.yml
-# Затем в kratos/kratos.docker.yml подставить реальный SMTP-доступ
-# приложения в courier.smtp.connection_uri (место YOUR_APP_PASSWORD).
+# SMTP-доступ (courier.smtp.connection_uri) подставляется из переменной
+# окружения SMTP_URI (файл .env) автоматически при старте контейнера —
+# пароль приложения НЕ хранится в конфиге. Значение задаётся так:
+#   SMTP_URI=smtps://user:APP_PASSWORD@smtp.yandex.ru:465/?skip_ssl_verify=false
 # Для локальной отладки можно указать smtp://mailslurper:1025 (письма
 # попадут в веб-интерфейс http://localhost:4436).
 # Реальный файл kratos/kratos.docker.yml — gitignored.
 #
 # ВАЖНО: recovery-ссылка из письма после клика редиректится Kratos на
 # selfservice.flows.settings.ui_url — он должен указывать на /change-password.
+#
+# ВАЖНО: secrets.cookie / secrets.cipher (по 32 hex) и значение web_hook
+# (`change-me-webhook-secret`) заменить на случайные значения перед запуском
+# без флага --dev:
+#   node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 # ========================================================
 
 version: v1.3.1
@@ -19,7 +26,7 @@ dsn: postgres://kratos:kratos@kratos-db:5432/kratos?sslmode=disable
 
 serve:
   public:
-    base_url: http://localhost:4433
+    base_url: http://localhost:3000/.ory
     cors:
       enabled: true
       allowed_origins:
@@ -42,15 +49,19 @@ serve:
     base_url: http://0.0.0.0:4434
 
 selfservice:
-  default_browser_return_url: http://localhost:4200/projects
+  default_browser_return_url: http://localhost:3000/projects
   allowed_return_urls:
-    - http://localhost:4200
-    - http://localhost:4200/projects
-    - http://localhost:4200/dashboard
-    - http://localhost:4200/login
-    - http://localhost:4200/registration
-    - http://localhost:4200/recovery
-    - http://localhost:4200/change-password
+    - http://localhost:3000
+    - http://localhost:3000/projects
+    - http://localhost:3000/dashboard
+    - http://localhost:3000/login
+    - http://localhost:3000/registration
+    - http://localhost:3000/recovery
+    - http://localhost:3000/change-password
+    - http://localhost:3000/main-entrance
+    - http://localhost:3000/link-sent
+    - http://localhost:3000/settings
+    - http://localhost:3000/error
 
   methods:
     password:
@@ -62,14 +73,14 @@ selfservice:
 
   flows:
     error:
-      ui_url: http://localhost:4200/error
+      ui_url: http://localhost:3000/error
 
     login:
-      ui_url: http://localhost:4200/login
+      ui_url: http://localhost:3000/login
       lifespan: 10m
 
     registration:
-      ui_url: http://localhost:4200/registration
+      ui_url: http://localhost:3000/registration
       lifespan: 10m
       after:
         password:
@@ -90,21 +101,21 @@ selfservice:
                   ignore: true
 
     settings:
-      ui_url: http://localhost:4200/change-password
+      ui_url: http://localhost:3000/change-password
       privileged_session_max_age: 15m
 
     recovery:
       enabled: true
-      ui_url: http://localhost:4200/recovery
+      ui_url: http://localhost:3000/recovery
 
     logout:
       after:
-        default_browser_return_url: http://localhost:4200/login
+        default_browser_return_url: http://localhost:3000/login
 
 log:
-  level: debug
+  level: info
   format: text
-  leak_sensitive_values: true
+  leak_sensitive_values: false
 
 secrets:
   cookie:
@@ -128,9 +139,9 @@ identity:
 
 courier:
   smtp:
-    connection_uri: smtps://noreply%40industrial-telemetry.ru:YOUR_APP_PASSWORD@smtp.yandex.ru:465/?skip_ssl_verify=false
+    connection_uri: __SMTP_URI__
     from_address: noreply@industrial-telemetry.ru
     from_name: Industrial Telemetry
 
 feature_flags:
-  use_continue_with_transitions: false
+  use_continue_with_transitions: true
