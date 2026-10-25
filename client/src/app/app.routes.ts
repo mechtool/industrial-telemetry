@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './auth.guard';
+import { presentationGuard } from './components/presentation/presentation.guard';
 
 export const routes: Routes = [
   // ---- Аутентификация (без оболочки) ----
@@ -31,6 +33,7 @@ export const routes: Routes = [
   // ---- Основная оболочка приложения (после входа) ----
   {
     path: '',
+    canActivate: [authGuard],
     loadComponent: () => import('./components/app-shell/app-shell.component').then(m => m.AppShellComponent),
     children: [
       {
@@ -70,8 +73,29 @@ export const routes: Routes = [
   // ---- Настройки (отдельная страница, вне оболочки) ----
   {
     path: 'settings',
+    canActivate: [authGuard],
     loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent),
     title: 'Настройки — Industrial Telemetry',
+  },
+
+  // ---- Публичная презентация возможностей (только для демо-почты) ----
+  {
+    path: 'presentation',
+    canActivate: [presentationGuard],
+    loadComponent: () => import('./components/presentation/presentation.component').then(m => m.PresentationComponent),
+    title: 'Презентация возможностей — CRYOMON',
+    children: [
+      {
+        path: 'retail',
+        loadComponent: () => import('./components/presentation/presentation-retail/presentation-retail.component').then(m => m.PresentationRetailComponent),
+        title: 'Презентация: ритейл — CRYOMON',
+      },
+      {
+        path: 'service',
+        loadComponent: () => import('./components/presentation/presentation-service/presentation-service.component').then(m => m.PresentationServiceComponent),
+        title: 'Презентация: сервис — CRYOMON',
+      },
+    ],
   },
 
   // Обратная совместимость со старым адресом главной страницы.

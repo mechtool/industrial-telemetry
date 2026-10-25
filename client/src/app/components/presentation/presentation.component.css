@@ -1,0 +1,175 @@
+/* ========================================================
+   Presentation — оболочка публичной презентации
+   ======================================================== */
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f4f8fd;
+}
+
+.pres-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.pres-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 28px;
+  background: #fff;
+  border-bottom: 1px solid #eef2f7;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.pres-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.pres-logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #fff;
+  font-size: 22px;
+}
+
+.pres-title-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pres-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #10243a;
+  white-space: nowrap;
+}
+
+.pres-subtitle {
+  font-size: 12px;
+  color: #8fa6bc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pres-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pres-perspective-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 8px 0 0;
+}
+
+.pres-logout-icon {
+  margin-right: 6px;
+  vertical-align: -2px;
+}
+
+/* ── Tabs ── */
+.pres-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 14px 28px 0;
+  background: #fff;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.pres-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5b7590;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-bottom: none;
+  transition: color 0.2s, background 0.2s;
+}
+
+.pres-tab:hover {
+  color: #1470c8;
+  background: #f7fafd;
+}
+
+.pres-tab--active {
+  color: #1470c8;
+  background: #f4f8fd;
+  border-color: #eef2f7;
+  position: relative;
+}
+
+.pres-tab--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: #1e88e5;
+}
+
+/* ── Main ── */
+.pres-main {
+  flex: 1 1 auto;
+  padding: 24px 28px 40px;
+}
+
+/* ── Footer ── */
+.pres-footer {
+  padding: 14px 28px;
+  text-align: center;
+  font-size: 12px;
+  color: #8fa6bc;
+  background: #fff;
+  border-top: 1px solid #eef2f7;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .pres-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pres-header-right {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .pres-tabs {
+    padding: 10px 16px 0;
+    overflow-x: auto;
+  }
+
+  .pres-main {
+    padding: 16px 16px 32px;
+  }
+}

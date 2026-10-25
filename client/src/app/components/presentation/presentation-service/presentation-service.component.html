@@ -1,0 +1,80 @@
+<div class="pres-perspective">
+  <!-- Hero -->
+  <section class="pp-hero pp-hero--service">
+    <div class="pp-hero-badge">
+      <nz-icon nzType="cluster" />
+      ТОЧКА ЗРЕНИЯ: СЕРВИСНЫЕ ОРГАНИЗАЦИИ
+    </div>
+    <h1 class="pp-hero-title">
+      Обслуживайте парк оборудования —<br />
+      <span class="pp-hero-accent">удалённо и по фактическому состоянию</span>
+    </h1>
+    <p class="pp-hero-sub">
+      CRYOMON превращает сервисную организацию в проактивную команду: единый парк
+      клиентских объектов, удалённая диагностика, автоматическая диспетчеризация
+      и прозрачная отчётность по SLA.
+    </p>
+  </section>
+
+  <!-- Capabilities -->
+  <section class="pp-section">
+    <h2 class="pp-section-title">Возможности платформы для сервиса</h2>
+    <div class="pp-cards">
+      @for (c of capabilities; track c.title) {
+        <article class="pp-card">
+          <span class="pp-card-icon pp-card-icon--green">
+            <nz-icon [nzType]="c.icon" />
+          </span>
+          <h3 class="pp-card-title">{{ c.title }}</h3>
+          <p class="pp-card-desc">{{ c.desc }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="pp-section">
+    <h2 class="pp-section-title">Достоинства мониторинга для сервисных организаций</h2>
+    <div class="pp-benefits">
+      @for (b of benefits; track b.label) {
+        <div class="pp-benefit pp-benefit--green">
+          <div class="pp-benefit-value">{{ b.value }}</div>
+          <div class="pp-benefit-label">{{ b.label }}</div>
+          <div class="pp-benefit-desc">{{ b.desc }}</div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Techniques -->
+  <section class="pp-section">
+    <h2 class="pp-section-title">Используемые приёмы и технологии</h2>
+    <div class="pp-tech-list">
+      @for (t of techniques; track t.name) {
+        <div class="pp-tech">
+          <span class="pp-tech-dot pp-tech-dot--green"></span>
+          <div class="pp-tech-body">
+            <div class="pp-tech-name">{{ t.name }}</div>
+            <div class="pp-tech-desc">{{ t.desc }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Roadmap -->
+  <section class="pp-section">
+    <h2 class="pp-section-title">Будущие разработки</h2>
+    <div class="pp-roadmap">
+      @for (r of roadmap; track r.title) {
+        <div class="pp-roadmap-item">
+          <span class="pp-roadmap-index pp-roadmap-index--green">{{ $index + 1 }}</span>
+          <div class="pp-roadmap-body">
+            <div class="pp-roadmap-title">{{ r.title }}</div>
+            <div class="pp-roadmap-desc">{{ r.desc }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+</div>

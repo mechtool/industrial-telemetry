@@ -6,6 +6,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { AuthService } from '../../../services/auth.service';
+import { PresentationService } from '../../../services/presentation.service';
 
 interface KratosProxyResponse {
   success: boolean;
@@ -24,6 +25,7 @@ interface KratosProxyResponse {
 export class AuthLoginComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly presentationService = inject(PresentationService);
   private readonly notification = inject(NzNotificationService);
 
   email = '';
@@ -57,7 +59,13 @@ export class AuthLoginComponent {
 
       this.authService.checkSession().subscribe();
       this.notification.info('Вход выполнен', 'Вы успешно вошли в систему');
-      this.router.navigate(['/']);
+
+      // Демо-пользователь презентации попадает сразу в публичную презентацию.
+      if (this.presentationService.captureFromEmail(this.email)) {
+        this.router.navigate(['/presentation']);
+      } else {
+        this.router.navigate(['/']);
+      }
     } catch (err: any) {
       this.notification.error('Ошибка входа', err?.message || 'Не удалось выполнить вход');
     } finally {

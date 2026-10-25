@@ -19,6 +19,11 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
 
+// Доверяем первому прокси (nginx в проде, Angular dev-proxy локально),
+// чтобы req.secure/req.protocol корректно отражали схему клиента
+// (X-Forwarded-Proto) при определении Secure-атрибута cookie.
+app.set('trust proxy', 1);
+
 // --------------- Middleware ---------------
 app.use(compression());
 app.use(cors({ origin: config.cors.origin, credentials: true }));

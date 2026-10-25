@@ -10,7 +10,8 @@
     "dev": "tsx watch src/index.ts",
     "keeper:start": "node dist/src/keeper.js",
     "keeper:dev": "tsx src/keeper.ts",
-    "migrate:roles": "tsx src/scripts/migrate-roles.ts"
+    "migrate:roles": "tsx src/scripts/migrate-roles.ts",
+    "seed:presentation": "tsx src/scripts/seed-presentation-users.ts"
   },
   "dependencies": {
     "compression": "^1.8.1",

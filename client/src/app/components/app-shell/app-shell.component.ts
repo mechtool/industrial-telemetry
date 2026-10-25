@@ -89,4 +89,8 @@ export class AppShellComponent {
       nzBodyStyle: { padding: '24px 28px' },
     });
   }
+
+  logout(): void {
+    this.auth.logout();
+  }
 }

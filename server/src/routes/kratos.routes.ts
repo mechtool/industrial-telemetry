@@ -35,9 +35,29 @@ function getSetCookies(from: Response): string[] {
   return sc ? [sc] : [];
 }
 
-/** Проксирует Set-Cookie от Kratos клиенту (сессионные cookie для флоу). */
-function forwardSetCookie(from: Response, to: ExpressResponse): void {
-  for (const c of getSetCookies(from)) to.append('Set-Cookie', c);
+/**
+ * Убирает атрибут Secure из cookie-строки.
+ * Kratos выставляет Secure даже на HTTP — без снятия флага cookie не будет
+ * сохраняться браузером на незащищённом соединении (не-localhost HTTP).
+ */
+function stripSecure(cookie: string): string {
+  return cookie
+    .split(';')
+    .map((part) => part.trim())
+    .filter((part) => part.toLowerCase() !== 'secure')
+    .join('; ');
+}
+
+/**
+ * Проксирует Set-Cookie от Kratos клиенту (сессионные cookie для флоу).
+ * Если клиент подключён по HTTP — снимает флаг Secure, чтобы cookie работал
+ * на любом HTTP-хосте, а не только на localhost.
+ */
+function forwardSetCookie(req: Request, from: Response, to: ExpressResponse): void {
+  const secure = req.secure;
+  for (const c of getSetCookies(from)) {
+    to.append('Set-Cookie', secure ? c : stripSecure(c));
+  }
 }
 
 /** Получает settings-флоу Kratos, пробрасывая cookie клиента. */
@@ -121,7 +141,7 @@ router.post('/login', async (req: Request, res: ExpressResponse) => {
       redirect: 'manual',
     });
 
-    forwardSetCookie(loginRes, res);
+    forwardSetCookie(req, loginRes, res);
 
     if (loginRes.status === 422 || loginRes.status === 400) {
       const err = await loginRes.json();
@@ -172,7 +192,7 @@ router.post('/registration', async (req: Request, res: ExpressResponse) => {
       redirect: 'manual',
     });
 
-    forwardSetCookie(regRes, res);
+    forwardSetCookie(req, regRes, res);
 
     if (regRes.status === 422 || regRes.status === 400) {
       const err = await regRes.json();
@@ -307,7 +327,7 @@ router.get('/recovery', async (req: Request, res: ExpressResponse) => {
         return;
       }
       clearTimeout(timer);
-      forwardSetCookie(r, res);
+      forwardSetCookie(req, r, res);
       if (r.ok) {
         const flow = await r.json();
         res.json({ success: true, data: flow });
@@ -322,7 +342,7 @@ router.get('/recovery', async (req: Request, res: ExpressResponse) => {
             const sessionCookie = getSetCookies(r).map((c) => c.split(';')[0]).join('; ');
             const fr = await fetchSettingsFlow(newId, sessionCookie || cookie);
             if (fr.ok) {
-              forwardSetCookie(fr, res);
+              forwardSetCookie(req, fr, res);
               const d = await fr.json();
               res.json({ success: true, data: d }); return;
             }
@@ -339,7 +359,7 @@ router.get('/recovery', async (req: Request, res: ExpressResponse) => {
       res.status(502).json({ success: false, error: { message: 'Flow not found or expired' } });
       return;
     }
-    forwardSetCookie(flowRes, res);
+    forwardSetCookie(req, flowRes, res);
     const flow = await flowRes.json();
     res.json({ success: true, data: flow });
   } catch (err: any) {
@@ -374,7 +394,7 @@ router.post('/recovery/submit', async (req: Request, res: ExpressResponse) => {
       body: body.toString(),
       redirect: 'manual',
     });
-    forwardSetCookie(r, res);
+    forwardSetCookie(req, r, res);
     if (r.status === 422 || r.status === 400) {
       const e = await r.json();
       const m = extractErrorMessage(e?.ui) ?? e?.error?.message ?? 'Recovery error';
@@ -388,7 +408,7 @@ router.post('/recovery/submit', async (req: Request, res: ExpressResponse) => {
         const newId = u.searchParams.get('flow') ?? u.searchParams.get('id');
         if (newId) {
           const fr = await fetchSettingsFlow(newId, cookie);
-          if (fr.ok) { forwardSetCookie(fr, res); const d = await fr.json(); res.json({ success: true, data: d }); return; }
+          if (fr.ok) { forwardSetCookie(req, fr, res); const d = await fr.json(); res.json({ success: true, data: d }); return; }
         }
       }
       res.status(502).json({ success: false, error: { message: 'Redirect failed' } });
@@ -402,6 +422,66 @@ router.post('/recovery/submit', async (req: Request, res: ExpressResponse) => {
     res.json({ success: true, data: d });
   } catch (e: any) {
     console.error('[Kratos] Recovery submit:', e.message);
+    res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
+  }
+});
+
+// ============================================================
+// Logout
+// ============================================================
+
+/** Извлекает logout-токен из ответа Kratos (logout_token или logout_url). */
+function extractLogoutToken(body: { logout_url?: string; logout_token?: string }): string | null {
+  if (body.logout_token) return body.logout_token;
+  if (body.logout_url) {
+    try {
+      return new URL(body.logout_url).searchParams.get('token');
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * POST /api/kratos/logout
+ *
+ * Завершает сессию Kratos серверной стороной и возвращает success.
+ * Клиент после этого переходит на /login. Серверный прокси нужен потому,
+ * что браузерный logout-флоу Kratos (`/self-service/logout/browser`)
+ * возвращает JSON с logout_url, а не редирект — напрямую в браузере это
+ * показывало «пустую» страницу с JSON.
+ */
+router.post('/logout', async (req: Request, res: ExpressResponse) => {
+  const cookie = req.headers.cookie;
+
+  try {
+    const initRes = await fetch(`${config.kratos.publicUrl}/self-service/logout/browser`, {
+      headers: { 'Accept': 'application/json', ...(cookie ? { Cookie: cookie } : {}) },
+      redirect: 'manual',
+    });
+
+    // Нет активной сессии — считаем, что пользователь уже вышел.
+    if (!initRes.ok) {
+      res.json({ success: true });
+      return;
+    }
+
+    const initBody = (await initRes.json()) as { logout_url?: string; logout_token?: string };
+    const token = extractLogoutToken(initBody);
+
+    if (token) {
+      const logoutRes = await fetch(`${config.kratos.publicUrl}/self-service/logout?token=${token}`, {
+        headers: { ...(cookie ? { Cookie: cookie } : {}) },
+        redirect: 'manual',
+      });
+      // Пробрасываем cookie очистки сессии клиенту (с учётом HTTP/Secure).
+      forwardSetCookie(req, logoutRes, res);
+    }
+
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Kratos] Logout error:', err.message);
     res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
   }
 });

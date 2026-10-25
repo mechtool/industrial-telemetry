@@ -1,0 +1,57 @@
+<div class="pres-root">
+  <!-- Header -->
+  <header class="pres-header">
+    <div class="pres-header-left">
+      <span class="pres-logo-mark">
+        <nz-icon nzType="rise" />
+      </span>
+      <div class="pres-title-block">
+        <span class="pres-title">Презентация возможностей</span>
+        <span class="pres-subtitle">CRYOMON — платформа мониторинга холодильного оборудования</span>
+      </div>
+    </div>
+
+    <div class="pres-header-right">
+      <nz-tag class="pres-perspective-tag" nzColor="blue">
+        <nz-icon nzType="eye" />
+        {{ perspectiveLabel() }}
+      </nz-tag>
+      <button nz-button nzType="text" routerLink="/">
+        <nz-icon nzType="arrow-left" />
+        В приложение
+      </button>
+      <button nz-button nzType="text" (click)="logout()">
+        <svg class="pres-logout-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        Выйти
+      </button>
+    </div>
+  </header>
+
+  <!-- Perspective tabs -->
+  <nav class="pres-tabs" aria-label="Точки зрения презентации">
+    @for (tab of tabs; track tab.key) {
+      <a
+        class="pres-tab"
+        [routerLink]="tab.route"
+        routerLinkActive="pres-tab--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <nz-icon [nzType]="tab.icon" />
+        <span>{{ tab.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <!-- Perspective content -->
+  <main class="pres-main">
+    <router-outlet />
+  </main>
+
+  <footer class="pres-footer">
+    <span>CRYOMON &copy;{{ currentYear }} · Публичная демонстрация возможностей платформы</span>
+  </footer>
+</div>

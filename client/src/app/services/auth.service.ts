@@ -68,9 +68,21 @@ export class AuthService {
     );
   }
 
-  /** Выход через Kratos */
-  logout(): void {
+  /** Выход через серверный прокси Kratos, затем редирект на /login. */
+  async logout(): Promise<void> {
     this.currentUser.set(null);
-    window.location.href = '/.ory/self-service/logout/browser';
+
+    try {
+      await fetch('/api/kratos/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Даже если запрос не удался — локально выходим и идём на /login.
+    }
+
+    // replace (а не assign/href) — чтобы текущая страница приложения не
+    // осталась в истории, и «назад» не возвращался в приложение после выхода.
+    window.location.replace('/login');
   }
 }

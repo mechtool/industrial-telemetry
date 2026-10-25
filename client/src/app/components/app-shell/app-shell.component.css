@@ -147,6 +147,13 @@
   color: #1e88e5;
 }
 
+.as-logout-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex-shrink: 0;
+}
+
 .as-header-divider {
   width: 1px;
   height: 24px;

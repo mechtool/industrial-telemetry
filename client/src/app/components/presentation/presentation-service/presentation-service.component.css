@@ -1,0 +1,268 @@
+/* ========================================================
+   Presentation Service — точка зрения сервисных организаций
+   ======================================================== */
+
+:host {
+  display: block;
+}
+
+.pres-perspective {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* ── Hero ── */
+.pp-hero {
+  background: linear-gradient(135deg, #0f2744, #163a63);
+  border-radius: 12px;
+  padding: 36px 40px;
+  color: #fff;
+}
+
+.pp-hero--service {
+  background: linear-gradient(135deg, #0b2e28, #0f4a3d);
+}
+
+.pp-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.pp-hero-title {
+  margin: 20px 0 14px;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #fff;
+}
+
+.pp-hero-accent {
+  color: #7cd6c2;
+}
+
+.pp-hero-sub {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #d2ece6;
+  max-width: 720px;
+}
+
+/* ── Sections ── */
+.pp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pp-section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+/* ── Capabilities cards ── */
+.pp-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.pp-card {
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.pp-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  background: #eaf4fe;
+  color: #1e88e5;
+  font-size: 20px;
+}
+
+.pp-card-icon--green {
+  background: #e6f6f1;
+  color: #0fa97e;
+}
+
+.pp-card-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pp-card-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #5b7590;
+}
+
+/* ── Benefits ── */
+.pp-benefits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.pp-benefit {
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.pp-benefit--green .pp-benefit-value {
+  color: #0fa97e;
+}
+
+.pp-benefit-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e88e5;
+  line-height: 1;
+}
+
+.pp-benefit-label {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pp-benefit-desc {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: #8fa6bc;
+}
+
+/* ── Techniques ── */
+.pp-tech-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pp-tech {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+
+.pp-tech-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #1e88e5;
+}
+
+.pp-tech-dot--green {
+  background: #0fa97e;
+}
+
+.pp-tech-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pp-tech-desc {
+  margin-top: 2px;
+  font-size: 13px;
+  color: #5b7590;
+}
+
+/* ── Roadmap ── */
+.pp-roadmap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.pp-roadmap-item {
+  display: flex;
+  gap: 14px;
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+.pp-roadmap-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #e6f6f1;
+  color: #0fa97e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pp-roadmap-index--green {
+  background: #e6f6f1;
+  color: #0fa97e;
+}
+
+.pp-roadmap-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pp-roadmap-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #5b7590;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .pp-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .pp-benefits {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .pp-hero {
+    padding: 24px 20px;
+  }
+  .pp-cards,
+  .pp-benefits,
+  .pp-roadmap {
+    grid-template-columns: 1fr;
+  }
+}
