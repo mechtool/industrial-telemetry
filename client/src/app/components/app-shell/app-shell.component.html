@@ -22,17 +22,16 @@
 
     <a class="as-logo" routerLink="/" title="На главную">
       <svg class="as-logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <g stroke="#1e88e5" stroke-width="2" stroke-linecap="round">
-          <path d="M12 2v20" />
-          <path d="M3.3 7l17.4 10" />
-          <path d="M20.7 7L3.3 17" />
-          <path d="M12 2l-2.6 1.5M12 2l2.6 1.5" />
-          <path d="M12 22l-2.6-1.5M12 22l2.6-1.5" />
-          <path d="M3.3 7L5 6.1M3.3 7l.6 2.2" />
-          <path d="M20.7 7L19 6.1M20.7 7l-.6 2.2" />
-          <path d="M3.3 17l1.7-.9M3.3 17l.6-2.2" />
-          <path d="M20.7 17L19 17.9M20.7 17l-.6 2.2" />
-        </g>
+        <defs>
+          <g id="asSnowAxis" stroke="#1e88e5" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2v20" />
+            <path d="M12 2l-2.6 1.5M12 2l2.6 1.5" />
+            <path d="M12 22l-2.6-1.5M12 22l2.6-1.5" />
+          </g>
+        </defs>
+        <use href="#asSnowAxis" />
+        <use href="#asSnowAxis" transform="rotate(60 12 12)" />
+        <use href="#asSnowAxis" transform="rotate(120 12 12)" />
       </svg>
       <div class="as-logo-text">
         <span class="as-logo-name">CRYOMON</span>
@@ -46,10 +45,6 @@
         <input class="as-search-input" placeholder="Поиск по системе..." />
       </div>
 
-      <button nz-button nzType="text" class="as-icon-btn" title="Уведомления">
-        <nz-icon nzType="bell" />
-      </button>
-
       <span class="as-header-divider"></span>
 
       <div class="as-user" (click)="openProfile()">
@@ -59,6 +54,10 @@
           <span class="as-user-caption">{{ userCaption() }}</span>
         </div>
       </div>
+
+      <button nz-button nzType="text" class="as-icon-btn" title="Уведомления">
+        <nz-icon nzType="bell" />
+      </button>
 
       <button nz-button nzType="text" class="as-icon-btn" title="Выйти" aria-label="Выйти из системы" (click)="logout()">
         <svg class="as-logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

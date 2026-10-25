@@ -276,6 +276,15 @@
   font-weight: 600;
 }
 
+/* Индикатор активного пункта: синяя полоса слева (вместо стандартной справа),
+   толщиной 4px (на 1px шире стандартных 3px). */
+.as-nav ::ng-deep .ant-menu-item::after {
+  right: auto;
+  left: 0;
+  border-right: none;
+  border-left: 4px solid #1890ff;
+}
+
 .as-nav-placeholder {
   color: #b6c4d3 !important;
   cursor: default;
