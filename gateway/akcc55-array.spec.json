@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AK-CC55 array telemetry (target MQTT payload)",
+  "description": "Целевой формат публикации шлюза Waveshare RS485 TO POE ETH (B) в режиме MQTT+JSON, когда дизайн собран как «массив объектов контроллеров». ЭТО СПЕКА ВЫХОДНОГО ФОРМАТА, а не файл для загрузки в шлюз: дизайн грузится в Vircom через CSV (см. make_array_csv.py -> akcc55-array.csv).",
+  "type": "object",
+  "required": ["controllers"],
+  "properties": {
+    "controllers": {
+      "description": "Массив объектов: по одному объекту на контроллер AK-CC55 на шине RS485.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/controller" }
+    }
+  },
+  "$defs": {
+    "controller": {
+      "type": "object",
+      "required": ["addr", "name"],
+      "properties": {
+        "addr": { "type": "string", "description": "Modbus slave address контроллера (o03), Fixed String: '1', '2', ..." },
+        "name": { "type": "string", "description": "Человекочитаемое имя, Fixed String: 'chamber-1', ..." },
+        "pe": { "type": "integer", "description": "Флаг ошибки испарителя (0/1)" },
+        "s2": { "type": "integer", "description": "Флаг ошибки S2 (0/1)" },
+        "s3": { "type": "integer", "description": "Флаг ошибки S3 (0/1)" },
+        "s4": { "type": "integer", "description": "Флаг ошибки S4 (0/1)" },
+        "s5": { "type": "integer", "description": "Флаг ошибки S5 (0/1)" },
+        "setpoint": { "type": "number", "description": "Уставка r00, °C, 1 десятичный знак" },
+        "diff": { "type": "number", "description": "Дифференциал r01, K, 1 десятичный знак" },
+        "main_switch": { "type": "integer", "description": "Главный выключатель (0/1)" },
+        "air_temp": { "type": "number", "description": "Температура воздуха, °C" },
+        "evap_temp": { "type": "number", "description": "Температура испарителя Te, °C" },
+        "food_temp": { "type": "number", "description": "Температура продукта, °C" },
+        "s2_temp": { "type": "number", "description": "Датчик S2, °C" },
+        "s3_temp": { "type": "number", "description": "Датчик S3, °C" },
+        "s4_temp": { "type": "number", "description": "Датчик S4, °C" },
+        "s5_temp": { "type": "number", "description": "Датчик S5, °C" },
+        "reg_state": { "type": "integer", "description": "Состояние регулирования" },
+        "eev_opening": { "type": "integer", "description": "Открытие EEV, %" },
+        "pwm_od": { "type": "integer", "description": "PWM OD, %" },
+        "alarm_sum": { "type": "integer", "description": "Суммарная авария (0/1)" },
+        "alarm_high_temp": { "type": "integer", "description": "Авария High t.alarm (0/1)" },
+        "alarm_low_temp": { "type": "integer", "description": "Авария Low t.alarm (0/1)" }
+      }
+    }
+  },
+  "example": {
+    "controllers": [
+      {
+        "addr": "1",
+        "name": "chamber-1",
+        "pe": 0, "s2": 1, "s3": 0, "s4": 1, "s5": 0,
+        "setpoint": 3.0, "diff": 3.1, "main_switch": 1,
+        "air_temp": 23.4, "evap_temp": -267.9, "food_temp": 2.8,
+        "s2_temp": -267.9, "s3_temp": 23.1, "s4_temp": -267.9, "s5_temp": 120.0,
+        "reg_state": 2, "eev_opening": 55, "pwm_od": 100,
+        "alarm_sum": 1, "alarm_high_temp": 0, "alarm_low_temp": 0
+      },
+      {
+        "addr": "2",
+        "name": "chamber-2",
+        "pe": 0, "s2": 0, "s3": 0, "s4": 0, "s5": 0,
+        "setpoint": 12.0, "diff": 2.0, "main_switch": 1,
+        "air_temp": 12.1, "evap_temp": -25.0, "food_temp": 12.3,
+        "s2_temp": 12.0, "s3_temp": 12.2, "s4_temp": 12.1, "s5_temp": 12.4,
+        "reg_state": 1, "eev_opening": 60, "pwm_od": 0,
+        "alarm_sum": 0, "alarm_high_temp": 0, "alarm_low_temp": 0
+      }
+    ]
+  },
+  "note": "Сырые значения шлюза — числа; недостоверные температуры (датчик в ошибке, значение вне -100..150 °C) нормализуются в null на сервере (server/src/services/telemetry/normalize.ts). В примере evap_temp/s2_temp/s4_temp у chamber-1 даны сырыми (-267.9) и после нормализации станут null."
+}

@@ -1,83 +1,277 @@
-# Конфигурация шлюза Waveshare RS485 TO POE ETH (B) — режим MQTT+JSON
+# Шлюз Waveshare RS485 TO POE ETH (B) — MQTT+JSON: инструкция и история экспериментов
 
-`akcc55-poll.json` — полное описание опроса контроллера **Danfoss AK-CC55 Compact**
-(код заказа `084B4081`) шлюзом **Waveshare RS485 TO POE ETH (B)**.
+> Полный контекст работы со шлюзом, контроллерами Danfoss AK-CC55 и форматами
+> публикуемого JSON. Документ заменяет разрозненные заметки в корне репозитория
+> (`ИСТОРИЯ_СЕССИИ_24-25.10.2026.md`, `НАСТРОЙКИ_СТЕНДА.md`, `РЕЦЕПТ_MQTT_JSON.md`).
 
-В этом режиме шлюз сам является Modbus-мастером: читает регистры по таблице
-и периодически публикует их как JSON в MQTT. Отдельный Node-сборщик на объекте
-больше не нужен.
+---
 
-## Как применить
+## 1. Стенд
 
-1. Скачать и установить утилиту **Vircom** (с сайта Waveshare) и прошивку
-   **MQTT And JSON** для RS485 TO POE ETH (B).
-2. В Vircom: «Firmware and Configuration» → «Webpage Directory Download» →
-   «JSON Configuration» → ввести таблицу регистров из `akcc55-poll.json`
-   (секция `registers`).
-3. «MQTT Configuration» → ввести параметры из секции `uplink.mqtt`.
-4. «Download» — прошивка и перезагрузка шлюза.
-5. Проверить приём: `mosquitto_sub -h <брокер> -t 'industrial/sensors/akcc55' -v`.
+```
+AK-CC55 Compact (2 шт, RS485 9600 8E1, адреса 1 и 2)
+        │  RS485
+        ▼
+Waveshare RS485 TO POE ETH (B)  192.168.31.200   (прошивка «MQTT And JSON»)
+        │  MQTT, сам является Modbus-мастером
+        ▼
+Mosquitto  158.160.204.124:1883  (контейнер it-mosquitto, allow_anonymous true)
+        │  топик industrial/sensors/akcc55
+        ▼
+it-keeper (server/src/keeper.ts)  →  PostgreSQL `telemetry`
+```
 
-> Внимание: прошивка MQTT+JSON перезаписывает веб-интерфейс настройки
-> устройства (возврат в прозрачный режим — обратной прошивкой).
+Ключевые адреса:
 
-## Что исправить, чтобы шлюз начал опрашивать (чек-лист)
+- Шлюз: `192.168.31.200`, MAC `04-EE-E8-1D-13-94`, штатная прошивка V1.523.
+- Контроллеры: Danfoss **AK-CC55 Compact** (код заказа `084B4081`), Modbus-адреса `o03 = 1` и `2`.
+- Сервер: ВМ Yandex Cloud `158.160.204.124`, домен `industrial-telemetry.ru`, SSH-алиас `yc-vm`.
+- БД: PostgreSQL `it-kratos-db`, база `telemetry`, таблица `telemetry(id, ts, device, topic, payload JSONB)`.
 
-По порядку важности — без первых пунктов опрос не заработает вообще.
+---
 
-1. **Прошить MQTT+JSON.** Заводская прошивка — прозрачный serial-server и сама
-   по себе ничего не опрашивает. Нужно залить прошивку «MQTT And JSON»
-   (Vircom → Firmware and Configuration → Download). `akcc55-poll.json` — это
-   данные конфигурации, а не прошивка.
-2. **Формат файла.** Файл в репозитории — спецификация для ручного ввода в
-   Vircom. Импорт поддерживается (Export/Import JSON-конфигурации), но схема
-   Vircom-специфичная; пока нет образца экспорта — вводить вручную в
-   «JSON Configuration» + «MQTT Configuration».
-3. **Uplayer Protocol = NONE/MQTT** (не HTTP GET/POST), иначе данные не пойдут
-   в Mosquitto.
-4. **Period of Send to Server = 30000** (мс).
-5. **Serial (в настройках устройства Vircom):** 9600, 8 бит данных, чётность
-   **Even**, 1 стоп-бит. При чётности None контроллер AK-CC55 молчит.
-6. **Каждый регистр:** Slave address = 1, Function code = 03, Data length = 2
-   байта, Data format = signed/unsigned по столбцу `signed`, Decimal places по
-   столбцу `decimals`.
-7. **JSON node data = object** (не array) — нормализатор в keeper ждёт объект.
-8. **MQTT:** server/port облачного брокера (по умолчанию `158.160.204.124:1883`),
-   publish topic `industrial/sensors/akcc55`, QoS 1. Если на брокере включена
-   авторизация — заполнить username/password.
-9. **NTP включить** — иначе метки времени будут от заводских часов.
+## 2. Настройки шлюза (режим MQTT+JSON)
 
-Поле `pollingIntervalMs` (30) соответствует «Serial port polling time» Vircom —
-это пауза между опросом соседних регистров, а не период отправки всего набора.
+В этом режиме шлюз **сам** опрашивает контроллеры по Modbus RTU и публикует
+результат в MQTT. Компьютер/сборщик в цепочке не участвуют.
 
-## Допущения, которые надо подтвердить на стенде
+### Устройство (Vircom → параметры устройства)
 
-- **Конвенция адреса регистра.** В файле используется `PNU − 1` (zero-based):
-  это совпадает с тем, что проверено на практике старым сборщиком (уставка r00
-  читается по адресу 99). Если Vircom использует 1-based адреса — все `address`
-  надо увеличить на 1.
-- **Имя ключа JSON.** `keyword` должен совпадать с ключами, которые ждёт
-  нормализатор в `server/src/services/telemetry/normalize.ts`. Если Vircom
-  запрещает `_` в ключах — заменить на camelCase и синхронно поправить
-  нормализатор.
-- **Функция чтения** — только `03` (поддерживается шлюзом; все точки AK-CC55
-  читаются функцией 03).
+| Параметр | Значение |
+|---|---|
+| Work Mode | **TCP Client** |
+| **Transfer Protocol** | **None** ← критично, см. §5 |
+| Destination IP : Port | `158.160.204.124` : `1883` |
+| Serial | `9600`, 8 бит, **Even**, 1 стоп-бит |
 
-## Поля регистра
+### JSON-конфигурация
 
-- `keyword` — имя ключа в исходящем JSON;
-- `pnu` / `address` — код параметра Danfoss и адрес Modbus (`pnu − 1`);
-- `bytes` — длина данных (2 байта = один регистр);
-- `signed` — знак (старший бит = знак, напр. температуры);
-- `decimals` — сколько знаков после запятой у значения;
-- `unit` — единица, подставляемая в JSON;
-- `kind` / `sensor` — **метаданные для нормализатора** (не настройки шлюза):
-  определяют, какие значения признавать недостоверными при ошибке датчика.
+| Параметр | Значение |
+|---|---|
+| Upper protocol | **NONE/MQTT** |
+| Period of send | **30000** (мс) |
+| Query period (на узел) | 100 (мс) |
 
-## MQTT
+### MQTT (файл `mqtt.txt`)
 
-- Брокер — облачный Mosquitto (`uplink.mqtt.server:port`).
-- Топик публикации `industrial/sensors/akcc55` совпадает с подпиской
-  `sensors/#` сервиса-хранителя (`server/src/keeper.ts`).
-- Сейчас брокер открыт (`allow_anonymous true`, порт 1883). Перед выносом в
-  интернет задать `username`/`password` (и, если поддерживается шлюзом, TLS).
+```
+CLIENT_ID=akcc55-gateway
+KEEPALIVE=60
+CLEAN_SESSION=1
+PUBLISH_TOPIC=industrial/sensors/akcc55
+PUBLISH_QOS=1
+PUBLISH_RETAIN=0
+```
+
+### Modbus
+
+- Функция чтения: **03**.
+- Адрес регистра = **PNU − 1** (zero-based). Уставка `r00` = адрес **99**.
+- Контроллер 1 → slave `1`; контроллер 2 → slave `2`.
+
+---
+
+## 3. Два формата JSON
+
+### 3.1 Формат «объект» (плоский) — старый
+
+Один плоский объект, второй контроллер — с префиксом `c2_`:
+
+```json
+{
+  "pe": 1, "s2": 1, "setpoint": 3.0, "air_temp": 22.9,
+  "c2_pe": 1, "c2_s2": 1, "c2_setpoint": 12.0, "c2_air_temp": 21.9
+}
+```
+
+Недостатки (почему отказались):
+
+- ключи контроллеров различаются (`pe` vs `c2_pe`), единой схемы нет;
+- нормализатор на сервере видел только «чистые» ключи первого контроллера,
+  второй лежал в `raw.c2_*` и в `values` не попадал;
+- нет явной привязки к адресу/имени контроллера.
+
+Спека и карта регистров этого формата — в `akcc55-poll.json`.
+
+### 3.2 Формат «массив объектов» — текущий
+
+Массив `controllers`, по одному объекту на контроллер, одинаковые ключи,
+плюс `addr` и `name`:
+
+```json
+{
+  "controllers": [
+    { "addr": "1", "name": "chamber-1", "pe": 1, "s2": 1, "s3": 0, "s4": 1, "s5": 0,
+      "setpoint": 3.0, "diff": 3.1, "main_switch": 1,
+      "air_temp": 22.9, "evap_temp": -267.9, "food_temp": 22.9,
+      "s2_temp": 180.0, "s3_temp": 22.9, "s4_temp": 180.0, "s5_temp": 120.0,
+      "reg_state": 16, "eev_opening": 0, "pwm_od": 0,
+      "alarm_sum": 1, "alarm_high_temp": 0, "alarm_low_temp": 0 },
+    { "addr": "2", "name": "chamber-2", "...": "..." }
+  ]
+}
+```
+
+- `addr`, `name` — Fixed String (жёстко заданы в дизайне).
+- Остальные 21 ключ — Modbus RTU, функция 03.
+- Схема и пример — `akcc55-array.spec.json`.
+- Загружаемый дизайн — `akcc55-array.csv` (полный) и `akcc55-array-min.csv` (тестовый).
+
+Проверено на живом шлюзе: публикация 656 байт каждые ~31 с, 2 контроллера,
+все 21 ключ на месте.
+
+---
+
+## 4. Формат CSV-дизайна Vircom
+
+Дизайн (структура JSON) загружается в Vircom **только CSV-файлом**
+(«JSON Configuration» → «导入配置»). На самом шлюзе дизайн хранится бинарным
+файлом `json` (заголовок `V0007`), который Vircom собирает сам — руками
+«JSON для загрузки» не пишется.
+
+### Колонки
+
+Заголовок — 23 колонки, у строк данных — 24 поля (последнее `255` — терминатор
+без имени в заголовке):
+
+```
+NO. | JSON KeyWord | Data Source | String | Modbus Slave Addr. | Modbus Function |
+Modbus RegAddr | 645 ID | 645 Type | Data Len | 4 Bytes Order | Data Format |
+Position of Bool | Decimal Position | Unit | With Qutation | Query Period |
+645 version | Func sel | JSON array | substract | divide | FE number | [255]
+```
+
+### Значения `Data Source` (точные токены)
+
+| Токен | Назначение |
+|---|---|
+| `Modbus RTU` | значение из регистра Modbus |
+| `Fixed String` | фиксированная строка (в колонке `String`) |
+| `Device ID` | MAC/ID шлюза |
+| `Current Time` | время по NTP |
+| **`Embeded JSON`** | вложенный контейнер (объект/элемент массива) |
+
+> ⚠️ Токен — **`Embeded JSON`** (с опечаткой Waveshare «Embeded»). `Nested JSON`
+> Vircom **не принимает** и выдаёт «add embeded node under non-embeded json node».
+
+### Тип узла — колонка `JSON array`
+
+- `0` = **Object data** (объект, нужен `JSON KeyWord`).
+- `1` = **Array data** (элемент массива, `JSON KeyWord` пустой).
+
+### Нумерация `NO.`
+
+`1.` — узел верхнего уровня; вложенные — точками: `1.1`, `1.1.1`, `1.2`, …
+
+### Как кодируется массив объектов
+
+```
+1.      controllers   Embeded JSON   JSON array=0   ← обёртка (объект)
+1.1                   Embeded JSON   JSON array=1   ← элемент массива (без ключа)
+1.1.1   addr          Fixed String   "1"
+1.1.2   name          Fixed String   "chamber-1"
+1.1.3   pe            Modbus RTU     slave=1, reg=20001
+...
+1.2                   Embeded JSON   JSON array=1   ← второй элемент
+1.2.1   addr          Fixed String   "2"
+...
+```
+
+Генератор: `make_array_csv.py` (запуск `python make_array_csv.py` пересоздаёт
+`akcc55-array.csv` и `akcc55-array-min.csv`).
+
+---
+
+## 5. Грабли, на которые уже наступали
+
+1. **Чётность RS485 — только Even.** С `None` контроллер молчит полностью.
+2. **Адрес регистра = PNU − 1.** Уставка `r00` читается по адресу 99, а не 100.
+3. **`r02` ограничивает `r00`.** Запись уставки выше `r02` отклоняется
+   `ILLEGAL DATA VALUE` — сначала поднять `r02`, потом `r00`.
+4. **MQTT+JSON: Transfer Protocol = None.** В режиме `Modbus TCP to RTU` шлюз
+   работает мостом на порту 4196 и движок JSON не запускает: клиент к брокеру
+   цепляется, keepalive идёт, публикаций ноль.
+5. **`Embeded JSON`, а не `Nested JSON`.** Неверный токен источника данных даёт
+   ошибку импорта CSV «add embeded node under non-embeded json node in excell».
+6. **После правки настроек шлюза проверять порт 4196 / публикации** — «Success!
+   restart» не гарантирует, что настройки применились.
+7. **Побочный эффект прошивки MQTT+JSON:** веб-интерфейс шлюза перестаёт
+   открываться, порт 4196 закрывается — настройки видны только через Vircom.
+   Возврат — обратной прошивкой V1.523 + веб-каталогом `2043_waveshare_web_zx`.
+
+---
+
+## 6. Как загрузить дизайн в шлюз
+
+1. Vircom → **Device Management → Search** → двойной щелчок по устройству.
+2. **Restart Dev** → дождаться → снова **Search**.
+3. **Firmware/Config** → режим **web directory download** → выбрать каталог.
+4. **JSON Configuration** → «删除全部» (Delete all) → «导入配置» (Import) →
+   нужный CSV (`akcc55-array.csv`).
+5. Проверить **предпросмотр** («保存 JSON 设计»): структура `{"controllers":[...]}`,
+   число строк соответствует дизайну, пустых ключей нет.
+6. Выставить **Upper protocol = NONE/MQTT**, **Period of send = 30000**.
+7. **MQTT Configuration**: server `158.160.204.124`, port `1883`,
+   Client ID `akcc55-gateway`, publish topic `industrial/sensors/akcc55`, QoS 1.
+8. Параметры устройства: **Work Mode = TCP Client**, **Transfer Protocol = None**,
+   Destination `158.160.204.124:1883`, serial `9600 8E1`.
+9. **Save JSON settings** → **Save MQTT settings** → **Download**.
+10. Дождаться перезагрузки (~1 мин). Признак успеха: порт 4196 закрыт, в логе
+    Mosquitto появляется `Received PUBLISH from akcc55-gateway`.
+
+Совет: для проверки импорта вложенной структуры сначала грузите минимальный
+`akcc55-array-min.csv` (обёртка + 2 элемента × `addr`,`name`,`pe`), затем полный.
+
+---
+
+## 7. Как проверить, что публикуется
+
+Локальный валидатор (без внешних зависимостей) — ловит сообщения N секунд и
+проверяет структуру массива:
+
+```powershell
+python gateway/capture_and_verify.py 158.160.204.124 1883 "industrial/sensors/akcc55" 75
+```
+
+Просто посмотреть payload:
+
+```powershell
+python mqtt_listen.py 158.160.204.124 1883 "industrial/sensors/akcc55" 40
+```
+
+Серверная сторона:
+
+```powershell
+ssh yc-vm "docker exec it-mosquitto mosquitto_sub -h 127.0.0.1 -t 'industrial/sensors/akcc55' -C 1 -v"
+ssh yc-vm "docker exec it-mosquitto grep -a 'Received PUBLISH from akcc55-gateway' /mosquitto/log/mosquitto.log | tail -5"
+```
+
+---
+
+## 8. Текущее состояние и следующие шаги
+
+- ✅ Массив публикуется корректно (2 контроллера, 21 ключ, ~31 с).
+- ⚠️ **Хранитель массив пока не пишет**: `server/src/services/telemetry/normalize.ts`
+  делает `Array.isArray(parsed) → null` и ждёт плоские ключи. Нужно обновить
+  нормализатор и репозиторий под `{"controllers":[...]}`: разложить массив на
+  строки по контроллерам, `device = addr`/`name`, применять прежнюю логику
+  достоверности (флаг ошибки датчика → `null`, температура вне −100…150 °C → `null`).
+- Сырые «сентинелы» отсутствующих датчиков: `evap_temp = -267.9`,
+  `s2_temp/s4_temp = 180.0`, подозрительный `s5_temp = 120.0` — после нормализации
+  должны превращаться в `null`.
+- Дальше по приоритету: API телеметрии, безопасность MQTT, ретеншен, мониторинг.
+
+---
+
+## 9. Файлы в этой папке
+
+| Файл | Назначение |
+|---|---|
+| `README.md` | эта инструкция |
+| `akcc55-array.csv` | полный дизайн «массив объектов» (2 контроллера, 21 ключ) |
+| `akcc55-array-min.csv` | минимальный тестовый дизайн (2 контроллера × `addr`,`name`,`pe`) |
+| `akcc55-array.spec.json` | JSON-схема целевого выходного формата + пример |
+| `akcc55-poll.json` | старый «объектный» формат + карта регистров (PNU/адрес/вид/датчик) |
+| `make_array_csv.py` | генератор CSV-дизайна |
+| `capture_and_verify.py` | захват и проверка живого формата |
+| `backup/` | снимки конфигурации шлюза (справочно) |

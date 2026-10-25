@@ -6,8 +6,13 @@
  *   - флаг ошибки датчика (Pe/S2/S3/S4/S5) → привязанные температуры = null;
  *   - температура вне физического диапазона −100…150 °C → null.
  *
+ * Поддерживаются два формата публикации:
+ *   1. «Массив объектов» (текущий): {"controllers":[{addr,name,pe,...}, ...]}
+ *      → одна запись на контроллер, device = name ?? addr ?? дефолт.
+ *   2. Плоский объект (старый): {pe, s2, ..., c2_pe, ...} → одна запись.
+ *
  * Ключи JSON шлюза должны совпадать с ключами ниже. Настраиваются в
- * Vircom («Corresponding JSON keyword») и в gateway/akcc55-poll.json.
+ * Vircom («Corresponding JSON keyword») и в gateway/akcc55-array.spec.json.
  */
 
 import type {
@@ -48,31 +53,53 @@ const POINTS: readonly RegisterPoint[] = [
 
 /**
  * Разбирает и нормализует сообщение шлюза.
- * Возвращает null, если payload не является JSON-объектом с распознаваемыми полями.
+ *
+ * Возвращает массив нормализованных записей (одна на контроллер). Пустой массив —
+ * если payload не является распознаваемым JSON-объектом.
  */
-export function normalizeGatewayMessage(
+export function normalizeGatewayMessages(
   raw: Buffer | string,
   fallbackDevice: string,
-): NormalizedTelemetry | null {
+): NormalizedTelemetry[] {
   let parsed: unknown;
   try {
     parsed = JSON.parse(typeof raw === 'string' ? raw : raw.toString('utf8'));
   } catch {
-    return null;
+    return [];
   }
 
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-    return null;
+    return [];
   }
 
   const obj = parsed as Record<string, unknown>;
 
-  // Идентификатор устройства: шлюз может добавить device/id, иначе — дефолт из конфига.
-  const device =
-    (typeof obj.device === 'string' && obj.device.length > 0 && obj.device) ||
-    (typeof obj.id === 'string' && obj.id.length > 0 && obj.id) ||
-    fallbackDevice;
+  // Формат «массив объектов»: {"controllers":[{...}, {...}]}.
+  if (Array.isArray(obj.controllers)) {
+    const records: NormalizedTelemetry[] = [];
+    for (const entry of obj.controllers) {
+      if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+        continue;
+      }
+      const controller = entry as Record<string, unknown>;
+      const device = firstString(controller.name, controller.addr) ?? fallbackDevice;
+      records.push(normalizeController(controller, device));
+    }
+    return records;
+  }
 
+  // Плоский объект (старый формат): device берём из device/id, иначе дефолт.
+  const device = firstString(obj.device, obj.id) ?? fallbackDevice;
+  return [normalizeController(obj, device)];
+}
+
+/**
+ * Нормализует один объект контроллера (плоский набор ключей) в одну запись.
+ */
+function normalizeController(
+  obj: Record<string, unknown>,
+  device: string,
+): NormalizedTelemetry {
   // Флаги ошибок датчиков: ненулевое значение = датчик в ошибке.
   const faults = new Set<SensorKey>();
   for (const key of SENSORS) {
@@ -127,6 +154,16 @@ export function normalizeGatewayMessage(
     alarms,
     raw: obj,
   };
+}
+
+/** Первая непустая строка из кандидатов; null, если таковой нет. */
+function firstString(...candidates: unknown[]): string | null {
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim() !== '') {
+      return candidate;
+    }
+  }
+  return null;
 }
 
 /** Приводит поле к конечному числу; null, если поле отсутствует или не число. */

@@ -16,7 +16,7 @@
 
 import mqtt, { type IClientOptions, type MqttClient } from 'mqtt';
 import { TelemetryRepository, type TelemetryRecord } from './repository.js';
-import { normalizeGatewayMessage } from './normalize.js';
+import { normalizeGatewayMessages } from './normalize.js';
 import type { KeeperConfig } from './types.js';
 
 const RECONNECT_MIN_MS = 1_000;
@@ -126,25 +126,27 @@ export class TelemetryKeeperService {
 
   /** Приём сообщения: нормализация → очередь → запись. */
   private onMessage(topic: string, payload: Buffer): void {
-    const normalized = normalizeGatewayMessage(payload, this.config.deviceId);
-    if (!normalized) {
+    const records = normalizeGatewayMessages(payload, this.config.deviceId);
+    if (records.length === 0) {
       this.repository.countInvalid(`топик ${topic}, payload ${payload.length} б`);
       return;
     }
 
-    if (this.queue.length >= this.config.maxQueue) {
-      this.queue.shift(); // теряем самое старое, чтобы не расти бесконечно
-      console.warn(
-        `[Keeper] Очередь переполнена (${this.config.maxQueue}) — старейшее сообщение отброшено`,
-      );
-    }
+    for (const normalized of records) {
+      if (this.queue.length >= this.config.maxQueue) {
+        this.queue.shift(); // теряем самое старое, чтобы не расти бесконечно
+        console.warn(
+          `[Keeper] Очередь переполнена (${this.config.maxQueue}) — старейшее сообщение отброшено`,
+        );
+      }
 
-    this.queue.push({
-      ts: new Date(normalized.ts),
-      device: normalized.device,
-      topic,
-      payload: normalized,
-    });
+      this.queue.push({
+        ts: new Date(normalized.ts),
+        device: normalized.device,
+        topic,
+        payload: normalized,
+      });
+    }
 
     void this.drain();
   }
