@@ -1,0 +1,65 @@
+<div class="pr-container">
+  @if (!ui.isProjectView()) {
+    <!-- Toolbar -->
+    <div class="pr-toolbar">
+      <nz-breadcrumb>
+        <nz-breadcrumb-item>ОБЗОР</nz-breadcrumb-item>
+        <nz-breadcrumb-item>ПРОЕКТЫ</nz-breadcrumb-item>
+        <nz-breadcrumb-item>ВСЕ ПРОЕКТЫ</nz-breadcrumb-item>
+      </nz-breadcrumb>
+      <span class="pr-sort">
+        <nz-icon nzType="swap" />
+        Сортировка: по сроку
+      </span>
+    </div>
+
+    <!-- Title -->
+    <div class="pr-title-row">
+      <h1 class="pr-title">Проекты</h1>
+      <div class="pr-title-actions">
+        <div class="pr-view-toggle">
+          <button
+            class="pr-view-btn"
+            routerLink="/projects/list"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            title="Список"
+          >
+            <nz-icon nzType="unordered-list" />
+          </button>
+          <button
+            class="pr-view-btn"
+            routerLink="/projects/tiles"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            title="Плитки"
+          >
+            <nz-icon nzType="appstore" />
+          </button>
+        </div>
+        <button nz-button nzType="primary" class="pr-new-btn" (click)="openNewProject()">
+          <nz-icon nzType="plus" />
+          Новый проект
+        </button>
+      </div>
+    </div>
+    <p class="pr-subtitle">{{ ui.subtitle() }}</p>
+
+    <!-- Filters -->
+    <div class="pr-filters">
+      @for (f of ui.filters; track f.label) {
+        <button class="pr-filter" [class.active]="f.label === ui.activeFilter()">
+          {{ f.label }} <span class="pr-filter-count">· {{ f.count }}</span>
+        </button>
+      }
+      <span class="pr-shown">ПОКАЗАНО {{ ui.shownCount() }} ИЗ {{ ui.totalCount() }}</span>
+    </div>
+  }
+
+  <!-- View content -->
+  <div class="pr-outlet">
+    <router-outlet />
+  </div>
+
+  <footer class="pr-footer">CRYOMON &copy;{{ currentYear }}</footer>
+</div>

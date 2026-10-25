@@ -1,0 +1,191 @@
+/* ========================================================
+   Projects — секция «Проекты» (рендерится внутри app-shell)
+   ======================================================== */
+
+:host {
+  display: block;
+  height: 100%;
+  background: #f4f8fd;
+}
+
+.pr-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px 32px 0;
+  overflow: hidden;
+}
+
+.pr-outlet {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+/* ── Toolbar ── */
+.pr-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.pr-toolbar ::ng-deep .ant-breadcrumb {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.pr-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #5b7590;
+}
+
+/* ── Title row ── */
+.pr-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.pr-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.pr-new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.pr-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pr-view-toggle {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e6edf4;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.pr-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #fff;
+  color: #8fa6bc;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.pr-view-btn + .pr-view-btn {
+  border-left: 1px solid #e6edf4;
+}
+
+.pr-view-btn:hover {
+  color: #1470c8;
+  background: #f7fafd;
+}
+
+.pr-view-btn.active {
+  background: #eaf4fe;
+  color: #1470c8;
+}
+
+.pr-subtitle {
+  margin: 8px 0 16px;
+  font-size: 13px;
+  color: #8fa6bc;
+  flex-shrink: 0;
+}
+
+/* ── Filters ── */
+.pr-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eef2f7;
+  flex-shrink: 0;
+}
+
+.pr-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid #e6edf4;
+  border-radius: 999px;
+  background: #fff;
+  color: #5b7590;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pr-filter:hover {
+  border-color: #1e88e5;
+  color: #1470c8;
+}
+
+.pr-filter.active {
+  background: #eaf4fe;
+  border-color: #1e88e5;
+  color: #1470c8;
+}
+
+.pr-filter-count {
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.pr-shown {
+  margin-left: auto;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: #8fa6bc;
+}
+
+/* ── Footer ── */
+.pr-footer {
+  margin-top: 24px;
+  padding: 12px 0;
+  text-align: center;
+  background: transparent;
+  color: #8fa6bc;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .pr-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

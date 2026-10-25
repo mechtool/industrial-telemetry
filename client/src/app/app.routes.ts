@@ -1,11 +1,7 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  {
-    path: '',
-    loadComponent: () => import('./components/auth/auth-login/auth-login.component').then(m => m.AuthLoginComponent),
-    title: 'Вход — Industrial Telemetry',
-  },
+  // ---- Аутентификация (без оболочки) ----
   {
     path: 'login',
     loadComponent: () => import('./components/auth/auth-login/auth-login.component').then(m => m.AuthLoginComponent),
@@ -31,41 +27,60 @@ export const routes: Routes = [
     loadComponent: () => import('./components/auth/auth-change-password/auth-change-password.component').then(m => m.AuthChangePasswordComponent),
     title: 'Изменение пароля — Industrial Telemetry',
   },
+
+  // ---- Основная оболочка приложения (после входа) ----
   {
-    path: 'main-entrance',
-    loadComponent: () => import('./components/main-entrance/main-entrance.component').then(m => m.MainEntranceComponent),
-    title: 'Главная — CRYOMON',
-  },
-  {
-    path: 'projects',
-    loadComponent: () => import('./components/projects/projects-shell/projects-shell.component').then(m => m.ProjectsShellComponent),
-    title: 'Проекты — CRYOMON',
+    path: '',
+    loadComponent: () => import('./components/app-shell/app-shell.component').then(m => m.AppShellComponent),
     children: [
-      { path: '', redirectTo: 'list', pathMatch: 'full' },
       {
-        path: 'empty',
-        loadComponent: () => import('./components/projects/projects-empty/projects-empty.component').then(m => m.ProjectsEmptyComponent),
+        // Первый компонент оболочки — главная страница.
+        path: '',
+        loadComponent: () => import('./components/main-entrance/main-entrance.component').then(m => m.MainEntranceComponent),
+        title: 'Главная — CRYOMON',
       },
       {
-        path: 'list',
-        loadComponent: () => import('./components/projects/projects-list/projects-list.component').then(m => m.ProjectsListComponent),
-      },
-      {
-        path: 'tiles',
-        loadComponent: () => import('./components/projects/projects-tiles/projects-tiles.component').then(m => m.ProjectsTilesComponent),
-      },
-      {
-        path: ':id',
-        loadComponent: () => import('./components/project/project-view/project-view.component').then(m => m.ProjectViewComponent),
-        title: 'Проект — CRYOMON',
+        path: 'projects',
+        loadComponent: () => import('./components/projects/projects.component').then(m => m.ProjectsComponent),
+        title: 'Проекты — CRYOMON',
+        children: [
+          { path: '', redirectTo: 'list', pathMatch: 'full' },
+          {
+            path: 'empty',
+            loadComponent: () => import('./components/projects/projects-empty/projects-empty.component').then(m => m.ProjectsEmptyComponent),
+          },
+          {
+            path: 'list',
+            loadComponent: () => import('./components/projects/projects-list/projects-list.component').then(m => m.ProjectsListComponent),
+          },
+          {
+            path: 'tiles',
+            loadComponent: () => import('./components/projects/projects-tiles/projects-tiles.component').then(m => m.ProjectsTilesComponent),
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./components/project/project-view/project-view.component').then(m => m.ProjectViewComponent),
+            title: 'Проект — CRYOMON',
+          },
+        ],
       },
     ],
   },
+
+  // ---- Настройки (отдельная страница, вне оболочки) ----
   {
     path: 'settings',
     loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent),
     title: 'Настройки — Industrial Telemetry',
   },
+
+  // Обратная совместимость со старым адресом главной страницы.
+  {
+    path: 'main-entrance',
+    redirectTo: '',
+    pathMatch: 'full',
+  },
+
   {
     path: '**',
     redirectTo: '',

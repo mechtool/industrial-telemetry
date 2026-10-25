@@ -1,17 +1,14 @@
 import { Component, inject, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { AuthService, initialsOf, primaryRole } from '../../../services/auth.service';
-import { ProjectsUiService } from '../../../services/projects-ui.service';
-import { ProjectNewComponent } from '../../project/project-new/project-new.component';
-import { UserProfileComponent } from '../../user-profile/user-profile.component';
+import { AuthService, initialsOf, primaryRole } from '../../services/auth.service';
+import { UserProfileComponent } from '../user-profile/user-profile.component';
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Администратор',
@@ -28,29 +25,26 @@ interface NavItem {
 }
 
 @Component({
-  selector: 'app-projects-shell',
+  selector: 'app-shell',
   standalone: true,
   imports: [
     CommonModule,
     RouterLink,
-    RouterLinkActive,
     RouterOutlet,
     NzLayoutModule,
     NzMenuModule,
     NzButtonModule,
     NzIconModule,
     NzAvatarModule,
-    NzBreadCrumbModule,
     NzModalModule,
   ],
-  templateUrl: './projects-shell.component.html',
-  styleUrl: './projects-shell.component.css',
+  templateUrl: './app-shell.component.html',
+  styleUrl: './app-shell.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProjectsShellComponent {
+export class AppShellComponent {
   private readonly auth = inject(AuthService);
   private readonly modalService = inject(NzModalService);
-  readonly ui = inject(ProjectsUiService);
 
   /** Свёрнут ли левый сайдбар. */
   readonly collapsed = signal(false);
@@ -84,17 +78,6 @@ export class ProjectsShellComponent {
     const role = ROLE_LABELS[primaryRole(u.roles)] ?? primaryRole(u.roles);
     return u.department ? `${role} · ${u.department}` : role;
   });
-
-  openNewProject(): void {
-    this.modalService.create({
-      nzTitle: '',
-      nzContent: ProjectNewComponent,
-      nzFooter: null,
-      nzWidth: 840,
-      nzMaskClosable: false,
-      nzBodyStyle: { padding: '24px 28px' },
-    });
-  }
 
   openProfile(): void {
     this.modalService.create({

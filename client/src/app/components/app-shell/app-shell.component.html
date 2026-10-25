@@ -1,0 +1,132 @@
+<nz-layout class="as-root">
+  <!-- ======================= Header ======================= -->
+  <nz-header class="as-header">
+    <button
+      nz-button
+      nzType="text"
+      class="as-collapse-btn"
+      (click)="toggleSidebar()"
+      [title]="collapsed() ? 'Развернуть меню' : 'Свернуть меню'"
+      aria-label="Переключить боковое меню"
+    >
+      @if (collapsed()) {
+        <svg class="as-collapse-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      } @else {
+        <svg class="as-collapse-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      }
+    </button>
+
+    <a class="as-logo" routerLink="/" title="На главную">
+      <svg class="as-logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <g stroke="#1e88e5" stroke-width="2" stroke-linecap="round">
+          <path d="M12 2v20" />
+          <path d="M3.3 7l17.4 10" />
+          <path d="M20.7 7L3.3 17" />
+          <path d="M12 2l-2.6 1.5M12 2l2.6 1.5" />
+          <path d="M12 22l-2.6-1.5M12 22l2.6-1.5" />
+          <path d="M3.3 7L5 6.1M3.3 7l.6 2.2" />
+          <path d="M20.7 7L19 6.1M20.7 7l-.6 2.2" />
+          <path d="M3.3 17l1.7-.9M3.3 17l.6-2.2" />
+          <path d="M20.7 17L19 17.9M20.7 17l-.6 2.2" />
+        </g>
+      </svg>
+      <div class="as-logo-text">
+        <span class="as-logo-name">CRYOMON</span>
+        <span class="as-logo-sub">МОНИТОРИНГ ХОЛОДИЛЬНОГО ОБОРУДОВАНИЯ</span>
+      </div>
+    </a>
+
+    <div class="as-header-right">
+      <div class="as-search">
+        <nz-icon nzType="search" class="as-search-icon" />
+        <input class="as-search-input" placeholder="Поиск по системе..." />
+      </div>
+
+      <button nz-button nzType="text" class="as-icon-btn" title="Уведомления">
+        <nz-icon nzType="bell" />
+      </button>
+
+      <span class="as-header-divider"></span>
+
+      <div class="as-user" (click)="openProfile()">
+        <nz-avatar [nzText]="avatarInitial()" [nzSize]="32" />
+        <div class="as-user-text">
+          <span class="as-user-name">{{ userName() }}</span>
+          <span class="as-user-caption">{{ userCaption() }}</span>
+        </div>
+      </div>
+    </div>
+  </nz-header>
+
+  <nz-layout class="as-main">
+    <!-- ======================= Sidebar ======================= -->
+    <nz-sider
+      class="as-sider"
+      nzWidth="280px"
+      [nzCollapsedWidth]="0"
+      nzTheme="light"
+      [nzCollapsible]="true"
+      [nzCollapsed]="collapsed()"
+      [nzTrigger]="null"
+    >
+      <div class="as-sider-brand">
+        <span class="as-brand-label">ПРОДУКТОВЫЙ РИТЕЙЛ</span>
+        <div class="as-brand-name-row">
+          <svg class="as-brand-globe" viewBox="0 0 32 32" width="32" height="32" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="asGlobeGrad" x1="27.31" x2="4.69" y1="4.69" y2="27.31" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#2563eb" offset="0" />
+                <stop stop-color="#0ea5e9" offset="1" />
+              </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="8" fill="url(#asGlobeGrad)" />
+            <g fill="none" stroke="#ffffff" stroke-width="1.5">
+              <circle cx="16" cy="16" r="8.5" />
+              <ellipse cx="16" cy="16" rx="4" ry="8.5" />
+              <line x1="7.5" x2="24.5" y1="13" y2="13" />
+              <line x1="7.5" x2="24.5" y1="19" y2="19" />
+            </g>
+          </svg>
+          <span class="as-brand-name">Глобус Гипермаркет</span>
+        </div>
+        <span class="as-brand-sub">Система мониторинга · CRYOMON</span>
+      </div>
+
+      <ul nz-menu nzMode="inline" nzTheme="light" class="as-nav">
+        @for (item of navItems; track item.id) {
+          @if (item.route) {
+            <li nz-menu-item nzMatchRouter [routerLink]="item.route">
+              <nz-icon [nzType]="item.icon" />
+              <span>{{ item.label }}</span>
+            </li>
+          } @else {
+            <li nz-menu-item class="as-nav-placeholder">
+              <nz-icon [nzType]="item.icon" />
+              <span>{{ item.label }}</span>
+            </li>
+          }
+        }
+      </ul>
+
+      <div class="as-sider-foot">
+        <span class="as-foot-label">СТАТУС СИСТЕМЫ</span>
+        <div class="as-foot-status">
+          <span class="as-foot-dot"></span>
+          <span class="as-foot-status-text">Система активна</span>
+        </div>
+        <span class="as-foot-date">12.05.2024, 08:42</span>
+      </div>
+    </nz-sider>
+
+    <!-- ======================= Content ======================= -->
+    <nz-layout class="as-body">
+      <nz-content class="as-content">
+        <router-outlet />
+      </nz-content>
+    </nz-layout>
+  </nz-layout>
+</nz-layout>

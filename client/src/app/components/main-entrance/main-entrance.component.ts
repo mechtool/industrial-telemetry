@@ -1,19 +1,8 @@
-import { Component, inject, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { AuthService, initialsOf, primaryRole } from '../../services/auth.service';
-
-interface NavItem {
-  id: string;
-  label: string;
-  icon: string;
-  route?: string;
-}
 
 interface Benefit {
   icon: string;
@@ -41,41 +30,15 @@ interface EventItem {
   color: string;
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Администратор',
-  engineer: 'Инженер',
-  operator: 'Диспетчер',
-  viewer: 'Наблюдатель',
-};
-
 @Component({
   selector: 'app-main-entrance',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    NzLayoutModule,
-    NzMenuModule,
-    NzButtonModule,
-    NzIconModule,
-    NzAvatarModule,
-  ],
+  imports: [CommonModule, RouterLink, NzButtonModule, NzIconModule],
   templateUrl: './main-entrance.component.html',
   styleUrl: './main-entrance.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainEntranceComponent {
-  private readonly auth = inject(AuthService);
-
-  readonly navItems: NavItem[] = [
-    { id: '01', label: 'Проекты', icon: 'folder', route: '/projects' },
-    { id: '02', label: 'Пользователи', icon: 'team' },
-    { id: '03', label: 'Журналы', icon: 'file-text' },
-    { id: '04', label: 'Настройки', icon: 'setting', route: '/settings' },
-    { id: '05', label: 'Протоколы', icon: 'profile' },
-    { id: '06', label: 'Чаты', icon: 'message' },
-  ];
-
   readonly benefits: Benefit[] = [
     { icon: 'thunderbolt', title: 'Мгновенные уведомления', desc: 'Алерты при отклонении температуры' },
     { icon: 'bar-chart', title: 'Аналитика и отчёты', desc: 'Графики, история и журналы событий' },
@@ -107,19 +70,4 @@ export class MainEntranceComponent {
   ];
 
   readonly currentYear = new Date().getFullYear();
-
-  readonly avatarInitial = computed(() => initialsOf(this.auth.currentUser()));
-
-  readonly userName = computed(() => {
-    const u = this.auth.currentUser();
-    if (!u) return 'Пользователь';
-    return u.username || u.email || 'Пользователь';
-  });
-
-  readonly userCaption = computed(() => {
-    const u = this.auth.currentUser();
-    if (!u) return '';
-    const role = ROLE_LABELS[primaryRole(u.roles)] ?? primaryRole(u.roles);
-    return u.department ? `${role} · ${u.department}` : role;
-  });
 }
