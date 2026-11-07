@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 
 interface RecoveryResponse {
   success: boolean;
-  error?: { message: string };
+  error?: { code?: string; message: string };
 }
 
 @Component({
@@ -21,9 +22,9 @@ interface RecoveryResponse {
 export class AuthRecoveryComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly notification = inject(NzNotificationService);
 
   email = '';
-  error = signal<string | null>(null);
   loading = signal(false);
 
   ngOnInit(): void {
@@ -40,13 +41,14 @@ export class AuthRecoveryComponent implements OnInit {
   }
 
   goToRegistration(): void {
-    this.router.navigate(['/registration']);
+    const email = this.email.trim();
+    // Подставляем введённый адрес в форму регистрации, чтобы не набирать заново.
+    this.router.navigate(['/registration'], email ? { queryParams: { email } } : {});
   }
 
   async submitEmail(): Promise<void> {
     if (!this.email) return;
     this.loading.set(true);
-    this.error.set(null);
     try {
       const r = await fetch('/api/kratos/recovery', {
         method: 'POST',
@@ -54,10 +56,20 @@ export class AuthRecoveryComponent implements OnInit {
         body: JSON.stringify({ email: this.email }),
       });
       const d: RecoveryResponse = await r.json();
+
+      // Пользователя нет — вместо письма предлагаем зарегистрироваться.
+      if (d.error?.code === 'EMAIL_NOT_REGISTERED') {
+        this.notification.warning(
+          'Пользователь не зарегистрирован',
+          `Пройдите регистрацию`,
+        );
+        return;
+      }
+
       if (!r.ok || !d.success) throw new Error(d.error?.message || 'Ошибка восстановления');
       this.router.navigate(['/link-sent'], { queryParams: { email: this.email } });
     } catch (e: any) {
-      this.error.set(e?.message || 'Ошибка восстановления');
+      this.notification.error('Ошибка восстановления', e?.message || 'Не удалось отправить ссылку');
     } finally {
       this.loading.set(false);
     }

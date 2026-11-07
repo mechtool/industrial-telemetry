@@ -6,13 +6,6 @@
   <h1 class="auth-title">Восстановление пароля</h1>
   <p class="auth-subtitle">Email, куда отправим ссылку для сброса пароля</p>
 
-  @if (error()) {
-    <div class="form-error">
-      <span nz-icon nzType="close-circle"></span>
-      <span>{{ error() }}</span>
-    </div>
-  }
-
   <form class="auth-form" #f1="ngForm" (ngSubmit)="submitEmail()">
     <div class="field field--last">
       <label class="field-label" for="recovery-email">Электронная почта <span class="field-required">*</span></label>

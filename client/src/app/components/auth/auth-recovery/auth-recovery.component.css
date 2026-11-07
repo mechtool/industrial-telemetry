@@ -98,27 +98,6 @@
   color: #8fa6bc;
 }
 
-/* ---- Общая ошибка ---- */
-.form-error {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 20px;
-  padding: 10px 12px;
-  background: #fff1f0;
-  border: 1px solid #ffccc7;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 18px;
-  color: #cf1322;
-}
-
-.form-error .anticon {
-  flex: none;
-  margin-top: 1px;
-  font-size: 14px;
-}
-
 /* ---- Примечание ---- */
 .recovery-note {
   display: flex;

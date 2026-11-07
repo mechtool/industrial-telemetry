@@ -1,4 +1,4 @@
-﻿import { Router, Request, Response as ExpressResponse } from 'express';
+import { Router, Request, Response as ExpressResponse } from 'express';
 import { config } from '../config/index.js';
 import { ketoService, Roles } from '../services/keto.service.js';
 import { verificationService } from '../services/verification.service.js';
@@ -122,6 +122,21 @@ router.post('/login', async (req: Request, res: ExpressResponse) => {
     return;
   }
   try {
+    // Проверяем, что пользователь с таким email зарегистрирован — иначе показываем
+    // явное сообщение и предложение регистрации вместо общей ошибки Kratos.
+    // Строго сравниваем с false: при недоступности Kratos (null) не мешаем обычному
+    // сценарию входа, иначе пользователь увидит ложное «не зарегистрирован».
+    if ((await verificationService.checkEmailRegistered(email)) === false) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'EMAIL_NOT_REGISTERED',
+          message: 'Пользователь с таким email не зарегистрирован.',
+        },
+      });
+      return;
+    }
+
     const { flowId, cookie } = await initBrowserFlow('/self-service/login/browser');
     const { flow, csrfToken } = await fetchFlow(flowId, cookie, 'login');
 
@@ -349,6 +364,24 @@ router.post('/recovery', async (req: Request, res: ExpressResponse) => {
     return;
   }
   try {
+    // Kratos для незарегистрированного адреса молча отвечает успехом (чтобы нельзя
+    // было перебирать базу). Нам нужно явное сообщение и предложение регистрации,
+    // поэтому проверяем наличие активного identity ДО создания флоу.
+    //
+    // false — пользователя точно нет → 404 с кодом, клиент покажет регистрацию.
+    // null  — Kratos недоступен, проверить нельзя → не блокируем восстановление.
+    const registered = await verificationService.checkEmailRegistered(email);
+    if (registered === false) {
+      res.status(404).json({
+        success: false,
+        error: {
+          code: 'EMAIL_NOT_REGISTERED',
+          message: 'Пользователь с таким email не зарегистрирован.',
+        },
+      });
+      return;
+    }
+
     const flowRes = await fetch(`${config.kratos.publicUrl}/self-service/recovery/api`, {
       headers: { 'Accept': 'application/json' },
     });

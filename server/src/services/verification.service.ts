@@ -45,6 +45,31 @@ class VerificationService {
     return identities.some((i) => i.state === 'active');
   }
 
+  /**
+   * Как isEmailRegistered, но различает два разных «false»:
+   *   true  — активный identity с таким email есть;
+   *   false — такого пользователя точно нет;
+   *   null  — Kratos не ответил или ответил ошибкой, проверить не удалось.
+   *
+   * Нужен там, где нельзя ломать сценарий из-за сбоя Kratos:
+   * при null вызывающий код продолжает обычную работу.
+   *
+   * Регистр можно не учитывать: admin API сопоставляет identifier
+   * без учёта регистра (проверено на стенде — `User@Telemetry.Local`
+   * находит `user@telemetry.local`).
+   */
+  async checkEmailRegistered(email: string): Promise<boolean | null> {
+    const url = `${config.kratos.adminUrl}/admin/identities?credentials_identifier=${encodeURIComponent(email)}&per_page=5`;
+    try {
+      const r = await fetchWithTimeout(url, {}, 10_000);
+      if (!r.ok) return null;
+      const identities = (await r.json()) as Array<{ state?: string }>;
+      return identities.some((i) => i.state === 'active');
+    } catch {
+      return null;
+    }
+  }
+
   /** Создать ожидающую регистрацию и вернуть токен подтверждения. */
   async create(email: string, username: string, password: string): Promise<string> {
     const token = randomBytes(32).toString('hex');

@@ -11,7 +11,7 @@ import { PresentationService } from '../../../services/presentation.service';
 interface KratosProxyResponse {
   success: boolean;
   data?: { id: string; email: string; username: string; role: string };
-  error?: { message: string };
+  error?: { code?: string; message: string };
 }
 
 @Component({
@@ -37,7 +37,9 @@ export class AuthLoginComponent {
   }
 
   goToRegistration(): void {
-    this.router.navigate(['/registration']);
+    const email = this.email.trim();
+    // Подставляем введённый адрес в форму регистрации, чтобы не набирать заново.
+    this.router.navigate(['/registration'], email ? { queryParams: { email } } : {});
   }
 
   async submitLogin(): Promise<void> {
@@ -54,6 +56,13 @@ export class AuthLoginComponent {
       const data: KratosProxyResponse = await res.json();
 
       if (!res.ok || !data.success) {
+        if (data.error?.code === 'EMAIL_NOT_REGISTERED') {
+          this.notification.warning(
+            'Пользователь не зарегистрирован',
+            `Аккаунта с адресом ${this.email.trim()} нет. Зарегистрируйтесь, чтобы войти.`,
+          );
+          return;
+        }
         throw new Error(data.error?.message || 'Неверные данные для входа');
       }
 

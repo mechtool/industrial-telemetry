@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -22,6 +22,7 @@ interface KratosProxyResponse {
 })
 export class AuthRegistrationComponent {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly notification = inject(NzNotificationService);
 
   email = signal('');
@@ -29,6 +30,15 @@ export class AuthRegistrationComponent {
   password = signal('');
   passwordConfirm = signal('');
   loading = signal(false);
+
+  constructor() {
+    // Email может прийти из формы восстановления пароля: незарегистрированному
+    // пользователю мы предлагаем регистрацию и подставляем уже введённый адрес.
+    const fromQuery = this.route.snapshot.queryParams['email'];
+    if (typeof fromQuery === 'string' && fromQuery.trim()) {
+      this.email.set(fromQuery.trim());
+    }
+  }
 
   readonly minLengthOk = computed(() => this.password().length >= 8);
   readonly hasUppercase = computed(() => /[A-ZА-ЯЁ]/.test(this.password()));
