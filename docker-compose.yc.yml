@@ -67,6 +67,9 @@ services:
     command:
       - |
         set -e
+        if [ -z "$$SMTP_URI" ]; then
+          echo "[Kratos] ВНИМАНИЕ: SMTP_URI не задан в .env.yc — письма восстановления пароля и подтверждения регистрации отправляться НЕ БУДУТ." >&2
+        fi
         sed "s|__SMTP_URI__|$$SMTP_URI|g" /etc/config/kratos/kratos.yc.yml > /tmp/kratos.yml
         exec kratos serve -c /tmp/kratos.yml --watch-courier
     volumes:
@@ -134,6 +137,13 @@ services:
       - CORS_ORIGIN=https://${DOMAIN:-industrial-telemetry.ru}
       - WEBHOOK_SECRET=${WEBHOOK_SECRET:-}
       - DADATA_API_KEY=${DADATA_API_KEY:-}
+      # ---- Почта: письма подтверждения регистрации и ссылки в них ----
+      # Без SMTP_URL сервер молча пойдёт на smtps://localhost:1025 и письма не уйдут.
+      - SMTP_URL=${SMTP_URL:-}
+      - SMTP_REJECT_UNAUTHORIZED=${SMTP_REJECT_UNAUTHORIZED:-true}
+      - MAIL_FROM=${MAIL_FROM:-noreply@industrial-telemetry.ru}
+      # Нужен для ссылки подтверждения: ${APP_BASE_URL}/api/kratos/verify-email?token=...
+      - APP_BASE_URL=${APP_BASE_URL:-https://industrial-telemetry.ru}
     depends_on:
       kratos:
         condition: service_healthy

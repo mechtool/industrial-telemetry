@@ -106,12 +106,40 @@ if (config.serveClient) {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+/**
+ * Предупреждает, если почта не настроена для текущего окружения.
+ * Без этого письма подтверждения регистрации молча не уходят: по умолчанию
+ * nodemailer идёт на smtps://localhost:1025 (MailSlurper из dev-стека),
+ * а ссылка в письме ведёт на localhost.
+ *
+ * Проверка имеет смысл только для настоящего прода — контейнер за nginx,
+ * клиент раздаётся отдельно. При SERVE_CLIENT=true это локальный прогон,
+ * где localhost — нормальный адрес.
+ */
+function warnIfMailMisconfigured(): void {
+  if (config.nodeEnv !== 'production' || config.serveClient) {
+    return;
+  }
+  if (!config.mail.smtpUrl || config.mail.smtpUrl.includes('localhost')) {
+    console.warn(
+      '[Mail] SMTP_URL не задан или указывает на localhost — письма подтверждения регистрации отправляться не будут. Задайте SMTP_URL в .env.yc.',
+    );
+  }
+  if (config.mail.appBaseUrl.includes('localhost')) {
+    console.warn(
+      `[Mail] APP_BASE_URL указывает на localhost (${config.mail.appBaseUrl}) — ссылка подтверждения в письме будет нерабочей.`,
+    );
+  }
+}
+
 // --------------- Startup (non-blocking) ---------------
 async function bootstrap(): Promise<void> {
   const server = app.listen(config.port, () => {
     console.log(`[Server] Industrial Telemetry API запущен на http://localhost:${config.port}`);
     console.log(`[Server] Kratos public: ${config.kratos.publicUrl}`);
   });
+
+  warnIfMailMisconfigured();
 
   // Явная обработка ошибок слушателя (напр. EADDRINUSE) вместо необработанного `error`
   server.on('error', (err: NodeJS.ErrnoException) => {

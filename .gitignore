@@ -15,3 +15,8 @@ kratos/kratos.yc.yml
 kratos/kratos.docker.yml
 .lh-profile/
 lighthouse/
+
+# Секреты не хранить в репозитории (ключи Postbox, пароли и т.п.)
+user-data/api_kyes_yandex.txt
+user-data/*key*.txt
+user-data/*secret*.txt
