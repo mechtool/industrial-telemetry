@@ -1,13 +1,13 @@
 # Industrial Telemetry — Руководство по развёртыванию (Production)
 
-**Версия:** 4.0
-**Дата:** 2026-09-27
+**Версия:** 5.1
+**Дата:** 2026-11-07
 **Стек:** Angular 22 (PWA, NG-ZORRO) · Express 4 (TypeScript ESM) · Mosquitto MQTT · Ory Kratos v1.3.1 · Ory Keto v0.14.0 · PostgreSQL 16 · Nginx
 **Домен:** `industrial-telemetry.ru`
 **Репозиторий:** `https://github.com/mechtool/industrial-telemetry.git` (публичный)
 **Целевая ВМ:** Yandex Cloud, Ubuntu 24.04, 2 vCPU, 4 GB RAM, 20 GB SSD
 
-> Актуальное состояние кода (HEAD `29820e8`). Документ описывает текущий prod-стек из `docker-compose.yc.yml`; локальная разработка — в `user-data/MANUAL_RUN_GUIDE.md`.
+> Актуальное состояние кода (HEAD `109b917`). Документ описывает prod-стек из `docker-compose.yc.yml`; локальная разработка — `user-data/MANUAL_RUN_GUIDE.md`, план развития — `user-data/DEVELOPMENT_PLAN.md`.
 
 ---
 
@@ -35,23 +35,26 @@
 
 Express Server ──► Keto :4466/4467 (роли в Keto; поресурсные права пока не включены, см. §10)
 Express Server ──► Mosquitto :1883 (MQTT)
+Шлюз Waveshare ──► Mosquitto :1883 ──► Keeper ──► PostgreSQL :5432 (база `telemetry`)
 Kratos ──► PostgreSQL :5432 (база `kratos`)
 Keto   ──► PostgreSQL :5432 (база `keto`)
 ```
 
 | Контейнер | Образ | Порт(ы) | Назначение |
 |---|---|---|---|
-| `it-kratos-db` | `postgres:16-alpine` | 5432 (internal) | База данных (Kratos + Keto, БД `keto` создаётся `keto/init-keto.sql`) |
+| `it-kratos-db` | `postgres:16-alpine` | 5432 (internal) | БД (Kratos + Keto + telemetry; БД `keto` создаётся `keto/init-keto.sql`) |
 | `it-kratos-migrate` | `oryd/kratos:v1.3.1` | — | Миграция схемы Kratos (одноразовая) |
 | `it-kratos` | `oryd/kratos:v1.3.1` | 4433, 4434 | Identity Provider (public + admin API) |
 | `it-keto-migrate` | `oryd/keto:v0.14.0` | — | Миграция схемы Keto (одноразовая) |
 | `it-keto` | `oryd/keto:v0.14.0` | 4466, 4467 (internal) | Permission Server (RBAC) |
-| `it-server` | `Dockerfile.server` | 3000 (internal) | Express API + MQTT-мост + Kratos-прокси |
-| `it-client` | `Dockerfile.client` | 80, 443 | Nginx + Angular PWA |
+| `it-server` | `Dockerfile.server` | 3000 (internal) | Express API + MQTT-мост + Kratos-прокси + DaData |
 | `it-mosquitto` | `eclipse-mosquitto:2` | 1883 | MQTT-брокер |
+| `it-telemetry-migrate` | `postgres:16-alpine` | — | Создание БД `telemetry` + схема (одноразовая) |
+| `it-keeper` | `Dockerfile.server` | 3100 (health) | Хранитель телеметрии: MQTT → normalize → PostgreSQL |
+| `it-client` | `Dockerfile.client` | 80, 443 | Nginx + Angular PWA |
 | `it-certbot` | `certbot/certbot` | — (profile `ssl`) | Автообновление сертификатов |
 
-Собственные образы (`it-server`, `it-client`) собираются **внутри Docker** многостадийными `Dockerfile` — Node на ВМ для сборки не требуется. Keto доступен только внутри сети `it-network` (порты наружу не публикуются); Kratos (4433/4434) и Mosquitto (1883) опубликованы наружу — см. §10.
+Собственные образы (`it-server`, `it-keeper`, `it-client`) собираются **внутри Docker** многостадийными `Dockerfile` — Node на ВМ для сборки не требуется. `it-keeper` использует тот же `Dockerfile.server`, что и `it-server`, но с точкой входа `dist/src/keeper.js`. Keto доступен только внутри сети `it-network`; Kratos (4433/4434) и Mosquitto (1883) опубликованы наружу — см. §10.
 
 ---
 
@@ -61,10 +64,10 @@ Keto   ──► PostgreSQL :5432 (база `keto`)
 
 | Файл в репо (tracked) | Файл на ВМ (gitignored) | Что содержит |
 |---|---|---|
-| `.env.yc.example` | `.env.yc` | `DOMAIN`, `DB_PASSWORD`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `WEBHOOK_SECRET` |
-| `kratos/kratos.yc.example.yml` | `kratos/kratos.yc.yml` | `secrets.cookie`, `secrets.cipher`, `courier.smtp.connection_uri`, `web_hook.auth.config.value` (общий секрет webhook) |
+| `.env.yc.example` | `.env.yc` | `DOMAIN`, `DB_PASSWORD`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `WEBHOOK_SECRET`, `DADATA_API_KEY`, `SMTP_URI` |
+| `kratos/kratos.yc.example.yml` | `kratos/kratos.yc.yml` | `secrets.cookie`, `secrets.cipher`, `web_hook.auth.config.value` (общий секрет webhook) |
 
-`.gitignore` уже содержит `.env`, `.env.local`, `.env.yc`, `.env.yc.*` (кроме `*.example`), `.codewhale/`, `certbot/`, `kratos/kratos.yc.yml`, `kratos/kratos.docker.yml`.
+`.gitignore` уже содержит `.env`, `.env.local`, `.env.yc`, `.env.yc.*` (кроме `*.example`), `.codewhale/`, `certbot/`, `kratos/kratos.yc.yml`, `kratos/kratos.docker.yml`, `lighthouse/`, `dist/`, `*.log`, `.npm-cache/`.
 
 ### 2.1 Генерация секретов Kratos
 
@@ -73,9 +76,9 @@ Keto   ──► PostgreSQL :5432 (база `keto`)
 node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
 ```
 
-> ⚠️ Kratos требует `secrets.cookie` и `secrets.cipher` **ровно 32 символа** (min=max=32); длина 64 вызовет ошибку валидации.
+> ⚠️ Kratos требует `secrets.cookie` и `secrets.cipher` **ровно 32 символа** (min=max=32).
 >
-> ⚠️ Kratos **не подставляет** `${VAR}` в конфиг-файл — плейсхолдеры трактуются буквально и падают с ошибкой валидации. Секреты прописываются в `kratos/kratos.yc.yml` напрямую.
+> ⚠️ Kratos **не подставляет** `${VAR}` в конфиг-файл — плейсхолдеры трактуются буквально. Исключение — `SMTP_URI`: в compose `kratos` обрабатывается командой `sed "s|__SMTP_URI__|$SMTP_URI|g"` перед запуском, поэтому SMTP задаётся переменной окружения, а не в файле.
 
 ### 2.2 Пример `.env.yc` (на ВМ)
 
@@ -85,9 +88,11 @@ DB_PASSWORD=<пароль-БД>
 MQTT_USERNAME=
 MQTT_PASSWORD=
 WEBHOOK_SECRET=<секрет-webhook>
+DADATA_API_KEY=<ключ-DaData>
+SMTP_URI=smtps://<логин>:<пароль>@smtp.yandex.ru:465
 ```
 
-Секрет webhook (`WEBHOOK_SECRET`) должен **совпадать** с `web_hook.auth.config.value` в `kratos/kratos.yc.yml` (см. §2.3). Генерируется отдельно (можно любой длины, рекомендуется 64 hex):
+Секрет webhook (`WEBHOOK_SECRET`) должен **совпадать** с `web_hook.auth.config.value` в `kratos/kratos.yc.yml` (см. §2.3):
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -95,7 +100,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ### 2.3 Пример `kratos/kratos.yc.yml` (на ВМ)
 
-Копируется из `kratos/kratos.yc.example.yml` и заполняется реальными значениями: `secrets.cookie`/`secrets.cipher` (32 hex), `courier.smtp.connection_uri` (SMTP-доступ отдельного ящика приложения `noreply@<домен>` либо транзакционного SMTP-сервиса) и `web_hook.auth.config.value` (= `WEBHOOK_SECRET` из `.env.yc`).
+Копируется из `kratos/kratos.yc.example.yml` и заполняется реальными значениями: `secrets.cookie`/`secrets.cipher` (32 hex) и `web_hook.auth.config.value` (= `WEBHOOK_SECRET`). SMTP в файл не пишется — он приходит через `SMTP_URI` (см. §2.1).
 
 > Webhook Kratos шлёт секрет в заголовке `Authorization` **без префикса `Bearer`**; сервер сравнивает его со значением `WEBHOOK_SECRET` (см. `server/src/routes/webhooks.routes.ts`).
 
@@ -123,30 +128,21 @@ Host yc-vm
     StrictHostKeyChecking no
 ```
 
-Проверка:
-
-```bash
-ssh yc-vm "hostname && docker --version"
-```
+Проверка: `ssh yc-vm "hostname && docker --version"`.
 
 ### 3.3 Ручная установка (если без cloud-init)
 
 ```bash
-# Docker
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER   # перелогиниться
-
-# Node.js 22 (нужен только если собирать вне Docker)
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash
 sudo apt install -y nodejs
-
-# Swap 2 GB
 sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
 sudo mkswap /swapfile && sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
 
-Либо воспользоваться готовым скриптом `scripts/deploy-yc.sh` (ставит Docker, клонирует репозиторий, создаёт `.env.yc`, получает сертификат, собирает и поднимает стек).
+Либо готовый скрипт `scripts/deploy-yc.sh`.
 
 ---
 
@@ -162,16 +158,14 @@ cd industrial-telemetry
 ### 4.1 Создать реальные конфиги из шаблонов
 
 ```bash
-# .env.yc — заполнить реальными значениями
 cp .env.yc.example .env.yc
 nano .env.yc
 
-# kratos.yc.yml — заполнить реальными секретами (см. §2)
 cp kratos/kratos.yc.example.yml kratos/kratos.yc.yml
 nano kratos/kratos.yc.yml
 ```
 
-> Эти два файла gitignored — `git pull` их не тронет. Они живут только на ВМ.
+> Эти два файла gitignored — `git pull` их не тронет.
 
 ### 4.2 SSL-сертификат (Let's Encrypt)
 
@@ -187,7 +181,7 @@ docker run --rm \
   -d industrial-telemetry.ru --non-interactive
 ```
 
-Альтернатива — `scripts/setup-https.sh` (создаёт самоподписанный bootstrap-сертификат, поднимает nginx и получает сертификат через webroot).
+Альтернатива — `scripts/setup-https.sh`.
 
 ---
 
@@ -205,7 +199,8 @@ docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
 2. `it-kratos-migrate` + `it-keto-migrate` (миграции, одноразовые)
 3. `it-kratos` + `it-keto`
 4. `it-mosquitto` + `it-server`
-5. `it-client` (nginx)
+5. `it-telemetry-migrate` → `it-keeper`
+6. `it-client` (nginx)
 
 Проверить статус:
 
@@ -234,7 +229,6 @@ ssh yc-vm
 cd ~/industrial-telemetry
 git pull origin master
 
-# пересобрать только изменённый сервис (client и/или server)
 docker compose -f docker-compose.yc.yml --env-file .env.yc build client
 docker compose -f docker-compose.yc.yml --env-file .env.yc up -d client
 ```
@@ -242,29 +236,33 @@ docker compose -f docker-compose.yc.yml --env-file .env.yc up -d client
 Какие сервисы пересобирать:
 
 - изменился только клиент (Angular) → `build client`;
-- изменился сервер → `build server`;
-- изменились конфиги Kratos/Keto/Mosquitto → достаточно `up -d <сервис>` (конфиги монтируются как volume, пересборка образа не нужна). Исключение — Kratos не перечитывает конфиг на лету, но `up -d kratos` пересоздаёт контейнер с новым конфигом.
-
-> Один и тот же стек/имена контейнеров — при `up -d` compose пересоздаст только изменённые контейнеры; БД и сертификаты сохраняются в Docker-томах и `/etc/letsencrypt`.
+- изменился сервер или keeper → `build server` (keeper использует тот же образ);
+- изменились конфиги Kratos/Keto/Mosquitto → достаточно `up -d <сервис>` (конфиги монтируются как volume). Kratos не перечитывает конфиг на лету — `up -d kratos` пересоздаёт контейнер с новым конфигом.
 
 ---
 
 ## 7. HTTPS (Let's Encrypt)
 
-Сертификаты монтируются в `it-client` (`/etc/letsencrypt:/etc/letsencrypt:ro`). Автообновление — контейнер `it-certbot` (profile `ssl`), `certbot renew` каждые 12 часов:
+Сертификаты монтируются в `it-client` (`/etc/letsencrypt:/etc/letsencrypt:ro`), webroot ACME-challenge — volume `certbot-webroot` (`/var/www/certbot`).
+
+**Автообновление** — хост-скрипт `scripts/renew-cert.sh` (webroot `certbot renew` + `docker exec it-client nginx -s reload`), запускается cron на ВМ дважды в сутки:
 
 ```bash
-docker compose -f docker-compose.yc.yml --env-file .env.yc --profile ssl up -d certbot
+# на ВМ: crontab -e (пользователь mit-2)
+0 3,15 * * * /home/mit-2/industrial-telemetry/scripts/renew-cert.sh >> /home/mit-2/industrial-telemetry/renew-cert.log 2>&1
 ```
 
-Nginx-конфиг (`nginx/nginx.yc.conf`) содержит HTTP→HTTPS redirect, ACME-challenge и security-заголовки (HSTS, X-Frame-Options `DENY`, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP). CSP задаётся `<meta http-equiv="Content-Security-Policy">` в `client/src/index.html` (на уровне Nginx CSP-заголовка нет).
+Скрипт обновляет сертификат через `certbot renew --webroot --webroot-path=/var/www/certbot` и затем перезагружает nginx, чтобы подхватить новый сертификат.
+
+> В compose остался сервис `certbot` (profile `ssl`, `certbot renew` каждые 12 часов), но он **не перезагружает nginx** после обновления — предпочтительнее `scripts/renew-cert.sh` по cron.
+
+Nginx-конфиг (`nginx/nginx.yc.conf`) содержит HTTP→HTTPS redirect, ACME-challenge и security-заголовки (HSTS, X-Frame-Options `DENY`, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP). CSP задаётся `<meta http-equiv="Content-Security-Policy">` в `client/src/index.html`.
 
 ---
 
 ## 8. Проверка после деплоя
 
 ```bash
-# статус контейнеров
 docker compose -f docker-compose.yc.yml --env-file .env.yc ps
 
 # API-сервер
@@ -275,15 +273,11 @@ curl -s https://industrial-telemetry.ru/api/health
 curl -s https://industrial-telemetry.ru/.ory/health/alive
 
 # главная страница (PWA)
-curl -s -o /dev/null -w "%{http_code}\n" https://industrial-telemetry.ru/
-# → 200
+curl -s -o /dev/null -w "%{http_code}\n" https://industrial-telemetry.ru/   # → 200
 
-# логи
-docker logs -f it-kratos
-docker logs -f it-server
-docker logs -f it-client
-docker logs -f it-keto
-docker logs -f it-mosquitto
+# хранитель телеметрии
+ssh yc-vm "curl -s http://localhost:3100/health"
+ssh yc-vm "docker exec it-kratos-db psql -U kratos -d telemetry -c 'SELECT count(*) FROM telemetry'"
 ```
 
 Чек-лист:
@@ -292,13 +286,13 @@ docker logs -f it-mosquitto
 - [ ] `/api/health` → `status: healthy`, `mqtt: connected`
 - [ ] `/.ory/health/alive` → `{"status":"ok"}`
 - [ ] регистрация нового пользователя
-- [ ] у нового пользователя в Keto роль `viewer` (`/api/users` под админом, либо relation-tuples в `it-keto`)
-- [ ] логин созданным аккаунтом → редирект на `/projects`
-- [ ] список проектов (`/api/projects`) отдаёт 4 стартовых проекта
-- [ ] дашборд показывает MQTT-статус
+- [ ] у нового пользователя в Keto роль `viewer` (под админом `/api/users`, либо relation-tuples в `it-keto`)
+- [ ] логин созданным аккаунтом → главная «CRYOMON»
+- [ ] список проектов (`/api/projects`) отдаёт стартовые проекты
 - [ ] под админом: список пользователей (`/api/users`) и смена ролей работают
 - [ ] под админом: настройки (`/api/settings`) читаются и сохраняются
 - [ ] logout → редирект на логин
+- [ ] `it-keeper` в статусе Up, `:3100/health` → `mqtt: connected`, `database: ok`
 - [ ] в логах `it-kratos` webhook `Dispatching webhook` без `webhook failed`
 
 ---
@@ -308,13 +302,14 @@ docker logs -f it-mosquitto
 ```bash
 ssh yc-vm
 cd ~/industrial-telemetry
-git log --oneline -5          # найти стабильный коммит
-git checkout <commit>         # или git reset --hard <commit>
+git log --oneline -5
+git checkout <commit>   # или git reset --hard <commit>
 docker compose -f docker-compose.yc.yml --env-file .env.yc build
 docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
+git checkout master
 ```
 
-Затем вернуть `master` на место: `git checkout master` (или `git reset --hard origin/master`).
+Данные БД и сертификаты при откате сохраняются (Docker-тома + `/etc/letsencrypt`).
 
 ---
 
@@ -322,30 +317,34 @@ docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
 
 ### 10.1 RBAC (Keto): роли работают, поресурсные права — нет
 
-Роли живут в Keto (relation tuples, namespace `Role`) и **работают**: `kratosAuth` читает их через `ketoService.listRoles()`, `/api/session` отдаёт `roles`, `requireAdmin` проверяет `roles.includes('admin')` — это защищает `/api/users` (список и `PUT /:id/roles`) и `PUT /api/settings`. Роль `viewer` назначается автоматически при регистрации (webhook + fallback).
+Роли живут в Keto (relation tuples, namespace `Role`) и **работают**: `kratosAuth` читает их через `ketoService.listRoles()`, `/api/session` отдаёт `roles`, `requireAdmin` проверяет `roles.includes('admin')` — защищает `/api/users` и `PUT /api/settings`. Роль `viewer` назначается автоматически при регистрации (webhook + fallback).
 
 Поресурсные права пока **не активированы**:
 
 - `ketoService.seedDefaults()` не вызывается при старте сервера → разрешения на ресурсы (`dashboard`, `mqtt`, `mqtt-topics`, `users`, `settings`) не сидятся;
 - `requirePermission` / `requireRole` / `loadPermissions` не применены к маршрутам (`/api/mqtt/*` защищён только `kratosAuth`);
-- маршрута `/api/permissions` на сервере нет, а клиентский `PermissionsService.load()` (который ходит на `/api/permissions`) нигде не вызывается.
+- маршрута `/api/permissions` на сервере нет; клиентский `PermissionsService` (ходит на `/api/permissions`) существует, но нигде не внедряется — мёртвый код.
 
-Следствие: все `/api/*` маршруты защищены аутентификацией (`kratosAuth`), админские операции — проверкой роли (`requireAdmin`), а поресурсной модели прав на уровне enforcement нет. Это задача ближайшего спринта (см. `user-data/NEXT_STEPS.md`).
+Это задача `user-data/DEVELOPMENT_PLAN.md` (Фаза 3).
 
-> ⚠️ **Одноразовая миграция для существующих инсталляций:** при обновлении со старых версий (где роль лежала в `traits.role`) выполнить `cd server && npm run migrate:roles` до/вместе с перезапуском `it-server` — переносит `traits.role` → Keto и чистит `traits.role`. Идемпотентна.
+> ⚠️ **Одноразовая миграция для существующих инсталляций:** при обновлении со старых версий (где роль лежала в `traits.role`) выполнить `cd server && npm run migrate:roles` до/вместе с перезапуском `it-server`.
 
 ### 10.2 Данные в памяти (без БД)
 
-`/api/projects` и `/api/settings` используют in-memory хранилище на стороне сервера (`server/src/services/projects.service.ts`, `settings.service.ts`): данные теряются при перезапуске контейнера и не общие между репликами. Это dev-заглушки — перенос в PostgreSQL запланирован.
+`/api/projects` и `/api/settings` используют in-memory хранилище (`server/src/services/projects.service.ts`, `settings.service.ts`): данные теряются при перезапуске контейнера. Разделы «Объекты/Шлюзы/Организации/Пользователи» внутри проекта — клиентские заготовки без серверных моделей. Перенос в PostgreSQL — `DEVELOPMENT_PLAN.md` (Фаза 3).
 
-### 10.3 Безопасность — к ротации/доработке
+### 10.3 Телеметрия
 
-- **MQTT** — `mosquitto.conf` использует `allow_anonymous true`; включить аутентификацию (`allow_anonymous false` + `password_file`).
-- **SMTP-доступ приложения** — живёт в `courier.smtp.connection_uri` в `kratos/kratos.yc.yml`; пароль приложения хранить вне git. `from_address` должен совпадать с ящиком в `connection_uri` (иначе SPF/DKIM отклонят письмо).
-- **Пароль БД** — сменить `kratos` по умолчанию через `ALTER USER` и обновить `DB_PASSWORD` в `.env.yc` + `dsn` в `kratos/kratos.yc.yml`/`keto/keto.yml`.
+Данные шлюза пишутся keeper'ом в таблицу `telemetry`, но API телеметрии нет — клиент их пока не показывает. Ретеншен отсутствует, таблица растёт. Задачи — `DEVELOPMENT_PLAN.md` (Фазы 1 и 4).
+
+### 10.4 Безопасность — к ротации/доработке
+
+- **MQTT** — `mosquitto.conf` использует `allow_anonymous true`; включить `allow_anonymous false` + `password_file` (+ TLS 8883).
+- **SMTP-доступ приложения** — теперь передаётся через env `SMTP_URI` (не в `kratos.yc.yml`). Пароль приложения хранить вне git. `from_address` должен совпадать с ящиком в `SMTP_URI` (иначе SPF/DKIM отклонят письмо).
+- **Пароль БД** — сменить `kratos` по умолчанию через `ALTER USER` и обновить `DB_PASSWORD` в `.env.yc` + `dsn`.
 - **Порты наружу** — `it-kratos` (4433/4434) и `it-mosquitto` (1883) опубликованы; в проде их стоит закрыть в security group ВМ (наружу нужны только 80/443 через nginx).
-- **Версия конфига Keto** — `keto/keto.yml` объявляет `version: v0.14.0-alpha.0`, тогда как compose использует образ `oryd/keto:v0.14.0`; при ошибке валидации Keto привести `version` в `keto.yml` к `v0.14.0`.
+- **Версия конфига Keto** — исправлено: `keto/keto.yml` объявляет `version: v0.14.0`, compose использует `oryd/keto:v0.14.0`.
 
-### 10.4 История git
+### 10.5 История git
 
-История была переписана (`git filter-repo`) — секреты из старых коммитов удалены, репозиторий публичный. После force-push любые локальные клоны нужно пересинхронизировать: `git fetch origin && git reset --hard origin/master`.
+История была переписана (`git filter-repo`) — секреты из старых коммитов удалены, репозиторий публичный. После force-push локальные клоны пересинхронизировать: `git fetch origin && git reset --hard origin/master`.

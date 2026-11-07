@@ -1,9 +1,9 @@
 # ========================================================
-# Ory Keto v0.13 — Permission Server
+# Ory Keto v0.14.0 — Permission Server
 # Industrial Telemetry — Role-Based Access Control
 # ========================================================
 
-version: v0.14.0-alpha.0
+version: v0.14.0
 
 dsn: postgres://kratos:kratos@kratos-db:5432/keto?sslmode=disable
 

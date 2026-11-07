@@ -1,12 +1,12 @@
 # План развёртывания Industrial Telemetry
 
-**Дата плана:** 2026-09-27
+**Дата плана:** 2026-11-07 (актуализировано под `master` HEAD `109b917`)
 **Цель:** развернуть и поддерживать Production-стек на Yandex Cloud VM
 **ВМ:** Ubuntu 24.04, 2 vCPU, 4 GB RAM, 20 GB SSD
 **DNS:** industrial-telemetry.ru
 **Репозиторий:** https://github.com/mechtool/industrial-telemetry.git (публичный, ветка `master`)
 
-> Детальная пошаговая инструкция — `user-data/DEPLOYMENT_GUIDE.md`, ежедневная эксплуатация — `user-data/MANUAL_RUN_GUIDE.md`.
+> Детальная пошаговая инструкция — `user-data/DEPLOYMENT_GUIDE.md`, ежедневная эксплуатация — `user-data/MANUAL_RUN_GUIDE.md`, план развития — `user-data/DEVELOPMENT_PLAN.md`.
 
 ---
 
@@ -14,16 +14,18 @@
 
 | Компонент | Статус | Комментарий |
 |---|---|---|
-| PostgreSQL 16 (Kratos + Keto) | ✅ Готов | Две базы: `kratos`, `keto` (БД `keto` создаётся `keto/init-keto.sql`) |
-| Ory Kratos v1.3.1 (Auth) | ✅ Готов | Регистрация, логин, recovery (link-based), webhook на регистрацию |
-| Ory Keto v0.14.0 (RBAC) | ✅ Готов | Роли admin/engineer/operator/viewer в relation tuples (namespace `Role`) |
+| PostgreSQL 16 (Kratos + Keto + telemetry) | ✅ Готов | Базы `kratos`, `keto` (создаётся `keto/init-keto.sql`), `telemetry` (создаётся миграцией) |
+| Ory Kratos v1.3.1 (Auth) | ✅ Готов | Регистрация, логин, recovery (link-based), webhook на регистрацию; SMTP через env |
+| Ory Keto v0.14.0 (RBAC) | ✅ Готов | Роли admin/engineer/operator/viewer (namespace `Role`); поресурсные права не включены |
 | Mosquitto MQTT | ✅ Готов | Топик `industrial/sensors/#`, `allow_anonymous true` (к доработке) |
-| Express API Server | ✅ Готов | Health, Kratos-прокси, Keto-клиент, MQTT-мост, users/settings/projects |
-| Angular 22 PWA (NG-ZORRO) | ✅ Готов | Dashboard, MQTT, проекты, пользователи, настройки, профиль |
+| Express API Server | ✅ Готов | Health, Kratos-прокси, Keto-клиент, MQTT-мост, users/settings/projects, DaData-адреса |
+| Keeper (телеметрия) | ✅ Готов | MQTT → normalize (массив/плоский) → таблица `telemetry`; health `:3100` |
+| Шлюз Waveshare (источник данных) | ✅ Готов | MQTT+JSON, публикует в `industrial/sensors/akcc55` напрямую (без сборщика) |
+| Angular 22 PWA (NG-ZORRO) | ✅ Готов | CRYOMON: проекты + карточка проекта (вкладки), настройки, презентация возможностей |
 | Nginx | ✅ Готов | Reverse proxy, статика, security headers, rate limiting |
-| Let's Encrypt HTTPS | ✅ Готов | Сертификаты монтируются, автообновление certbot (profile `ssl`) |
+| Let's Encrypt HTTPS | ✅ Готов | Сертификаты монтируются; автообновление — `scripts/renew-cert.sh` (webroot + reload nginx по cron) |
 
-> ⚠️ Известное ограничение: поресурсные права Keto не включены — авторизация сейчас по ролям через `requireAdmin`, а не по разрешениям на ресурсы (`user-data/NEXT_STEPS.md`). Данные проектов и настроек — in-memory заглушки.
+> ⚠️ Известные ограничения: поресурсные права Keto не включены (авторизация по ролям через `requireAdmin`); проекты/настройки — in-memory; API телеметрии нет (данные пишутся, но клиент их не показывает). См. `user-data/NEXT_STEPS.md` и `user-data/DEVELOPMENT_PLAN.md`.
 
 ---
 
@@ -40,12 +42,11 @@ cd industrial-telemetry
 # 3. Создать реальные конфиги из шаблонов
 cp .env.yc.example .env.yc
 cp kratos/kratos.yc.example.yml kratos/kratos.yc.yml
-#   .env.yc:        DOMAIN, DB_PASSWORD, MQTT_USERNAME, MQTT_PASSWORD, WEBHOOK_SECRET
-#   kratos.yc.yml:  secrets.cookie/cipher (32 hex), courier.smtp.connection_uri,
-#                   web_hook.auth.config.value (= WEBHOOK_SECRET)
+#   .env.yc:        DOMAIN, DB_PASSWORD, MQTT_USERNAME, MQTT_PASSWORD, WEBHOOK_SECRET,
+#                   DADATA_API_KEY, SMTP_URI
+#   kratos.yc.yml:  secrets.cookie/cipher (32 hex), web_hook.auth.config.value (= WEBHOOK_SECRET)
 
 # 4. Миграция ролей (traits.role -> Keto) — ТОЛЬКО при обновлении старой инсталляции
-#    (для свежего деплоя не нужна: роль viewer назначается webhook'ом)
 cd server && npm run migrate:roles && cd ..
 
 # 5. SSL-сертификат (один раз, до старта nginx)
@@ -59,12 +60,15 @@ docker run --rm -v /etc/letsencrypt:/etc/letsencrypt \
 docker compose -f docker-compose.yc.yml --env-file .env.yc build
 docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
 
-# 7. Включить автообновление сертификатов
-docker compose -f docker-compose.yc.yml --env-file .env.yc --profile ssl up -d certbot
+# 7. Включить автообновление сертификатов (webroot renew + reload nginx)
+crontab -e
+# добавить строку:
+#   0 3,15 * * * /home/mit-2/industrial-telemetry/scripts/renew-cert.sh >> /home/mit-2/industrial-telemetry/renew-cert.log 2>&1
 
 # 8. Проверить
 docker compose -f docker-compose.yc.yml --env-file .env.yc ps
 curl -s https://industrial-telemetry.ru/api/health
+ssh yc-vm "curl -s http://localhost:3100/health"
 ```
 
 > ⚠️ Порядок важен: при обновлении старой инсталляции миграцию `migrate:roles` выполнять **до** перезапуска `it-server`. Kratos не перечитывает конфиг на лету — после правки `kratos.yc.yml` выполнить `up -d kratos`.
@@ -76,12 +80,12 @@ curl -s https://industrial-telemetry.ru/api/health
 - [ ] `https://industrial-telemetry.ru/` — загружается Angular PWA
 - [ ] `https://industrial-telemetry.ru/api/health` — `status: healthy`, `mqtt: connected`
 - [ ] `/.ory/health/alive` — Kratos отвечает
-- [ ] Регистрация нового пользователя → в Keto у него роль `viewer`
-- [ ] Логин с созданным аккаунтом → редирект на `/projects`
+- [ ] Регистрация нового пользователя → в Keto роль `viewer`
+- [ ] Логин → главная «CRYOMON»
 - [ ] `/api/projects` возвращает стартовые проекты
-- [ ] Дашборд показывает MQTT-статус
-- [ ] Под админом: `/api/users` (список и смена ролей) работает
-- [ ] Под админом: `/api/settings` (чтение и сохранение) работает
+- [ ] Под админом: `/api/users` и `/api/settings` работают
+- [ ] `it-keeper` Up, `:3100/health` → `mqtt: connected`, `database: ok`
+- [ ] В таблице `telemetry` растут строки (если шлюз публикует)
 - [ ] Logout → редирект на логин
 - [ ] Recovery flow (восстановление пароля через email)
 - [ ] В логах Kratos webhook `Dispatching webhook` без `webhook failed`
@@ -94,12 +98,12 @@ curl -s https://industrial-telemetry.ru/api/health
 
 | Роль | Видит Dashboard | Видит MQTT | Управляет пользователями | Меняет настройки |
 |---|---|---|---|---|
-| viewer (просмотр) | ✅ | ✅ | ❌ | ❌ |
+| viewer | ✅ | ✅ | ❌ | ❌ |
 | operator | ✅ | ✅ | ❌ | ❌ |
 | engineer | ✅ (edit) | ✅ (edit) | ❌ | ✅ (edit) |
 | admin | ✅ (полный) | ✅ (полный) | ✅ | ✅ |
 
-> Роль `viewer` — низшая, назначается автоматически при регистрации. Enforcement сейчас по ролям (`requireAdmin` на `/api/users` и `PUT /api/settings`); поресурсная модель прав (`requirePermission`) не включена.
+> Роль `viewer` — низшая, назначается автоматически при регистрации. Enforcement сейчас по ролям (`requireAdmin` на `/api/users` и `PUT /api/settings`); поресурсная модель (`requirePermission`) не включена.
 
 ---
 
@@ -109,11 +113,11 @@ curl -s https://industrial-telemetry.ru/api/health
 
 ```bash
 cd ~/industrial-telemetry
-git log --oneline -5          # найти стабильный коммит
+git log --oneline -5
 git checkout <commit>         # или git reset --hard <commit>
 docker compose -f docker-compose.yc.yml --env-file .env.yc build
 docker compose -f docker-compose.yc.yml --env-file .env.yc up -d
-git checkout master           # вернуть ветку
+git checkout master
 ```
 
 Данные БД и сертификаты при откате сохраняются (Docker-тома + `/etc/letsencrypt`).
