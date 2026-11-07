@@ -5,12 +5,11 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { AuthService } from '../../../services/auth.service';
 
 interface KratosProxyResponse {
   success: boolean;
-  data?: { id: string; email: string; username: string; role: string };
-  error?: { message: string };
+  data?: { token: string; email: string };
+  error?: { code?: string; message?: string };
 }
 
 @Component({
@@ -23,7 +22,6 @@ interface KratosProxyResponse {
 })
 export class AuthRegistrationComponent {
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
   private readonly notification = inject(NzNotificationService);
 
   email = signal('');
@@ -79,12 +77,26 @@ export class AuthRegistrationComponent {
       const data: KratosProxyResponse = await res.json();
 
       if (!res.ok || !data.success) {
+        if (data.error?.code === 'EMAIL_EXISTS') {
+          this.notification.warning(
+            'Пользователь уже зарегистрирован',
+            data.error?.message || 'Регистрация не требуется',
+          );
+          return;
+        }
+        if (data.error?.code === 'PASSWORD_WEAK') {
+          this.notification.error(
+            'Пароль не подходит',
+            data.error?.message || 'Придумайте другой пароль',
+          );
+          return;
+        }
         throw new Error(data.error?.message || 'Ошибка регистрации');
       }
 
-      this.authService.checkSession().subscribe();
-      this.notification.success('Регистрация выполнена', 'Вы успешно зарегистрировались');
-      this.router.navigate(['/']);
+      this.router.navigate(['/check-email'], {
+        queryParams: { token: data.data?.token, email: data.data?.email },
+      });
     } catch (err: any) {
       this.notification.error('Ошибка регистрации', err?.message || 'Не удалось завершить регистрацию');
     } finally {

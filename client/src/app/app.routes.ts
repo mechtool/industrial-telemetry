@@ -25,6 +25,16 @@ export const routes: Routes = [
     title: 'Ссылка отправлена — Industrial Telemetry',
   },
   {
+    path: 'check-email',
+    loadComponent: () => import('./components/auth/auth-check-email/auth-check-email.component').then(m => m.AuthCheckEmailComponent),
+    title: 'Подтверждение email — Industrial Telemetry',
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () => import('./components/auth/auth-verify-email/auth-verify-email.component').then(m => m.AuthVerifyEmailComponent),
+    title: 'Подтверждение email — Industrial Telemetry',
+  },
+  {
     path: 'change-password',
     loadComponent: () => import('./components/auth/auth-change-password/auth-change-password.component').then(m => m.AuthChangePasswordComponent),
     title: 'Изменение пароля — Industrial Telemetry',

@@ -1,6 +1,7 @@
 ﻿import { Router, Request, Response as ExpressResponse } from 'express';
 import { config } from '../config/index.js';
 import { ketoService, Roles } from '../services/keto.service.js';
+import { verificationService } from '../services/verification.service.js';
 
 const router = Router();
 
@@ -162,61 +163,154 @@ router.post('/login', async (req: Request, res: ExpressResponse) => {
 });
 
 // ============================================================
-// Registration
+// Registration (создание identity в Kratos)
 // ============================================================
+
+/** Регистрирует identity в Kratos и назначает роль viewer (используется при подтверждении email). */
+async function registerIdentity(
+  email: string,
+  username: string,
+  password: string,
+): Promise<{ regRes: Response; result: any; errorMessage: string | null }> {
+  const { flowId, cookie } = await initBrowserFlow('/self-service/registration/browser');
+  const { flow, csrfToken } = await fetchFlow(flowId, cookie, 'registration');
+
+  const body = new URLSearchParams();
+  body.set('method', 'password');
+  body.set('csrf_token', csrfToken);
+  body.set('traits.email', email);
+  body.set('traits.username', username);
+  body.set('password', password);
+
+  const regRes = await fetch(`${config.kratos.publicUrl}/self-service/registration?flow=${flow.id}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json',
+      ...(cookie ? { Cookie: cookie } : {}),
+    },
+    body: body.toString(),
+    redirect: 'manual',
+  });
+
+  if (regRes.status === 422 || regRes.status === 400) {
+    const err = await regRes.json();
+    const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Registration error';
+    return { regRes, result: err, errorMessage: msg };
+  }
+  if (!regRes.ok) {
+    return { regRes, result: null, errorMessage: `Registration error (${regRes.status})` };
+  }
+
+  const result = await regRes.json();
+  const identityId = result?.identity?.id ?? result?.session?.identity?.id;
+  if (typeof identityId === 'string' && identityId) {
+    await ketoService.assignRole(identityId, Roles.VIEWER);
+  }
+
+  return { regRes, result, errorMessage: null };
+}
+
+/**
+ * POST /api/kratos/registration
+ * Проверяет существование email, создаёт pending-регистрацию и отправляет
+ * ссылку подтверждения. Identity в Kratos создаётся только после клика по
+ * ссылке (см. GET /verify-email).
+ */
 router.post('/registration', async (req: Request, res: ExpressResponse) => {
   const { email, username, password } = req.body;
   if (!email || !username || !password) {
     res.status(400).json({ success: false, error: { message: 'Email, username and password required' } });
     return;
   }
+
   try {
-    const { flowId, cookie } = await initBrowserFlow('/self-service/registration/browser');
-    const { flow, csrfToken } = await fetchFlow(flowId, cookie, 'registration');
-
-    const body = new URLSearchParams();
-    body.set('method', 'password');
-    body.set('csrf_token', csrfToken);
-    body.set('traits.email', email);
-    body.set('traits.username', username);
-    body.set('password', password);
-
-    const regRes = await fetch(`${config.kratos.publicUrl}/self-service/registration?flow=${flow.id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json',
-        ...(cookie ? { Cookie: cookie } : {}),
-      },
-      body: body.toString(),
-      redirect: 'manual',
-    });
-
-    forwardSetCookie(req, regRes, res);
-
-    if (regRes.status === 422 || regRes.status === 400) {
-      const err = await regRes.json();
-      const msg = extractErrorMessage(err?.ui) ?? err?.error?.message ?? 'Registration error';
-      res.status(400).json({ success: false, error: { message: msg } });
+    if (await verificationService.isEmailRegistered(email)) {
+      res.status(409).json({
+        success: false,
+        error: {
+          code: 'EMAIL_EXISTS',
+          message: 'Пользователь с таким email уже зарегистрирован. Регистрация не требуется.',
+        },
+      });
       return;
     }
-    if (!regRes.ok) {
-      res.status(502).json({ success: false, error: { message: `Registration error (${regRes.status})` } });
+
+    const passwordError = await verificationService.validatePassword(password);
+    if (passwordError) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'PASSWORD_WEAK', message: passwordError },
+      });
       return;
     }
-    const result = await regRes.json();
 
-    // Надёжность: назначаем роль просмотра синхронно, даже если webhook не сработал.
-    const identityId = result?.identity?.id ?? result?.session?.identity?.id;
-    if (typeof identityId === 'string' && identityId) {
-      await ketoService.assignRole(identityId, Roles.VIEWER);
-    }
-
-    res.json({ success: true, data: result });
+    const token = await verificationService.create(email, username, password);
+    await verificationService.sendVerificationEmail(token);
+    res.json({ success: true, data: { token, email } });
   } catch (err: any) {
     console.error('[Kratos] Registration error:', err.message);
     res.status(502).json({ success: false, error: { message: 'Auth unavailable' } });
   }
+});
+
+/**
+ * GET /api/kratos/verify-email?token=...
+ * Переход по ссылке из письма. При валидном токене создаёт identity в Kratos,
+ * пробрасывает сессию и редиректит в приложение. При невалидном — на /verify-email.
+ */
+router.get('/verify-email', async (req: Request, res: ExpressResponse) => {
+  const token = typeof req.query.token === 'string' ? req.query.token : '';
+  const pending = verificationService.get(token);
+
+  if (!pending) {
+    res.redirect(302, `${config.mail.appBaseUrl}/verify-email?invalid=1`);
+    return;
+  }
+
+  try {
+    const { regRes, errorMessage } = await registerIdentity(pending.email, pending.username, pending.password);
+    if (errorMessage) {
+      console.warn('[Kratos] Verify-email registration failed:', errorMessage);
+      res.redirect(302, `${config.mail.appBaseUrl}/verify-email?invalid=1`);
+      return;
+    }
+
+    verificationService.consume(token);
+    forwardSetCookie(req, regRes, res);
+    res.redirect(302, `${config.mail.appBaseUrl}/`);
+  } catch (err: any) {
+    console.error('[Kratos] Verify-email error:', err.message);
+    res.redirect(302, `${config.mail.appBaseUrl}/verify-email?invalid=1`);
+  }
+});
+
+/** POST /api/kratos/registration/resend — повторно отправить ссылку подтверждения. */
+router.post('/registration/resend', async (req: Request, res: ExpressResponse) => {
+  const { token } = req.body;
+  if (!token) {
+    res.status(400).json({ success: false, error: { message: 'token required' } });
+    return;
+  }
+
+  try {
+    await verificationService.sendVerificationEmail(token);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(400).json({ success: false, error: { message: err?.message || 'Не удалось отправить ссылку' } });
+  }
+});
+
+/** POST /api/kratos/registration/invalidate — сделать отправленную ссылку недействительной. */
+router.post('/registration/invalidate', async (req: Request, res: ExpressResponse) => {
+  const { token } = req.body;
+  if (!token) {
+    res.status(400).json({ success: false, error: { message: 'token required' } });
+    return;
+  }
+
+  verificationService.invalidate(token);
+  res.json({ success: true });
 });
 
 // ============================================================

@@ -66,4 +66,14 @@ export const config = {
       ? process.env.CORS_ORIGIN.split(',').map((s: string) => s.trim())
       : ['http://localhost:4200'],
   },
+
+  // ---- Mail (подтверждение регистрации) ----
+  mail: {
+    // Dev по умолчанию: MailSlurper SMTPS (неявный TLS, самоподписанный сертификат).
+    // В проде задать SMTP_URL (напр. smtps://user:pass@smtp.yandex.ru:465) и SMTP_REJECT_UNAUTHORIZED=true.
+    smtpUrl: process.env.SMTP_URL || 'smtps://localhost:1025',
+    smtpRejectUnauthorized: process.env.SMTP_REJECT_UNAUTHORIZED === 'true',
+    from: process.env.MAIL_FROM || 'noreply@industrial-telemetry.ru',
+    appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:3000',
+  },
 };

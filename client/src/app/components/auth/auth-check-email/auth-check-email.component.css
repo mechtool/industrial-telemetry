@@ -1,0 +1,148 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px;
+  background: #f4f8fd;
+}
+
+.auth-card {
+  width: 400px;
+  padding: 48px 40px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow:
+    0 8px 32px rgba(16, 36, 57, 0.0588),
+    0 2px 8px rgba(16, 36, 58, 0.0314);
+}
+
+/* ---- Логотип ---- */
+.auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: #1e88e5;
+  color: #ffffff;
+  font-size: 24px;
+}
+
+/* ---- Заголовок / подзаголовок ---- */
+.auth-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 26px;
+  text-align: center;
+  color: #10243a;
+}
+
+.auth-subtitle {
+  margin: 12px 0 32px;
+  font-size: 14px;
+  line-height: 14px;
+  text-align: center;
+  color: #5b7590;
+}
+
+/* ---- Отправлено на адрес ---- */
+.sent-address {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 28px;
+  font-size: 13px;
+  line-height: 17px;
+}
+
+.sent-address-icon {
+  flex: none;
+  font-size: 16px;
+  color: #8fa6bc;
+}
+
+.sent-address-email {
+  color: #5b7590;
+}
+
+/* ---- Кнопки (вертикально) ---- */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-button {
+  height: 52px;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.auth-button .anticon {
+  font-size: 18px;
+}
+
+/* ---- Подсказка повторной отправки ---- */
+.resend-hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 14px;
+  text-align: center;
+  color: #8fa6bc;
+}
+
+/* ---- Кнопка «Отправить ссылку» ---- */
+:host ::ng-deep .send-btn.ant-btn-primary {
+  background: #1e88e5;
+  border-color: #1e88e5;
+  box-shadow: none;
+}
+
+:host ::ng-deep .send-btn.ant-btn-primary:hover,
+:host ::ng-deep .send-btn.ant-btn-primary:focus {
+  background: #1775c2;
+  border-color: #1775c2;
+}
+
+:host ::ng-deep .send-btn.ant-btn-primary[disabled] {
+  background: #a7cdf0;
+  border-color: #a7cdf0;
+  color: #ffffff;
+}
+
+/* Неактивная кнопка повторной отправки — светлая, с серым текстом */
+:host ::ng-deep .send-btn.send-btn--cooldown.ant-btn-primary,
+:host ::ng-deep .send-btn.send-btn--cooldown.ant-btn-primary[disabled],
+:host ::ng-deep .send-btn.send-btn--cooldown.ant-btn-primary:hover,
+:host ::ng-deep .send-btn.send-btn--cooldown.ant-btn-primary:focus {
+  background: #eff7fe;
+  border-color: #e3edf7;
+  color: #8fa6bc;
+}
+
+/* ---- Кнопка «Отказаться» ---- */
+:host ::ng-deep .refuse-btn.ant-btn-default {
+  background: #ffffff;
+  border-color: #e3edf7;
+  color: #5b7590;
+  box-shadow: none;
+}
+
+:host ::ng-deep .refuse-btn.ant-btn-default:hover,
+:host ::ng-deep .refuse-btn.ant-btn-default:focus {
+  color: #10243a;
+  border-color: #1e88e5;
+}
