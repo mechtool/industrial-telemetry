@@ -32,6 +32,24 @@
               "src/manifest.webmanifest"
             ],
             "styles": [
+              "node_modules/ng-zorro-antd/style/index.min.css",
+              "node_modules/@angular/cdk/overlay-prebuilt.css",
+              "node_modules/ng-zorro-antd/auto-complete/style/index.min.css",
+              "node_modules/ng-zorro-antd/avatar/style/index.min.css",
+              "node_modules/ng-zorro-antd/breadcrumb/style/index.min.css",
+              "node_modules/ng-zorro-antd/button/style/index.min.css",
+              "node_modules/ng-zorro-antd/card/style/index.min.css",
+              "node_modules/ng-zorro-antd/icon/style/index.min.css",
+              "node_modules/ng-zorro-antd/input/style/index.min.css",
+              "node_modules/ng-zorro-antd/layout/style/index.min.css",
+              "node_modules/ng-zorro-antd/menu/style/index.min.css",
+              "node_modules/ng-zorro-antd/message/style/index.min.css",
+              "node_modules/ng-zorro-antd/modal/style/index.min.css",
+              "node_modules/ng-zorro-antd/notification/style/index.min.css",
+              "node_modules/ng-zorro-antd/select/style/index.min.css",
+              "node_modules/ng-zorro-antd/skeleton/style/index.min.css",
+              "node_modules/ng-zorro-antd/switch/style/index.min.css",
+              "node_modules/ng-zorro-antd/tag/style/index.min.css",
               "src/styles.scss"
             ],
             "scripts": []
@@ -82,6 +100,24 @@
               "src/manifest.webmanifest"
             ],
             "styles": [
+              "node_modules/ng-zorro-antd/style/index.min.css",
+              "node_modules/@angular/cdk/overlay-prebuilt.css",
+              "node_modules/ng-zorro-antd/auto-complete/style/index.min.css",
+              "node_modules/ng-zorro-antd/avatar/style/index.min.css",
+              "node_modules/ng-zorro-antd/breadcrumb/style/index.min.css",
+              "node_modules/ng-zorro-antd/button/style/index.min.css",
+              "node_modules/ng-zorro-antd/card/style/index.min.css",
+              "node_modules/ng-zorro-antd/icon/style/index.min.css",
+              "node_modules/ng-zorro-antd/input/style/index.min.css",
+              "node_modules/ng-zorro-antd/layout/style/index.min.css",
+              "node_modules/ng-zorro-antd/menu/style/index.min.css",
+              "node_modules/ng-zorro-antd/message/style/index.min.css",
+              "node_modules/ng-zorro-antd/modal/style/index.min.css",
+              "node_modules/ng-zorro-antd/notification/style/index.min.css",
+              "node_modules/ng-zorro-antd/select/style/index.min.css",
+              "node_modules/ng-zorro-antd/skeleton/style/index.min.css",
+              "node_modules/ng-zorro-antd/switch/style/index.min.css",
+              "node_modules/ng-zorro-antd/tag/style/index.min.css",
               "src/styles.scss"
             ],
             "scripts": []

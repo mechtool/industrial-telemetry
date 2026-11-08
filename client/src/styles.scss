@@ -3,8 +3,8 @@
 // NG-ZORRO (Ant Design) тема + кастомные переменные
 // ========================================================
 
-// NG-ZORRO (Ant Design) стили
-@import 'ng-zorro-antd/ng-zorro-antd.min.css';
+// NG-ZORRO (Ant Design) стили подключаются в angular.json (массив `styles`):
+// там перечислены только используемые компоненты (tree-shaking), чтобы не тянуть весь Ant Design.
 
 // ---- CSS-переменные проекта ----
 :root {
