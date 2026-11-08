@@ -1,10 +1,10 @@
 # Industrial Telemetry — Руководство по запуску и эксплуатации
 
-**Версия:** 6.1
-**Дата:** 2026-11-07
+**Версия:** 6.2
+**Дата:** 2026-11-08
 **Стек:** Angular 22 (PWA, NG-ZORRO, zoneless) · Express 4 (TypeScript ESM) · Mosquitto MQTT · Ory Kratos v1.3.1 · Ory Keto v0.14.0 · PostgreSQL 16 · Nginx
 
-> Сверено с кодом на `master` (HEAD `109b917`). Что изменилось к v6.0: раздел клиента переработан в **CRYOMON** (проекты + карточка проекта с вкладками), добавлены телеметрия (шлюз → MQTT → keeper → PostgreSQL), DaData-подсказки адресов, публичная презентация возможностей; Mosquitto включён в dev-стек; SMTP передаётся через переменную окружения.
+> Сверено с кодом на `master` (HEAD `a4eed1e`). Что изменилось к v6.2: добавлена демо-панель мониторинга `/presentation/dashboard` (карусель параметров, аварии/предупреждения, фейковые графики); письма подтверждения регистрации уходят с домена приложения через Yandex Cloud Postbox.
 
 ---
 
@@ -136,6 +136,7 @@ industrial-telemetry/                  ← КОРЕНЬ ПРОЕКТА
 | `/projects/:id` | `project-view` | Карточка проекта (вкладки) |
 | `/settings` | `settings` | Настройки приложения (отдельная страница) |
 | `/presentation` | `presentation` (retail / service) | Публичная презентация (демо-почта) |
+| `/presentation/dashboard` | `presentation-dashboard` | Демо-панель мониторинга (кнопка «В панель мониторинга») |
 | `/main-entrance` | — | redirect на `/` |
 | `**` | — | redirect на `/` |
 

@@ -1,7 +1,7 @@
 # Industrial Telemetry — Текущее состояние и ограничения
 
-**Дата:** 2026-11-07
-**Ветка:** `master` (HEAD `109b917`, 2026-10-31)
+**Дата:** 2026-11-08
+**Ветка:** `master` (HEAD `a4eed1e`, 2026-11-07; поверх — демо-панель `/presentation/dashboard`)
 **Статус:** документ сверен с фактическим кодом (`server/src`, `client/src`, `docker-compose*.yml`, `scripts/`, `gateway/`, `keto/`, `kratos/`).
 
 > Подробный план дальнейшего развития — `user-data/DEVELOPMENT_PLAN.md`.
@@ -17,12 +17,15 @@
 - [x] Автоназначение `viewer` при регистрации: webhook Kratos (`POST /api/webhooks/registration`) + синхронный fallback в `/api/kratos/registration`; защита секретом `WEBHOOK_SECRET`.
 - [x] Проверка по ролям: `requireAdmin` закрывает `GET /api/users`, `PUT /api/users/:id/roles`, `PUT /api/settings`.
 - [x] Миграция `npm run migrate:roles` (идемпотентная) — перенос старых `traits.role` → Keto.
+- [x] Верификация email при регистрации: `check-email`, `verify`, `resend`, `invalidate` (`42a7fe9`).
+- [x] Проверка, зарегистрирован ли email, перед логином и восстановлением пароля; при недоступном Kratos — fail-open (`493ee50`).
 
 ### Сервер (Express 4, TypeScript ESM)
 - [x] Kratos-прокси (`/api/kratos/*`) + публичный прокси `/.ory/*`.
 - [x] Keto-клиент на REST: `check`, `hasRole`, `listRoles`, `assignRole`, `revokeRole`, `setRoles`, `grantPermission`, `seedDefaults`.
 - [x] MQTT-мост: подписка/публикация/статус, wildcard-топики `+`/`#`, реконнект; сервер слушает `sensors/#` (логирование).
 - [x] DaData-прокси подсказок адресов РФ: `GET /api/address/suggest` (ключ `DADATA_API_KEY`).
+- [x] Почта: письма подтверждения регистрации уходят с домена приложения через Yandex Cloud Postbox (`SMTP_URL`/`MAIL_FROM`/`APP_BASE_URL`, скрипты `scripts/set-postbox-smtp.ps1`, `scripts/test-postbox-smtp.mjs`) (`a4eed1e`).
 - [x] Маршруты: `/api/health`, `/api/session`, `/api/kratos/*`, `/api/webhooks/*`, `/api/mqtt/*`, `/api/projects`, `/api/users`, `/api/settings`, `/api/address/*`, `/.ory/*`.
 
 ### Телеметрия (шлюз → MQTT → PostgreSQL)
@@ -37,6 +40,7 @@
 - [x] Оболочка после входа (`authGuard`): главная «CRYOMON», раздел «Проекты» (список / плитки / пусто / карточка проекта), «Настройки»; профиль — модальное окно.
 - [x] Карточка проекта `/projects/:id` с вкладками: Общие, Панель управления, Объекты, Данные, Шлюзы, Организации, Триггеры, Пользователи. Реализованы: Общие / Панель / Объекты / Шлюзы / Организации / Пользователи; «Данные» и «Триггеры» — заглушки.
 - [x] Публичная презентация `/presentation` (`retail`, `service`) для демо-почт `service@telemetry.ru` и `retail@telemetry.ru` (пароль `presentation`), доступ через `presentationGuard`; сидинг — `npm run seed:presentation`.
+- [x] Демо-панель мониторинга `/presentation/dashboard`: карусель плиток параметров, аварии/предупреждения, фейковые графики температуры и влажности; переход по кнопке «В панель мониторинга» в шапке презентации.
 - [x] `authGuard` на клиенте есть; `adminGuard` — нет (защита административных операций только на сервере через `requireAdmin`).
 
 ### Инфраструктура
