@@ -105,6 +105,11 @@ export const routes: Routes = [
         loadComponent: () => import('./components/presentation/presentation-service/presentation-service.component').then(m => m.PresentationServiceComponent),
         title: 'Презентация: сервис — CRYOMON',
       },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./components/presentation/presentation-dashboard/presentation-dashboard.component').then(m => m.PresentationDashboardComponent),
+        title: 'Панель мониторинга — CRYOMON',
+      },
     ],
   },
 

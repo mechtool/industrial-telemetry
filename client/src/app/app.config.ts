@@ -55,6 +55,15 @@ import {
   DeleteOutline,
   MenuFoldOutline,
   MenuUnfoldOutline,
+  AlertOutline,
+  CloseCircleOutline,
+  CloudOutline,
+  DashboardOutline,
+  FieldTimeOutline,
+  FireOutline,
+  LineChartOutline,
+  ToolOutline,
+  WarningOutline,
 } from '@ant-design/icons-angular/icons';
 import { routes } from './app.routes';
 
@@ -109,6 +118,15 @@ const nzIcons = [
   DeleteOutline,
   MenuFoldOutline,
   MenuUnfoldOutline,
+  AlertOutline,
+  CloseCircleOutline,
+  CloudOutline,
+  DashboardOutline,
+  FieldTimeOutline,
+  FireOutline,
+  LineChartOutline,
+  ToolOutline,
+  WarningOutline,
 ];
 
 export const appConfig: ApplicationConfig = {
