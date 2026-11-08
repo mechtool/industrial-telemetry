@@ -9,7 +9,7 @@
 
 .dash {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   max-width: 1920px;
   margin: 0 auto;
@@ -20,6 +20,13 @@
 .dash-main {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  min-height: 0;
+}
+
+.dash-side {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px;
   min-height: 0;
 }
@@ -72,6 +79,11 @@
 .dash-card-head-icon--green {
   background: #e6f6f1;
   color: #0fa97e;
+}
+
+.dash-card-head-icon--violet {
+  background: #f1edfd;
+  color: #7c5cf0;
 }
 
 .dash-card-title {
@@ -259,6 +271,11 @@
   color: #fa8c16;
 }
 
+.dash-count-progress {
+  font-weight: 700;
+  color: #1e88e5;
+}
+
 .dash-alert-list {
   display: flex;
   flex-direction: column;
@@ -359,6 +376,114 @@
   flex-shrink: 0;
 }
 
+/* ── 4 · Вызовы сервисным компаниям ── */
+.dash-call-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: auto;
+}
+
+.dash-call {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #fbfdff;
+  border: 1px solid #eef2f7;
+  border-left: 6px solid #1e88e5;
+}
+
+.dash-call--done {
+  border-left-color: #0fa97e;
+}
+
+.dash-call--rejected {
+  border-left-color: #e5484d;
+}
+
+.dash-call-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #eaf4fe;
+  color: #1e88e5;
+  font-size: 16px;
+}
+
+.dash-call--done .dash-call-icon {
+  background: #e6f6f1;
+  color: #0fa97e;
+}
+
+.dash-call--rejected .dash-call-icon {
+  background: #fdecec;
+  color: #e5484d;
+}
+
+.dash-call-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dash-call-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-call-company {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #10243a;
+}
+
+.dash-call-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: #eaf4fe;
+  color: #1e88e5;
+  flex-shrink: 0;
+}
+
+.dash-call-badge.is-done {
+  background: #e6f6f1;
+  color: #0fa97e;
+}
+
+.dash-call-badge.is-rejected {
+  background: #fdecec;
+  color: #e5484d;
+}
+
+.dash-call-reason {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #5b7590;
+}
+
+.dash-call-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: #8fa6bc;
+}
+
 /* ── 3 · Графики ── */
 .dash-charts-grid {
   display: grid;
@@ -455,6 +580,18 @@
 }
 
 /* ── Responsive ── */
+@media (max-width: 1600px) {
+  .dash-params-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1300px) {
+  .dash-params-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 1100px) {
   .dash {
     grid-template-columns: 1fr;
@@ -463,25 +600,11 @@
   }
 }
 
-@media (max-width: 1000px) {
-  .dash-params-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 @media (max-width: 900px) {
   .dash-charts-grid {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 800px) {
-  .dash-params-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
   .dash-params-grid {
     grid-template-columns: 1fr;
   }

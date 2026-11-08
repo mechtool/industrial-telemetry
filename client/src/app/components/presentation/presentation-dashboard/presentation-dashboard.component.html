@@ -119,44 +119,94 @@
     </section>
   </div>
 
-  <!-- 3 · Аварии и предупреждения (правая колонка) -->
-  <section class="dash-card dash-alerts">
-    <header class="dash-card-head">
-      <div class="dash-card-heading">
-        <span class="dash-card-head-icon dash-card-head-icon--red"><nz-icon nzType="alert" /></span>
-        <div class="dash-card-heading-text">
-          <h2 class="dash-card-title">Аварии и предупреждения</h2>
-          <span class="dash-card-sub">{{ alarms.length }} активных событий · последние 40 минут</span>
+  <!-- 3 · Вызовы сервисным компаниям + Аварии (правая колонка) -->
+  <div class="dash-side">
+    <!-- 3.1 · Вызовы сервисным компаниям -->
+    <section class="dash-card dash-calls">
+      <header class="dash-card-head">
+        <div class="dash-card-heading">
+          <span class="dash-card-head-icon dash-card-head-icon--violet"><nz-icon nzType="customer-service" /></span>
+          <div class="dash-card-heading-text">
+            <h2 class="dash-card-title">Вызовы сервисным компаниям</h2>
+            <span class="dash-card-sub">{{ calls.length }} вызовов · автоматическое оповещение</span>
+          </div>
         </div>
-      </div>
-      <span class="dash-count">
-        <span class="dash-count-crit">{{ criticalCount }}</span> аварии ·
-        <span class="dash-count-warn">{{ warningCount }}</span> предупреждения
-      </span>
-    </header>
+        <span class="dash-count">
+          <span class="dash-count-progress">{{ inProgressCount }}</span> в работе
+        </span>
+      </header>
 
-    <ul class="dash-alert-list">
-      @for (a of alarms; track a.id) {
-        <li class="dash-alert" [class.dash-alert--critical]="a.severity === 'critical'">
-          <span class="dash-alert-icon">
-            <nz-icon [nzType]="a.severity === 'critical' ? 'close-circle' : 'warning'" />
-          </span>
-          <div class="dash-alert-body">
-            <div class="dash-alert-line">
-              <span class="dash-alert-title">{{ a.title }}</span>
-              <span class="dash-alert-badge" [class.is-critical]="a.severity === 'critical'">
-                {{ a.severity === 'critical' ? 'Авария' : 'Предупреждение' }}
-              </span>
+      <ul class="dash-call-list">
+        @for (c of calls; track c.id) {
+          <li
+            class="dash-call"
+            [class.dash-call--done]="c.status === 'done'"
+            [class.dash-call--rejected]="c.status === 'rejected'"
+          >
+            <span class="dash-call-icon">
+              <nz-icon [nzType]="callIcon(c.status)" />
+            </span>
+            <div class="dash-call-body">
+              <div class="dash-call-line">
+                <span class="dash-call-company">{{ c.company }}</span>
+                <span
+                  class="dash-call-badge"
+                  [class.is-done]="c.status === 'done'"
+                  [class.is-rejected]="c.status === 'rejected'"
+                >
+                  {{ callStatusLabel(c.status) }}
+                </span>
+              </div>
+              <div class="dash-call-reason">{{ c.reason }}</div>
+              <div class="dash-call-time">
+                <nz-icon nzType="field-time" />
+                {{ c.time }}
+              </div>
             </div>
-            <div class="dash-alert-object">{{ a.object }}</div>
-            <div class="dash-alert-msg">{{ a.message }}</div>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <!-- 3.2 · Аварии и предупреждения -->
+    <section class="dash-card dash-alerts">
+      <header class="dash-card-head">
+        <div class="dash-card-heading">
+          <span class="dash-card-head-icon dash-card-head-icon--red"><nz-icon nzType="alert" /></span>
+          <div class="dash-card-heading-text">
+            <h2 class="dash-card-title">Аварии и предупреждения</h2>
+            <span class="dash-card-sub">{{ alarms.length }} активных событий · последние 40 минут</span>
           </div>
-          <div class="dash-alert-time">
-            <nz-icon nzType="field-time" />
-            {{ a.time }}
-          </div>
-        </li>
-      }
-    </ul>
-  </section>
+        </div>
+        <span class="dash-count">
+          <span class="dash-count-crit">{{ criticalCount }}</span> аварии ·
+          <span class="dash-count-warn">{{ warningCount }}</span> предупреждения
+        </span>
+      </header>
+
+      <ul class="dash-alert-list">
+        @for (a of alarms; track a.id) {
+          <li class="dash-alert" [class.dash-alert--critical]="a.severity === 'critical'">
+            <span class="dash-alert-icon">
+              <nz-icon [nzType]="a.severity === 'critical' ? 'close-circle' : 'warning'" />
+            </span>
+            <div class="dash-alert-body">
+              <div class="dash-alert-line">
+                <span class="dash-alert-title">{{ a.title }}</span>
+                <span class="dash-alert-badge" [class.is-critical]="a.severity === 'critical'">
+                  {{ a.severity === 'critical' ? 'Авария' : 'Предупреждение' }}
+                </span>
+              </div>
+              <div class="dash-alert-object">{{ a.object }}</div>
+              <div class="dash-alert-msg">{{ a.message }}</div>
+            </div>
+            <div class="dash-alert-time">
+              <nz-icon nzType="field-time" />
+              {{ a.time }}
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
 </div>

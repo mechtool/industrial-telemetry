@@ -35,6 +35,16 @@ interface Alarm {
   time: string;
 }
 
+type CallStatus = 'in-progress' | 'rejected' | 'done';
+
+interface ServiceCall {
+  id: string;
+  time: string;
+  company: string;
+  reason: string;
+  status: CallStatus;
+}
+
 const SERIES_LENGTH = 48;
 const CHART_W = 600;
 const CHART_H = 200;
@@ -213,6 +223,79 @@ export class PresentationDashboardComponent implements OnInit {
     },
   ];
 
+  readonly calls: ServiceCall[] = [
+    {
+      id: 'c1',
+      time: '14:42',
+      company: 'ХолодСервис',
+      reason: 'Температура выше порога · Камера №12',
+      status: 'in-progress',
+    },
+    {
+      id: 'c2',
+      time: '14:39',
+      company: 'КриоТех',
+      reason: 'Ошибка датчика S5 · Витрина №3',
+      status: 'in-progress',
+    },
+    {
+      id: 'c3',
+      time: '14:33',
+      company: 'РефСервис',
+      reason: 'Дверь открыта дольше 5 минут · Камера №7',
+      status: 'done',
+    },
+    {
+      id: 'c4',
+      time: '14:21',
+      company: 'ХолодСервис',
+      reason: 'Плановый цикл дефроста · Камера №12',
+      status: 'rejected',
+    },
+    {
+      id: 'c5',
+      time: '14:12',
+      company: 'АрктикаСервис',
+      reason: 'Повышенная влажность · Камера №12',
+      status: 'done',
+    },
+    {
+      id: 'c6',
+      time: '13:56',
+      company: 'КриоТех',
+      reason: 'Высокое давление конденсации · Камера №9',
+      status: 'done',
+    },
+    {
+      id: 'c7',
+      time: '13:41',
+      company: 'РефСервис',
+      reason: 'Внеплановая профилактика компрессора',
+      status: 'rejected',
+    },
+    {
+      id: 'c8',
+      time: '13:24',
+      company: 'ХолодСервис',
+      reason: 'Проверка датчика испарителя S3 · Камера №4',
+      status: 'done',
+    },
+    {
+      id: 'c9',
+      time: '13:07',
+      company: 'АрктикаСервис',
+      reason: 'Аварийная остановка агрегата · Витрина №1',
+      status: 'in-progress',
+    },
+    {
+      id: 'c10',
+      time: '12:50',
+      company: 'КриоТех',
+      reason: 'Замена уплотнителя двери · Камера №7',
+      status: 'done',
+    },
+  ];
+
   readonly tempSeries = signal<number[]>(seedSeries(TEMP_MIN, TEMP_MAX));
   readonly humSeries = signal<number[]>(seedSeries(HUM_MIN, HUM_MAX));
 
@@ -236,6 +319,10 @@ export class PresentationDashboardComponent implements OnInit {
     return this.alarms.filter((a) => a.severity === 'warning').length;
   }
 
+  get inProgressCount(): number {
+    return this.calls.filter((c) => c.status === 'in-progress').length;
+  }
+
   ngOnInit(): void {
     this.dataTimer = setInterval(() => this.tick(), 2000);
     this.destroyRef.onDestroy(() => {
@@ -257,6 +344,28 @@ export class PresentationDashboardComponent implements OnInit {
         return 'Внимание';
       default:
         return 'Норма';
+    }
+  }
+
+  callStatusLabel(status: CallStatus): string {
+    switch (status) {
+      case 'done':
+        return 'Выполнено';
+      case 'rejected':
+        return 'Отклонено';
+      default:
+        return 'В работе';
+    }
+  }
+
+  callIcon(status: CallStatus): string {
+    switch (status) {
+      case 'done':
+        return 'check-circle';
+      case 'rejected':
+        return 'close-circle';
+      default:
+        return 'phone';
     }
   }
 
