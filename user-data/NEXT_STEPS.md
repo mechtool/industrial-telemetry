@@ -86,6 +86,19 @@
 - ~~`keto/keto.yml` объявлял `version: v0.14.0-alpha.0`~~ — исправлено на `v0.14.0`.
 - В `server/.env` и корневых `.env*` — локальные значения; они gitignored и в репозиторий не входят.
 
+### 2.9 Производительность фронтенда (бандл и рендер)
+
+Замерено Lighthouse (Chrome headless) по `/presentation/dashboard`:
+- dev (`localhost:4200`, `ng serve`): mobile **41** (FCP/LCP 11.2 c, TTI 43 c), desktop **81**; суммарный payload ~7 MB (не минифицировано + source maps + `@vite/client`).
+- prod (`https://industrial-telemetry.ru`): сервер отвечает быстро (TTFB ~48 мс, HTML 12 KB за ~150 мс) — медленная именно отрисовка в браузере, а не бэкенд.
+
+Причины и задачи:
+
+- [x] **Полный CSS NG-ZORRO.** `client/src/styles.scss` импортировал `ng-zorro-antd/ng-zorro-antd.min.css` — весь Ant Design (~624 KB; Lighthouse: 99% CSS не используется). **Сделано**: стили переведены на tree-shaking — в `angular.json` (массив `styles`) подключены базовый `style/index.min.css` + `@angular/cdk/overlay-prebuilt.css` (CDK overlay) + стили 16 используемых компонентов (auto-complete, avatar, breadcrumb, button, card, icon, input, layout, menu, message, modal, notification, select, skeleton, switch, tag). Результат: `styles.css` 624 → 268 KB (−57%), Lighthouse desktop 81 → 90, FCP/LCP 2.0 → 1.4 c. (незакоммичено)
+- [ ] **Блокирующий внешний шрифт Inter.** `index.html` грузит `fonts.googleapis.com/css2?family=Inter…` как render-blocking. Самосхостить шрифт (локальные `@font-face` + preload) либо грузить неблокирующе (`media="print" onload=…`). Убирает задержку первого кадра (~250+ мс, в RU-сетях может быть хуже).
+- [ ] **Крупный `main.js`** (~493 KB / 131 KB gzip: Angular + ng-zorro runtime). После tree-shake CSS пересмотреть: редко используемые модули в lazy-чанки, анализ бандла (source-map-explorer).
+- [ ] **Мерить prod, а не dev.** Для адекватных оценок Lighthouse гонять по `ng serve --configuration production` / собранному `dist` (или по домену), а не по `localhost:4200` (dev: `optimization: false`, source maps, HMR).
+
 ---
 
 ## 3. Что делать дальше
