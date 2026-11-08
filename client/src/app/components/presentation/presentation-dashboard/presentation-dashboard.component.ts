@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzButtonModule } from 'ng-zorro-antd/button';
 
 type MetricStatus = 'normal' | 'warning' | 'critical';
 type AlarmSeverity = 'warning' | 'critical';
@@ -158,7 +157,7 @@ function seedSeries(min: number, max: number): number[] {
 @Component({
   selector: 'app-presentation-dashboard',
   standalone: true,
-  imports: [CommonModule, NzIconModule, NzButtonModule],
+  imports: [CommonModule, NzIconModule],
   templateUrl: './presentation-dashboard.component.html',
   styleUrl: './presentation-dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -166,11 +165,8 @@ function seedSeries(min: number, max: number): number[] {
 export class PresentationDashboardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private dataTimer?: ReturnType<typeof setInterval>;
-  private carouselTimer?: ReturnType<typeof setInterval>;
 
   readonly now = signal(new Date());
-  readonly page = signal(0);
-  readonly pageSize = signal(4);
 
   readonly metrics = signal<Metric[]>(initialMetrics.map((m) => ({ ...m })));
 
@@ -220,23 +216,6 @@ export class PresentationDashboardComponent implements OnInit {
   readonly tempSeries = signal<number[]>(seedSeries(TEMP_MIN, TEMP_MAX));
   readonly humSeries = signal<number[]>(seedSeries(HUM_MIN, HUM_MAX));
 
-  readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.metrics().length / this.pageSize())),
-  );
-
-  readonly visibleMetrics = computed(() => {
-    const start = this.page() * this.pageSize();
-    return this.metrics().slice(start, start + this.pageSize());
-  });
-
-  readonly activeColumns = computed(() =>
-    Math.min(this.pageSize(), this.visibleMetrics().length),
-  );
-
-  readonly pagesArray = computed(() =>
-    Array.from({ length: this.totalPages() }, (_, i) => i),
-  );
-
   readonly tempLine = computed(() => this.buildLine(this.tempSeries(), TEMP_MIN, TEMP_MAX));
   readonly tempArea = computed(() => this.buildArea(this.tempSeries(), TEMP_MIN, TEMP_MAX));
   readonly humLine = computed(() => this.buildLine(this.humSeries(), HUM_MIN, HUM_MAX));
@@ -259,32 +238,11 @@ export class PresentationDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.dataTimer = setInterval(() => this.tick(), 2000);
-    this.carouselTimer = setInterval(() => this.nextPage(), 6000);
-    this.updatePageSize();
-    window.addEventListener('resize', this.handleResize);
     this.destroyRef.onDestroy(() => {
       if (this.dataTimer) {
         clearInterval(this.dataTimer);
       }
-      if (this.carouselTimer) {
-        clearInterval(this.carouselTimer);
-      }
-      window.removeEventListener('resize', this.handleResize);
     });
-  }
-
-  private readonly handleResize = (): void => this.updatePageSize();
-
-  prevPage(): void {
-    this.page.update((p) => (p - 1 + this.totalPages()) % this.totalPages());
-  }
-
-  nextPage(): void {
-    this.page.update((p) => (p + 1) % this.totalPages());
-  }
-
-  selectPage(index: number): void {
-    this.page.set(index);
   }
 
   formatValue(metric: Metric): string {
@@ -313,15 +271,6 @@ export class PresentationDashboardComponent implements OnInit {
     this.humSeries.update((s) =>
       this.pushSeries(s, this.jitter(this.lastOf(s), HUM_MIN, HUM_MAX)),
     );
-  }
-
-  private updatePageSize(): void {
-    const width = window.innerWidth;
-    const size = width >= 1200 ? 4 : width >= 900 ? 3 : width >= 620 ? 2 : 1;
-    this.pageSize.set(size);
-    if (this.page() > this.totalPages() - 1) {
-      this.page.set(this.totalPages() - 1);
-    }
   }
 
   private pushSeries(series: number[], value: number): number[] {

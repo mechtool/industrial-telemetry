@@ -1,5 +1,6 @@
 /* ========================================================
    Presentation Dashboard — демо-панель мониторинга
+   Компоновка: слева параметры+графики, справа аварии.
    ======================================================== */
 
 :host {
@@ -8,12 +9,19 @@
 
 .dash {
   display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
   gap: 16px;
-  max-width: 1200px;
+  max-width: 1920px;
   margin: 0 auto;
   height: calc(100vh - 238px);
   min-height: 620px;
+}
+
+.dash-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  min-height: 0;
 }
 
 .dash-card {
@@ -80,14 +88,7 @@
   color: #8fa6bc;
 }
 
-/* ── 1 · Карусель параметров ── */
-.dash-params-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
+/* ── live indicator ── */
 .dash-live {
   display: inline-flex;
   align-items: center;
@@ -118,20 +119,11 @@
   }
 }
 
-.dash-params-nav {
-  display: flex;
-  gap: 6px;
-}
-
-.dash-params-viewport {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
+/* ── 1 · Параметры ── */
 .dash-params-grid {
   display: grid;
-  gap: 14px;
-  height: 100%;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
 }
 
 .param-tile {
@@ -143,8 +135,7 @@
   padding: 12px 14px;
   background: #fbfdff;
   border: 1px solid #eef2f7;
-  border-left: 3px solid #1e88e5;
-  border-radius: 10px;
+  border-left: 6px solid #1e88e5;
   animation: dash-tile-in 0.4s ease both;
 }
 
@@ -248,30 +239,6 @@
   background: currentColor;
 }
 
-/* Dots */
-.dash-dots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.dash-dot {
-  width: 7px;
-  height: 7px;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: #d9e4ee;
-  cursor: pointer;
-  transition: width 0.2s, background 0.2s;
-}
-
-.dash-dot--active {
-  width: 18px;
-  background: #1e88e5;
-}
-
 /* ── 2 · Аварии и предупреждения ── */
 .dash-count {
   display: inline-flex;
@@ -295,7 +262,7 @@
 .dash-alert-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
   flex: 1 1 auto;
   min-height: 0;
   margin: 0;
@@ -311,8 +278,7 @@
   padding: 10px 12px;
   background: #fbfdff;
   border: 1px solid #eef2f7;
-  border-left: 3px solid #fa8c16;
-  border-radius: 9px;
+  border-left: 6px solid #fa8c16;
 }
 
 .dash-alert--critical {
@@ -489,15 +455,34 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .dash {
+    grid-template-columns: 1fr;
     height: auto;
     min-height: 0;
-    grid-template-rows: none;
-    grid-auto-rows: minmax(300px, auto);
   }
+}
 
+@media (max-width: 1000px) {
+  .dash-params-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
   .dash-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .dash-params-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .dash-params-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -1,33 +1,24 @@
 <div class="dash">
-  <!-- 1 · Карусель плиток основных параметров -->
-  <section class="dash-card dash-params">
-    <header class="dash-card-head">
-      <div class="dash-card-heading">
-        <span class="dash-card-head-icon"><nz-icon nzType="dashboard" /></span>
-        <div class="dash-card-heading-text">
-          <h2 class="dash-card-title">Основные параметры</h2>
-          <span class="dash-card-sub">Камера №12 · агрегат Danfoss AK-CC55 · демо-данные</span>
+  <!-- Левая колонка: параметры + графики -->
+  <div class="dash-main">
+    <!-- 1 · Основные параметры (все 8, без карусели) -->
+    <section class="dash-card dash-params">
+      <header class="dash-card-head">
+        <div class="dash-card-heading">
+          <span class="dash-card-head-icon"><nz-icon nzType="dashboard" /></span>
+          <div class="dash-card-heading-text">
+            <h2 class="dash-card-title">Основные параметры</h2>
+            <span class="dash-card-sub">Камера №12 · агрегат Danfoss AK-CC55 · демо-данные</span>
+          </div>
         </div>
-      </div>
-      <div class="dash-params-controls">
         <span class="dash-live">
           <span class="dash-live-dot"></span>
           live · {{ timeText() }}
         </span>
-        <div class="dash-params-nav">
-          <button nz-button nzShape="circle" nzSize="small" (click)="prevPage()" aria-label="Предыдущие параметры">
-            <nz-icon nzType="arrow-left" />
-          </button>
-          <button nz-button nzShape="circle" nzSize="small" (click)="nextPage()" aria-label="Следующие параметры">
-            <nz-icon nzType="arrow-right" />
-          </button>
-        </div>
-      </div>
-    </header>
+      </header>
 
-    <div class="dash-params-viewport">
-      <div class="dash-params-grid" [style.grid-template-columns]="'repeat(' + activeColumns() + ', 1fr)'">
-        @for (m of visibleMetrics(); track m.id) {
+      <div class="dash-params-grid">
+        @for (m of metrics(); track m.id) {
           <article
             class="param-tile"
             [class.param-tile--warning]="m.status === 'warning'"
@@ -52,21 +43,83 @@
           </article>
         }
       </div>
-    </div>
+    </section>
 
-    <div class="dash-dots">
-      @for (i of pagesArray(); track i) {
-        <button
-          class="dash-dot"
-          [class.dash-dot--active]="i === page()"
-          (click)="selectPage(i)"
-          [attr.aria-label]="'Страница ' + (i + 1)"
-        ></button>
-      }
-    </div>
-  </section>
+    <!-- 2 · Климат камеры №12 -->
+    <section class="dash-card dash-charts">
+      <header class="dash-card-head">
+        <div class="dash-card-heading">
+          <span class="dash-card-head-icon dash-card-head-icon--green"><nz-icon nzType="line-chart" /></span>
+          <div class="dash-card-heading-text">
+            <h2 class="dash-card-title">Климат камеры №12</h2>
+            <span class="dash-card-sub">Температура и влажность · последние 15 минут</span>
+          </div>
+        </div>
+      </header>
 
-  <!-- 2 · Аварии и предупреждения -->
+      <div class="dash-charts-grid">
+        <div class="dash-chart">
+          <div class="dash-chart-head">
+            <div class="dash-chart-title"><nz-icon nzType="fire" /> Температура</div>
+            <div class="dash-chart-value">{{ tempCurrent().toFixed(1) }}<span>°C</span></div>
+          </div>
+          <div class="dash-chart-body">
+            <span class="dash-chart-y-top">−18 °C</span>
+            <span class="dash-chart-y-bottom">−24 °C</span>
+            <svg viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="dashGradTemp" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1e88e5" stop-opacity="0.30" />
+                  <stop offset="100%" stop-color="#1e88e5" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <polygon [attr.points]="tempArea()" fill="url(#dashGradTemp)" />
+              <polyline
+                [attr.points]="tempLine()"
+                fill="none"
+                stroke="#1e88e5"
+                stroke-width="2"
+                vector-effect="non-scaling-stroke"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div class="dash-chart">
+          <div class="dash-chart-head">
+            <div class="dash-chart-title"><nz-icon nzType="cloud" /> Влажность</div>
+            <div class="dash-chart-value dash-chart-value--green">{{ humCurrent().toFixed(1) }}<span>%</span></div>
+          </div>
+          <div class="dash-chart-body">
+            <span class="dash-chart-y-top">96 %</span>
+            <span class="dash-chart-y-bottom">84 %</span>
+            <svg viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="dashGradHum" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0fa97e" stop-opacity="0.30" />
+                  <stop offset="100%" stop-color="#0fa97e" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <polygon [attr.points]="humArea()" fill="url(#dashGradHum)" />
+              <polyline
+                [attr.points]="humLine()"
+                fill="none"
+                stroke="#0fa97e"
+                stroke-width="2"
+                vector-effect="non-scaling-stroke"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 3 · Аварии и предупреждения (правая колонка) -->
   <section class="dash-card dash-alerts">
     <header class="dash-card-head">
       <div class="dash-card-heading">
@@ -105,78 +158,5 @@
         </li>
       }
     </ul>
-  </section>
-
-  <!-- 3 · Два графика климата камеры -->
-  <section class="dash-card dash-charts">
-    <header class="dash-card-head">
-      <div class="dash-card-heading">
-        <span class="dash-card-head-icon dash-card-head-icon--green"><nz-icon nzType="line-chart" /></span>
-        <div class="dash-card-heading-text">
-          <h2 class="dash-card-title">Климат камеры №12</h2>
-          <span class="dash-card-sub">Температура и влажность · последние 15 минут</span>
-        </div>
-      </div>
-    </header>
-
-    <div class="dash-charts-grid">
-      <div class="dash-chart">
-        <div class="dash-chart-head">
-          <div class="dash-chart-title"><nz-icon nzType="fire" /> Температура</div>
-          <div class="dash-chart-value">{{ tempCurrent().toFixed(1) }}<span>°C</span></div>
-        </div>
-        <div class="dash-chart-body">
-          <span class="dash-chart-y-top">−18 °C</span>
-          <span class="dash-chart-y-bottom">−24 °C</span>
-          <svg viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <linearGradient id="dashGradTemp" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#1e88e5" stop-opacity="0.30" />
-                <stop offset="100%" stop-color="#1e88e5" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            <polygon [attr.points]="tempArea()" fill="url(#dashGradTemp)" />
-            <polyline
-              [attr.points]="tempLine()"
-              fill="none"
-              stroke="#1e88e5"
-              stroke-width="2"
-              vector-effect="non-scaling-stroke"
-              stroke-linejoin="round"
-              stroke-linecap="round"
-            />
-          </svg>
-        </div>
-      </div>
-
-      <div class="dash-chart">
-        <div class="dash-chart-head">
-          <div class="dash-chart-title"><nz-icon nzType="cloud" /> Влажность</div>
-          <div class="dash-chart-value dash-chart-value--green">{{ humCurrent().toFixed(1) }}<span>%</span></div>
-        </div>
-        <div class="dash-chart-body">
-          <span class="dash-chart-y-top">96 %</span>
-          <span class="dash-chart-y-bottom">84 %</span>
-          <svg viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <linearGradient id="dashGradHum" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#0fa97e" stop-opacity="0.30" />
-                <stop offset="100%" stop-color="#0fa97e" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            <polygon [attr.points]="humArea()" fill="url(#dashGradHum)" />
-            <polyline
-              [attr.points]="humLine()"
-              fill="none"
-              stroke="#0fa97e"
-              stroke-width="2"
-              vector-effect="non-scaling-stroke"
-              stroke-linejoin="round"
-              stroke-linecap="round"
-            />
-          </svg>
-        </div>
-      </div>
-    </div>
   </section>
 </div>
