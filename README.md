@@ -32,6 +32,7 @@ npm run install:all                 # зависимости server + client
 
 docker compose up -d                # PostgreSQL + Kratos + Keto + MailSlurper + Mosquitto
 #   (первый запуск: cp kratos/kratos.docker.example.yml kratos/kratos.docker.yml)
+#   (рекомендуется: cp server/.env.example server/.env — SERVE_CLIENT=false, почта через MailSlurper)
 
 cd server && npm run dev            # Express :3000
 cd client && npm run start          # Angular :4200  → http://localhost:4200

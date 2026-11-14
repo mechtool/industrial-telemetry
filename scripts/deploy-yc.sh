@@ -38,8 +38,16 @@ MQTT_PASSWORD=
 WEBHOOK_SECRET=
 # DaData API-ключ (подсказки адресов РФ)
 DADATA_API_KEY=
-# SMTP для Kratos (пример: smtps://noreply%40industrial-telemetry.ru:<пароль-приложения>@smtp.yandex.ru:465/?skip_ssl_verify=false)
+# SMTP для Kratos — письма восстановления пароля
+# (пример: smtps://noreply%40industrial-telemetry.ru:<пароль-приложения>@smtp.yandex.ru:465/?skip_ssl_verify=false)
 SMTP_URI=
+# SMTP для сервера — письма подтверждения регистрации (nodemailer).
+# Без SMTP_URL письма подтверждения не уходят (сервер логирует предупреждение).
+SMTP_URL=
+SMTP_REJECT_UNAUTHORIZED=true
+MAIL_FROM=noreply@industrial-telemetry.ru
+# Адрес, из которого строится ссылка подтверждения в письме.
+APP_BASE_URL=https://industrial-telemetry.ru
 EOF
     echo ".env.yc создан. Отредактируйте секреты: nano .env.yc"
 fi

@@ -1,13 +1,15 @@
 # Industrial Telemetry — Руководство по развёртыванию (Production)
 
-**Версия:** 5.1
-**Дата:** 2026-11-07
-**Стек:** Angular 22 (PWA, NG-ZORRO) · Express 4 (TypeScript ESM) · Mosquitto MQTT · Ory Kratos v1.3.1 · Ory Keto v0.14.0 · PostgreSQL 16 · Nginx
+**Версия:** 6.0
+**Дата:** 2026-11-14
+**Стек:** Angular 22 (PWA, NG-ZORRO, zoneless) · Express 4 (TypeScript ESM) · Mosquitto MQTT · Ory Kratos v1.3.1 · Ory Keto v0.14.0 · PostgreSQL 16 · Nginx
 **Домен:** `industrial-telemetry.ru`
 **Репозиторий:** `https://github.com/mechtool/industrial-telemetry.git` (публичный)
 **Целевая ВМ:** Yandex Cloud, Ubuntu 24.04, 2 vCPU, 4 GB RAM, 20 GB SSD
 
-> Актуальное состояние кода (HEAD `109b917`). Документ описывает prod-стек из `docker-compose.yc.yml`; локальная разработка — `user-data/MANUAL_RUN_GUIDE.md`, план развития — `user-data/DEVELOPMENT_PLAN.md`.
+> Актуальное состояние кода (HEAD `1d8eca1`). Документ описывает prod-стек из `docker-compose.yc.yml`; локальная разработка — `user-data/MANUAL_RUN_GUIDE.md`, план развития — `user-data/DEVELOPMENT_PLAN.md`.
+>
+> Что изменилось к v6.0: регистрация стала двухшаговой (pending-запись → письмо → подтверждение по ссылке `/api/kratos/verify-email`); разделены два SMTP-канала — `SMTP_URI` (Kratos, recovery) и `SMTP_URL`/`MAIL_FROM`/`APP_BASE_URL` (сервер, подтверждение регистрации).
 
 ---
 
@@ -47,7 +49,7 @@ Keto   ──► PostgreSQL :5432 (база `keto`)
 | `it-kratos` | `oryd/kratos:v1.3.1` | 4433, 4434 | Identity Provider (public + admin API) |
 | `it-keto-migrate` | `oryd/keto:v0.14.0` | — | Миграция схемы Keto (одноразовая) |
 | `it-keto` | `oryd/keto:v0.14.0` | 4466, 4467 (internal) | Permission Server (RBAC) |
-| `it-server` | `Dockerfile.server` | 3000 (internal) | Express API + MQTT-мост + Kratos-прокси + DaData |
+| `it-server` | `Dockerfile.server` | 3000 (internal) | Express API + MQTT-мост + Kratos-прокси + DaData + письма подтверждения регистрации |
 | `it-mosquitto` | `eclipse-mosquitto:2` | 1883 | MQTT-брокер |
 | `it-telemetry-migrate` | `postgres:16-alpine` | — | Создание БД `telemetry` + схема (одноразовая) |
 | `it-keeper` | `Dockerfile.server` | 3100 (health) | Хранитель телеметрии: MQTT → normalize → PostgreSQL |
@@ -64,7 +66,7 @@ Keto   ──► PostgreSQL :5432 (база `keto`)
 
 | Файл в репо (tracked) | Файл на ВМ (gitignored) | Что содержит |
 |---|---|---|
-| `.env.yc.example` | `.env.yc` | `DOMAIN`, `DB_PASSWORD`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `WEBHOOK_SECRET`, `DADATA_API_KEY`, `SMTP_URI` |
+| `.env.yc.example` | `.env.yc` | `DOMAIN`, `DB_PASSWORD`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `WEBHOOK_SECRET`, `DADATA_API_KEY`, `SMTP_URI` (Kratos), `SMTP_URL`, `SMTP_REJECT_UNAUTHORIZED`, `MAIL_FROM`, `APP_BASE_URL` (сервер) |
 | `kratos/kratos.yc.example.yml` | `kratos/kratos.yc.yml` | `secrets.cookie`, `secrets.cipher`, `web_hook.auth.config.value` (общий секрет webhook) |
 
 `.gitignore` уже содержит `.env`, `.env.local`, `.env.yc`, `.env.yc.*` (кроме `*.example`), `.codewhale/`, `certbot/`, `kratos/kratos.yc.yml`, `kratos/kratos.docker.yml`, `lighthouse/`, `dist/`, `*.log`, `.npm-cache/`.
@@ -89,8 +91,18 @@ MQTT_USERNAME=
 MQTT_PASSWORD=
 WEBHOOK_SECRET=<секрет-webhook>
 DADATA_API_KEY=<ключ-DaData>
+
+# Kratos: письма восстановления пароля
 SMTP_URI=smtps://<логин>:<пароль>@smtp.yandex.ru:465
+
+# Сервер: письма подтверждения регистрации (nodemailer)
+SMTP_URL=smtps://<логин>:<пароль>@smtp.yandex.ru:465
+SMTP_REJECT_UNAUTHORIZED=true
+MAIL_FROM=noreply@industrial-telemetry.ru
+APP_BASE_URL=https://industrial-telemetry.ru
 ```
+
+> ⚠️ **Два SMTP-канала.** `SMTP_URI` — письма восстановления пароля (читает Kratos); `SMTP_URL` — письма подтверждения регистрации (читает сервер). Без `SMTP_URL` письма подтверждения молча не уходят (в логе `it-server` предупреждение). `MAIL_FROM` должен принадлежать домену, подтверждённому у провайдера.
 
 Секрет webhook (`WEBHOOK_SECRET`) должен **совпадать** с `web_hook.auth.config.value` в `kratos/kratos.yc.yml` (см. §2.3):
 
@@ -285,8 +297,9 @@ ssh yc-vm "docker exec it-kratos-db psql -U kratos -d telemetry -c 'SELECT count
 - [ ] `/` отдаёт 200
 - [ ] `/api/health` → `status: healthy`, `mqtt: connected`
 - [ ] `/.ory/health/alive` → `{"status":"ok"}`
-- [ ] регистрация нового пользователя
+- [ ] регистрация: форма → экран «Проверьте почту» → письмо приходит (`SMTP_URL`) → клик по ссылке → редирект в приложение
 - [ ] у нового пользователя в Keto роль `viewer` (под админом `/api/users`, либо relation-tuples в `it-keto`)
+- [ ] recovery: письмо восстановления приходит (`SMTP_URI`), смена пароля работает
 - [ ] логин созданным аккаунтом → главная «CRYOMON»
 - [ ] список проектов (`/api/projects`) отдаёт стартовые проекты
 - [ ] под админом: список пользователей (`/api/users`) и смена ролей работают
@@ -317,7 +330,7 @@ git checkout master
 
 ### 10.1 RBAC (Keto): роли работают, поресурсные права — нет
 
-Роли живут в Keto (relation tuples, namespace `Role`) и **работают**: `kratosAuth` читает их через `ketoService.listRoles()`, `/api/session` отдаёт `roles`, `requireAdmin` проверяет `roles.includes('admin')` — защищает `/api/users` и `PUT /api/settings`. Роль `viewer` назначается автоматически при регистрации (webhook + fallback).
+Роли живут в Keto (relation tuples, namespace `Role`) и **работают**: `kratosAuth` читает их через `ketoService.listRoles()`, `/api/session` отдаёт `roles`, `requireAdmin` проверяет `roles.includes('admin')` — защищает `/api/users` и `PUT /api/settings`. Роль `viewer` назначается автоматически при регистрации — двумя механизмами: `registerIdentity()` на сервере (в `GET /api/kratos/verify-email`) и webhook Kratos (`POST /api/webhooks/registration`).
 
 Поресурсные права пока **не активированы**:
 
@@ -340,7 +353,7 @@ git checkout master
 ### 10.4 Безопасность — к ротации/доработке
 
 - **MQTT** — `mosquitto.conf` использует `allow_anonymous true`; включить `allow_anonymous false` + `password_file` (+ TLS 8883).
-- **SMTP-доступ приложения** — теперь передаётся через env `SMTP_URI` (не в `kratos.yc.yml`). Пароль приложения хранить вне git. `from_address` должен совпадать с ящиком в `SMTP_URI` (иначе SPF/DKIM отклонят письмо).
+- **SMTP-доступ** — два канала через env, вне git: `SMTP_URI` (Kratos, recovery) и `SMTP_URL` (сервер, подтверждение регистрации). `from_address` (Kratos) и `MAIL_FROM` (сервер) должны принадлежать домену, подтверждённому у провайдера (иначе SPF/DKIM отклонят письмо).
 - **Пароль БД** — сменить `kratos` по умолчанию через `ALTER USER` и обновить `DB_PASSWORD` в `.env.yc` + `dsn`.
 - **Порты наружу** — `it-kratos` (4433/4434) и `it-mosquitto` (1883) опубликованы; в проде их стоит закрыть в security group ВМ (наружу нужны только 80/443 через nginx).
 - **Версия конфига Keto** — исправлено: `keto/keto.yml` объявляет `version: v0.14.0`, compose использует `oryd/keto:v0.14.0`.
