@@ -19,14 +19,18 @@
 
 .dash-main {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  /* Параметры — не более 50% высоты (внутри вертикальный скролл),
+     графики — остаток. */
+  grid-template-rows: minmax(0, 50%) minmax(0, 1fr);
   gap: 16px;
   min-height: 0;
 }
 
 .dash-side {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  /* Вызовы — верхняя гибкая область; аварии — по содержимому, но не более 55%,
+     чтобы список вызовов никогда не схлопывался. */
+  grid-template-rows: minmax(0, 1fr) minmax(0, 55%);
   gap: 16px;
   min-height: 0;
 }
@@ -136,6 +140,9 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .param-tile {
@@ -280,7 +287,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-height: 0;
   margin: 0;
   padding: 0;
@@ -597,6 +604,17 @@
     grid-template-columns: 1fr;
     height: auto;
     min-height: 0;
+  }
+
+  /* В одну колонку карточки вызовов/аварий идут по содержимому — без пустого
+     пространства ниже аварий. */
+  .dash-side {
+    grid-template-rows: auto auto;
+  }
+
+  /* При auto-высоте график (SVG absolute) схлопывается — фиксируем высоту. */
+  .dash-chart-body {
+    min-height: 200px;
   }
 }
 
